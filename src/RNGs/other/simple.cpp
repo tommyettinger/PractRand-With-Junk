@@ -938,6 +938,12 @@ namespace PractRand {
 					state1 = rotate32(s1, 13);
 					return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
 
+					//const uint32_t result = (s0 << 5) - s0;
+					//state0 = rotate32(s0, 26) ^ s1 ^ (s1 << 9);
+					//state1 = rotate32(s1, 13);
+					//return (result << 11) - rotate32(result, 4);
+
+
 					//const uint32_t result = s0 * (s1 | 0xA529u);
 					//state0 = rotate32(s0, 26) ^ s1 ^ (s1 << 9);
 					//state1 = rotate32(s1, 13);
@@ -1145,7 +1151,8 @@ namespace PractRand {
 					// passes 32TB with only one anomaly, "unusual" at 4TB: FPF
 					//const uint32_t result = (rotate32(state1 * 31U, 23) + UINT32_C(0x9E3779BD));
 					// *3U;//(state0 << 8) + state0;// +UINT32_C(0x9E3779BD);
-					const uint32_t result = state1 * 127;
+					const uint32_t result = state1 * UINT32_C(31);
+					//const uint32_t result = state1 * 127;
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1157,7 +1164,9 @@ namespace PractRand {
 
 					state3 = rotate32(state3, 11);
 
-					return ((result << 11) - rotate32(result, 9));
+					//return ((result << 11) - rotate32(result, 9));
+					return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
+					//return result ^ result >> 11;
 					//return (result << 6) - rotate32(result, 4);
 					//return rotate32(result, 21) + 0x9E3779B9;// *0xaaaaaaab;// *0xfbffdfff;// (result ^ result >> 17) * 3U;
 
