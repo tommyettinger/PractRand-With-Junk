@@ -29,7 +29,7 @@
 #include "PractRand/Tests/FPMulti.h"
 #include "PractRand/Tests/BRank.h"
 #include "PractRand/Tests/CoupGap.h"
-#include "PractRand/Tests/mod3.h"
+#include "PractRand/Tests/Mod3.h"
 
 //specific RNG algorithms, to produce (pseudo-)random numbers
 #include "PractRand/RNGs/all.h"
