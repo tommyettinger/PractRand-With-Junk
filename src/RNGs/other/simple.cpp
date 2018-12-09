@@ -1151,8 +1151,8 @@ namespace PractRand {
 					// passes 32TB with only one anomaly, "unusual" at 4TB: FPF
 					//const uint32_t result = (rotate32(state1 * 31U, 23) + UINT32_C(0x9E3779BD));
 					// *3U;//(state0 << 8) + state0;// +UINT32_C(0x9E3779BD);
+					// StarPhi32, passes 32TB with seed 0x6dcb1257
 					const uint32_t result = state1 * UINT32_C(31);
-					//const uint32_t result = state1 * 127;
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1163,10 +1163,10 @@ namespace PractRand {
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-
-					//return ((result << 11) - rotate32(result, 9));
 					return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
+
 					//return result ^ result >> 11;
+					//return ((result << 11) - rotate32(result, 9));
 					//return (result << 6) - rotate32(result, 4);
 					//return rotate32(result, 21) + 0x9E3779B9;// *0xaaaaaaab;// *0xfbffdfff;// (result ^ result >> 17) * 3U;
 
