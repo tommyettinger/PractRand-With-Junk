@@ -1713,9 +1713,9 @@ namespace PractRand {
 				Uint64 moverCounter64::raw64() {
 					//passes 32TB with no anomalies, seed = 0x8b2bfcb
 					//return (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) * (b += UINT64_C(0x9E3779B97F4A7AF6));// *((b += UINT64_C(0x9E3779B97F4A7AF5)) | UINT64_C(1));
-																											  // 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83
+																											  // 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83 0x6C8E9CF570932BD5
 					//return (b += (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) ^ UINT64_C(0x9E3779B97F4A7AF5));//* UINT64_C(0x41C64E6D)); //
-					return (a = rotate64(a, 21) * (b += UINT64_C(0x9E3779B97F4A7AF6))) * UINT64_C(0x41C64E6D);
+					return (a = rotate64(a, 21) * (b += UINT64_C(0x9E3779B97F4A7AF6))) * UINT64_C(0x41C64E6B);
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
@@ -1725,12 +1725,12 @@ namespace PractRand {
 
 					//uint64_t r = a;
 
-					////a = UINT64_C(0x9B1B51BEB2EFF7A1); //0x41C64E6B
-					////for (uint64_t ra = (r & 0xFFFF); ra; ra--)
-					////{
-					////	a = rotate64(a, 20) + (a << 27);
-					////}
-					//a = UINT64_C(0x9E3779B9); //0x41C64E6B
+					//////a = UINT64_C(0x9B1B51BEB2EFF7A1); //0x41C64E6B
+					//////for (uint64_t ra = (r & 0xFFFF); ra; ra--)
+					//////{
+					//////	a = rotate64(a, 20) + (a << 27);
+					//////}
+					//a = UINT64_C(0x9E3779B9); //0x41C64E6B 0x9E3779B9
 					//for (uint64_t ra = (r & 0xFFFF); ra; ra--)
 					//{
 					//	a = rotate64(a, 21) * UINT64_C(0x9E3779B9);
