@@ -21,10 +21,17 @@ static inline uint32_t rotate32(uint32_t value, unsigned int rot)
 
 
 //minimover64
-static uint64_t x = UINT64_C(0x9E3779B9);
+//static uint64_t x = UINT64_C(0x9E3779B9);
+//static inline uint64_t next()
+//{
+//    return (x = rotate64(x, 21) * UINT64_C(0x9E3779B9)) * UINT64_C(0x41C64E6D);
+//}
+
+//movercounter64
+static uint64_t a = UINT64_C(0x9E3779B9), b = UINT64_C(1);
 static inline uint64_t next()
 {
-    return (x = rotate64(x, 21) * UINT64_C(0x9E3779B9)) * UINT64_C(0x41C64E6D);
+    return (a = rotate64(a, 21) * (b += UINT64_C(0x9E3779B97F4A7AF6))) * UINT64_C(0x41C64E6B);
 }
 //uint64_t z = (x = (x ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0x41C64E6B));
 //z -= z >> 28;
