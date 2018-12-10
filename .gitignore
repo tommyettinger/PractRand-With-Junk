@@ -36,3 +36,7 @@
 **.tlog
 **/Release/
 **/Debug/
+
+# jEdit garbage
+\#*\#
+*~

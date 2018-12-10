@@ -256,7 +256,7 @@ double print_result(const PractRand::TestResult &result, bool print_header = fal
 	if (true) {// 17 characters?
 		/*
 			Threshold Values:
-			The idea is to assign a suspicioun level based not just upon the 
+			The idea is to assign a suspicion level based not just upon the 
 			p-value but also the number of p-values and their relative importance.  
 			If there are a million p-values then we probably don't care about 
 			anything less extreme than a one in ten million event.  
@@ -294,7 +294,7 @@ double print_result(const PractRand::TestResult &result, bool print_header = fal
 
 const char *seed_str = NULL;
 
-double show_checkpoint(TestManager *tman, int mode, Uint64 seed, double time, bool smart_thresholds, double threshold, bool end_on_failure) {
+void show_checkpoint(TestManager *tman, int mode, Uint64 seed, double time, bool smart_thresholds, double threshold, bool end_on_failure) {
 	std::printf("rng=%s", tman->get_rng()->get_name().c_str());
 
 	std::printf(", seed=");
