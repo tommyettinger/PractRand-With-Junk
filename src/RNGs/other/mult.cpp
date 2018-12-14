@@ -1246,8 +1246,9 @@ namespace PractRand {
 
 				// UINT64_C(0x369DEA0F31A53F85); // UINT64_C(0x632BE59BD9B4E019);
 				Uint64 linnormA::raw64() {
-					uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
-					z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					//(state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
+					uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xC6BC279692B5CC83));
+					z = rotate64(z, 27) * UINT64_C(0xDB4F0B9175AE2165);
 					return z ^ (z >> 25u);
 				}
 				std::string linnormA::get_name() const { return "LinnormA"; }
@@ -1453,11 +1454,11 @@ namespace PractRand {
 					//return (z >> 28) ^ z;
 
 					// passes 32TB, but with issues at the end, no failures though
-					//uint64_t z = (state += UINT64_C(0x3C6EF372FE94F82A));
-					//z *= ((z >> 21) ^ z);
-					//return z - (z >> 28);
+					uint64_t z = (state += UINT64_C(0x3C6EF372FE94F82A));
+					z *= ((z >> 21) ^ z);
+					return z - (z >> 29);
 
-					uint64_t z = (state += UINT64_C(0x2C6EF372FE24F82A)); z *= ((z >> shift1) ^ z); return z - (z >> shift2); // 0x6C6EF372FB7CD85A
+					//uint64_t z = (state += UINT64_C(0x9E3779B97F4A7C16)); z *= (z >> 25 ^ z); return z - (z >> 22); // 0x6C6EF372FB7CD85A
 																															  //uint64_t z = (state += UINT64_C(0x3C6EF372FE94F82A));
 																															  //z *= ((z >> 21) ^ z);
 																															  //return z - (z >> 25);
@@ -1484,8 +1485,8 @@ namespace PractRand {
 				}
 				void thrust63::seed(Uint64 seed)
 				{
-					shift2 = seed & 63u;
-					shift1 = seed >> 8 & 63u;
+//					shift2 = seed & 63u;
+//					shift1 = seed >> 8 & 63u;
 					autoseed();
 					state |= 1;
 				}
@@ -1713,15 +1714,17 @@ namespace PractRand {
 				Uint64 moverCounter64::raw64() {
 					//passes 32TB with no anomalies, seed = 0x8b2bfcb
 					//return (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) * (b += UINT64_C(0x9E3779B97F4A7AF6));// *((b += UINT64_C(0x9E3779B97F4A7AF5)) | UINT64_C(1));
-																											  // 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83 0x6C8E9CF570932BD5
+                    // 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83 0x6C8E9CF570932BD5
 					//return (b += (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) ^ UINT64_C(0x9E3779B97F4A7AF5));//* UINT64_C(0x41C64E6D)); //
+					//return (a = (rotate64(a, 21) ^ (b += UINT64_C(0x9E3779B97F4A7AF5))) * UINT64_C(0xC6BC279692B5CC83)) * UINT64_C(0x41C64E6B);
 					return (a = rotate64(a, 21) * (b += UINT64_C(0x9E3779B97F4A7AF6))) * UINT64_C(0x41C64E6B);
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
 					walker->handle(b);
-					b |= 1;
+					b |= UINT64_C(1);
+					//b = b << 3 | UINT64_C(5);
 
 					//uint64_t r = a;
 
