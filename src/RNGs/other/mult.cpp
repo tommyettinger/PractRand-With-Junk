@@ -1259,11 +1259,24 @@ namespace PractRand {
 					//z = rotate64(z, 27) * UINT64_C(0xDB4F0B9175AE2165);
 					//return z ^ (z >> 25u);
 					
+					//uint64_t z = (rotate64(state, 21) ^ rotate64(state, 41) ^ state++) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 29) * UINT64_C(0xAEF17502108EF2D9);
+					//return z ^ z >> 30;
 					//z = rotate64(z, 29) * UINT64_C(0xD1B54A32D192ED03);
 					//z = (z ^ z >> 29u) * UINT64_C(0xAEF17502108EF2D9);
-					uint64_t z = (state++ ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83); // golden ratio, neely
-					z = (z ^ z >> 28u ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
-					return z ^ rotate64(z, 19) ^ rotate64(z, 37); // primes close to 1/3 and 3/5 of 64
+					////Early version of DiverRNG.determine(), passes 32TB no anomalies, not very fast
+					//uint64_t z = (state++ ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83); // golden ratio, neely
+					//z = (z ^ z >> 28u ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
+					//return z ^ rotate64(z, 19) ^ rotate64(z, 37); // primes close to 1/3 and 3/5 of 64
+
+					//uint64_t z = (rotate64(state, 19) ^ rotate64(state, 37) ^ state++) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 30) * UINT64_C(0xDB4F0B9175AE2165); // phi, used in philox
+					//return z ^ z >> 29; // primes close to 1/3 and 3/5 of 64
+
+					uint64_t z = (rotate64(state, 21) ^ rotate64(state, 33) ^ state++ ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83); // neely
+					z = (z ^ z >> 28 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // golden ratio
+					return z ^ z >> 28;
+
 					//return (z ^ z >> 30u);
 
 				}
