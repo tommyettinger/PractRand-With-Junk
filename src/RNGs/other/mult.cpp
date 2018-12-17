@@ -1047,10 +1047,16 @@ namespace PractRand {
 					//QuixoticRNG attempt for speed maybe
 					//uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0x42042E4DD58B));
 					//uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0x5DA942042E4DD58B));// 0x5888120408461063 // 0x4120508604029043 //0x482050128A101603
+					
 					//QuixoticRNG normal
 					//uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0x41C64E6B));
-					//z = (z ^ z >> 27u) + UINT64_C(0x9E3779B97F4A7C15);
-					//return z ^ z >> 31u;
+					//z = (z ^ z >> 27u) + UINT64_C(0xAEF17502108EF2D9);
+					//return z ^ z >> 25u;
+					
+					//uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xC6BC279692B5CC83));
+					//z = rotate64(z, 27);
+					//z = (z << 26) - z;
+					//return z ^ z >> 25u;
 
 					// fails at 512GB
 					//					uint64_t z = (state = state * UINT64_C(0x41C64E6B) + UINT64_C(1));
@@ -1063,9 +1069,9 @@ namespace PractRand {
 					//return (z ^ z >> 29u);
 
 					// LinnormRNG.determine()
-					//uint64_t z = ((state += UINT64_C(0x632BE59BD9B4E019)) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
-					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
-					//return (z ^ z >> 25u);
+					uint64_t z = ((state += UINT64_C(0x632BE59BD9B4E019)) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
+					z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					return (z ^ z >> 25u);
 
 					// Quixotic determine attempt?
 					// where we left off
@@ -1210,10 +1216,11 @@ namespace PractRand {
 					//uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xD1B54A32D192ED03));
 					//z -= z >> 28;
 					//return z ^ z >> 26;
-                    uint64_t z = (state += UINT64_C(0x6C8E9CF570932BD5));
-					z ^= z >> 25;
-					z = rotate64(z, 21) * UINT64_C(0xDB4F0B9175AE2165);
-					return rotate64(z, 21) * UINT64_C(0x9E3779B97F4A7C15);
+                    //uint64_t z = (state += UINT64_C(0x6C8E9CF570932BD5));
+					//z ^= z >> 25;
+					//z = rotate64(z, 21) * UINT64_C(0xDB4F0B9175AE2165);
+					//return rotate64(z, 21) * UINT64_C(0x9E3779B97F4A7C15);
+					
 					//uint64_t z = (state += UINT64_C(0x9E3779B97F4A7C15));
 					//z = (UINT64_C(0xDB4F0B9175AE2165) ^ (z ^ z >> 28)) * UINT64_C(0xD1B54A32D192ED03);
 					//z ^= z << 15;
@@ -1239,7 +1246,7 @@ namespace PractRand {
 					walker->handle(stream);
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
-					printf("Seed is 0x%I64X, Stream is 0x%I64X\r\n", state, stream);
+					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, stream);
 					//printf("Seed is 0x%I64X\r\n", state);
 				}
 
@@ -1247,9 +1254,18 @@ namespace PractRand {
 				// UINT64_C(0x369DEA0F31A53F85); // UINT64_C(0x632BE59BD9B4E019);
 				Uint64 linnormA::raw64() {
 					//(state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
-					uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xC6BC279692B5CC83));
-					z = rotate64(z, 27) * UINT64_C(0xDB4F0B9175AE2165);
-					return z ^ (z >> 25u);
+					//// DiverRNG, passes 32TB with one anomaly
+					//uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xC6BC279692B5CC83));
+					//z = rotate64(z, 27) * UINT64_C(0xDB4F0B9175AE2165);
+					//return z ^ (z >> 25u);
+					
+					//z = rotate64(z, 29) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ z >> 29u) * UINT64_C(0xAEF17502108EF2D9);
+					uint64_t z = (state++ ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83); // golden ratio, neely
+					z = (z ^ z >> 28u ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
+					return z ^ rotate64(z, 19) ^ rotate64(z, 37); // primes close to 1/3 and 3/5 of 64
+					//return (z ^ z >> 30u);
+
 				}
 				std::string linnormA::get_name() const { return "LinnormA"; }
 				void linnormA::walk_state(StateWalkingObject *walker) {
