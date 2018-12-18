@@ -1273,9 +1273,33 @@ namespace PractRand {
 					//z = (z ^ z >> 30) * UINT64_C(0xDB4F0B9175AE2165); // phi, used in philox
 					//return z ^ z >> 29; // primes close to 1/3 and 3/5 of 64
 
-					uint64_t z = (rotate64(state, 21) ^ rotate64(state, 33) ^ state++ ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83); // neely
-					z = (z ^ z >> 28 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // golden ratio
-					return z ^ z >> 28;
+					// fails at 16TB suddenly wih BRank issue
+					//uint64_t z = (rotate64(state, 21) ^ rotate64(state, 33) ^ state++ ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83); // generalized golden ratio, neely
+					//z = (z ^ z >> 28 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
+					//return z ^ z >> 28;
+
+					uint64_t z = state++;
+					z = (rotate64(z, 21) ^ rotate64(z, 35) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83);
+					z = (z ^ z >> 28 ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xD2B74407B1CE6E93);// +UINT64_C(0x9E3779B97F4A7C15);
+					//z = rotate64(z, 31);
+					return z ^ z >> 26;
+
+					//z = (z ^ z >> 28 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
+
+					//uint64_t z = state++;
+					//z = (z << 4) - rotate64(z, 2);
+					//z = ((z << 8) - rotate64(z, 6)) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 27) * UINT64_C(0x9E3779B97F4A7C15);//) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
+					//return z ^ z >> 29;
+					//z = ((z ^ rotate64(z, 21) ^ rotate64(z, 33) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83));
+						// ^ ((rotate64(z, 39) ^ rotate64(z, 11) ^ rotate64(z, 47) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93));
+					//z = (z ^ z >> 29 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93);
+					//z = rotate64(z, 27) * UINT64_C(0x9E3779B97F4A7C15);
+					//z = rotate64(z, 29) * UINT64_C(0xD2B74407B1CE6E93);
+
+					//z = (rotate64(z, 43) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93);
+					//z = (rotate64(z, 51) ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xD1B54A32D192ED03);
+
 
 					//return (z ^ z >> 30u);
 
