@@ -1308,10 +1308,22 @@ namespace PractRand {
 					//z = (z ^ (z >> ((z >> 60) + 16))) * UINT64_C(0x369DEA0F31A53F85);
 					//return z ^ z >> 27;
 
+					//// passes 32TB no anomalies
+					//uint64_t z = ++state;
+					//z = ((z << ((z & 31) + 5)) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03); //rotate64(z, 3)
+					//z = (z ^ (z >> ((z >> 60) + 16))) * UINT64_C(0x369DEA0F31A53F85);
+					//return z ^ z >> 27;
+					
+					
+					//// passes 32TB with one anomaly (16GB, [Low16/64]DC6-9x1Bytes-1, unusual)
 					uint64_t z = ++state;
-					z = ((z << ((z & 31) + 5)) ^ rotate64(z, 3)) * UINT64_C(0xAEF17502108EF2D9);
-					z = (z ^ (z >> ((z >> 60) + 16))) * UINT64_C(0x369DEA0F31A53F85);
-					return z ^ z >> 27;
+					z ^= rotate64(z, 21) ^ rotate64(z, 41);
+					z += UINT64_C(0x9E3779B97F4A7C15);
+					z = (z ^ z >> 30) * UINT64_C(0xBF58476D1CE4E5B9);
+					z = (z ^ z >> 27) * UINT64_C(0x94D049BB133111EB);
+					return z ^ z >> 31;
+
+					
 					//z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
 					//z = ((z >> 30) ^ rotate64(z, 37)) * UINT64_C(0x369DEA0F31A53F85);
 					//z = ((z >> 26) ^ z) * UINT64_C(0x9E3779B97F4A7C15);
