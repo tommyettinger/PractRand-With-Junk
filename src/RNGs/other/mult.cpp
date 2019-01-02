@@ -1291,44 +1291,86 @@ namespace PractRand {
 					//uint64_t z = (rotate64(state, 21) ^ rotate64(state, 33) ^ state++ ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83); // generalized golden ratio, neely
 					//z = (z ^ z >> 28 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
 					//return z ^ z >> 28;
-
-					//uint64_t z = (state++ ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
-					//z = (z ^ z >> 27u) * UINT64_C(0xDB4F0B9175AE2165);
-					//return (z ^ z >> 29u);
-
-					//uint64_t z = state++;
-					//z = ((z << ((z & 31u) + 5)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
-					//z = (z >> 27 ^ rotate64(z, 39)) * UINT64_C(0x369DEA0F31A53F85);
-					//return z ^ z >> 29;
+					
+					//uint64_t z = (state++ ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					////uint64_t z = state++;
+					////z = rotate64(z, 3) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 26u) * UINT64_C(0x9E3779B97F4A7C15) + UINT64_C(0x369DEA0F31A53F85);
+					//return (z ^ z >> 25u);
 
 					//uint64_t z = state++;
-					//z = ((z << ((z & 31u) + 5)) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					//z = (z >> 27 ^ rotate64(z, 39)) * UINT64_C(0x369DEA0F31A53F85);
-					//return z ^ z >> 29;
-
-
+					//z = (z ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					//return (z ^ z >> 25u) * UINT64_C(0x2545F4914F6CDD1D);        
+					
+					////passes 32TB no anomalies
+					//uint64_t z = (rotate64(state, 5) ^ rotate64(state, 8) ^ state++) * 0x7FFFFFFF;
+					//z = (z ^ z >> 30) * 0xBF58476D1CE4E5B9;
+					//z = (z ^ z >> 27) * 0x94D049BB133111EB;
+					//return z ^ z >> 31;
+					
+					////passes 32TB no anomalies
 					//uint64_t z = state++;
+					//z = ((z << 32) ^ rotate64(z, 29)) * UINT64_C(127);//UINT64_C(0x7FFFFFFF);
+					//z = (z ^ z >> 30) * UINT64_C(0xBF58476D1CE4E5B9);
+					//z = (z ^ z >> 27) * UINT64_C(0x94D049BB133111EB);
+					//return z ^ z >> 31;
+					
+					//// passes 32TB no anomalies
+					//uint64_t z = state;
+					//z = ((z << (((++state) & 31) + 5)) ^ rotate64(z, 3)) * UINT64_C(0xAEF17502108EF2D9);
+					//z = (z ^ (z >> ((z >> 60) + 16))) * UINT64_C(0x369DEA0F31A53F85);
+					//return z ^ z >> 27;
+
+					//// passes 32TB no anomalies
+					//uint64_t z = ++state;
 					//z = ((z << ((z & 31) + 5)) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
 					//z = (z ^ (z >> ((z >> 60) + 16))) * UINT64_C(0x369DEA0F31A53F85);
-					//return (z ^ z >> 27);
-
-					uint64_t z = ++state;
-					z = (z ^ z << 11 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					z ^= z >> 25;
-					z = (z ^ z >> 27 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					//z = (z ^ z >> 31 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//return z ^ z >> 27;
 					
-					//z = (rotate64(z, 11) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					//z = rotate64(z, 31) * UINT64_C(0x369DEA0F31A53F85);
-					//z = rotate64(z, 41) * UINT64_C(0xD1B54A32D192ED03);
-					//z = ((z << ((z & 31u) + 5u)) ^ z) * UINT64_C(0x7FF8A3ED) + UINT64_C(0xD1B54A32D192ED03);
-					//z = (z ^ (z >> ((z >> 60) | 16u))) * UINT64_C(0x369DEA0F31A53F85);
-					return (z ^ z >> 29);// ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					
+					//// passes 32TB with one anomaly (16GB, [Low16/64]DC6-9x1Bytes-1, unusual)
+					//uint64_t z = ++state;
+					//z ^= rotate64(z, 21) ^ rotate64(z, 41);
+					//z += UINT64_C(0x9E3779B97F4A7C15);
+					//z = (z ^ z >> 30) * UINT64_C(0xBF58476D1CE4E5B9);
+					//z = (z ^ z >> 27) * UINT64_C(0x94D049BB133111EB);
+					//return z ^ z >> 31;
+
+					//// passes 32TB with 4 anomalies, worsening toward the end
+					//uint64_t z = ++state;
+					//z = ((z << 11) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z ^= z >> 25;
+					//z = ((z >> 27) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//return ((z >> 29) ^ z);// ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+
+					//uint64_t z = ++state;
+					//z = ((z << 21) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ (z >> ((z >> 60) | 16))) * UINT64_C(0x369DEA0F31A53F85);
+					//return z ^ z >> 27;
+
+					//uint64_t z = ++state;
+					//z = (z ^ z << 11 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z ^= z >> 25;
+					//z = (z ^ z >> 27 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//return (z ^ z >> 29);// ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
 
 
+					// testing now, no anomalies at 8TB
+					uint64_t z = ++state;
+					z = (z ^ rotate64(z, 21) ^ rotate64(z, 45) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					z = (z ^ rotate64(z, 21) ^ rotate64(z, 45)) * UINT64_C(0xDB4F0B9175AE2165);
+					return z ^ z >> 27;
+
+					//z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
+					//z = ((z >> 30) ^ rotate64(z, 37)) * UINT64_C(0x369DEA0F31A53F85);
+					//z = ((z >> 26) ^ z) * UINT64_C(0x9E3779B97F4A7C15);
+					//return z ^ z >> 26;
 					//uint64_t z = state++;
 					//z = (rotate64(z, 21) ^ rotate64(z, 35) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83);
-					//z = (z ^ z >> 26) * UINT64_C(0xD1B54A32D192ED03);// +UINT64_C(0x9E3779B97F4A7C15);
+					//z = (z ^ z >> 26) * UINT64_C(0xD1B54A32D192ED03);
+
+
 					//return z ^ z >> 26;
 
 					//z = (z ^ z >> 28 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
