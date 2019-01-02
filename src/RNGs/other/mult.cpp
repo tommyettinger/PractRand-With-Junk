@@ -1,5 +1,6 @@
 #include <string>
 #include <sstream>
+#include <cstdint>
 #include "PractRand/config.h"
 #include "PractRand/rng_basics.h"
 #include "PractRand/rng_helpers.h"
@@ -1068,10 +1069,21 @@ namespace PractRand {
 					//z = (z ^ z >> 26u) * UINT64_C(0xAEF17502108EF2D9);
 					//return (z ^ z >> 29u);
 
-					// LinnormRNG.determine()
-					uint64_t z = ((state += UINT64_C(0x632BE59BD9B4E019)) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
-					z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
-					return (z ^ z >> 25u);
+					//// LinnormRNG.determine()
+					//uint64_t z = ((state += UINT64_C(0x632BE59BD9B4E019)) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					//return (z ^ z >> 25u);
+
+
+					uint64_t z = ++state;
+					//z = (z ^ z << 10 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					z = (z ^ rotate64(z, 21) ^ rotate64(z, 45) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (rotate64(z, 10) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z ^= rotate64(z, 21) ^ rotate64(z, 43);
+					z = (z ^ rotate64(z, 21) ^ rotate64(z, 45) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ z >> 29) * UINT64_C(0x369DEA0F31A53F85);
+					return (z ^ z >> 27);
+
 
 					// Quixotic determine attempt?
 					// where we left off
@@ -1233,6 +1245,8 @@ namespace PractRand {
 					// philox 0xCA5A826395121157 0xD2B74407B1CE6E93
 					// neely  0xC6BC279692B5CC83
 					// golden 0xD1B54A32D192ED03 0xDB4F0B9175AE2165
+                    // even   0xC6BC2796 0xD1B54A32
+					// odd    0xDB4F0B91 0xCA5A8263 0xD2B74407
 					//const uint64_t z = (l ^ l >> 25 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83) + UINT64_C(0x632BE59BD9B4E019);// *UINT64_C(0xDB4F0B9175AE2165);// +UINT64_C(0xCA5A826395121157);
 					//const uint64_t z = (l ^ l >> 27 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83);// +UINT64_C(0xCA5A826395121157);
 					//return (z ^ z >> 26);
@@ -1278,11 +1292,44 @@ namespace PractRand {
 					//z = (z ^ z >> 28 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
 					//return z ^ z >> 28;
 
-					uint64_t z = state++;
-					z = (rotate64(z, 21) ^ rotate64(z, 35) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83);
-					z = (z ^ z >> 28 ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xD2B74407B1CE6E93);// +UINT64_C(0x9E3779B97F4A7C15);
-					//z = rotate64(z, 31);
-					return z ^ z >> 26;
+					//uint64_t z = (state++ ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 27u) * UINT64_C(0xDB4F0B9175AE2165);
+					//return (z ^ z >> 29u);
+
+					//uint64_t z = state++;
+					//z = ((z << ((z & 31u) + 5)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
+					//z = (z >> 27 ^ rotate64(z, 39)) * UINT64_C(0x369DEA0F31A53F85);
+					//return z ^ z >> 29;
+
+					//uint64_t z = state++;
+					//z = ((z << ((z & 31u) + 5)) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z >> 27 ^ rotate64(z, 39)) * UINT64_C(0x369DEA0F31A53F85);
+					//return z ^ z >> 29;
+
+
+					//uint64_t z = state++;
+					//z = ((z << ((z & 31) + 5)) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ (z >> ((z >> 60) + 16))) * UINT64_C(0x369DEA0F31A53F85);
+					//return (z ^ z >> 27);
+
+					uint64_t z = ++state;
+					z = (z ^ z << 11 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					z ^= z >> 25;
+					z = (z ^ z >> 27 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ z >> 31 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					
+					//z = (rotate64(z, 11) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = rotate64(z, 31) * UINT64_C(0x369DEA0F31A53F85);
+					//z = rotate64(z, 41) * UINT64_C(0xD1B54A32D192ED03);
+					//z = ((z << ((z & 31u) + 5u)) ^ z) * UINT64_C(0x7FF8A3ED) + UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ (z >> ((z >> 60) | 16u))) * UINT64_C(0x369DEA0F31A53F85);
+					return (z ^ z >> 29);// ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+
+
+					//uint64_t z = state++;
+					//z = (rotate64(z, 21) ^ rotate64(z, 35) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 26) * UINT64_C(0xD1B54A32D192ED03);// +UINT64_C(0x9E3779B97F4A7C15);
+					//return z ^ z >> 26;
 
 					//z = (z ^ z >> 28 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD2B74407B1CE6E93); // phi, used in philox
 
@@ -1313,9 +1360,44 @@ namespace PractRand {
 				Uint64 linnormB::raw64() {
 					//UINT64_C(0x9E3779B97F4A7C15)
 					//uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(3));
-					uint64_t z = (state = (state ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x41C64E6B));
-					z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
-					return z ^ (z >> 30u);
+
+					//uint64_t z = (state = (state ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x41C64E6B));
+					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					//return z ^ (z >> 30u);
+
+
+					//static const uint64_t P1 = 11400714785074694791ULL;  /* 0b1001111000110111011110011011000110000101111010111100101010000111 */
+					//static const uint64_t P2 = 14029467366897019727ULL;  /* 0b1100001010110010101011100011110100100111110101001110101101001111 */
+					//static const uint64_t P3 = 1609587929392839161ULL;   /* 0b0001011001010110011001111011000110011110001101110111100111111001 */
+					//static const uint64_t P4 = 9650029242287828579ULL;   /* 0b1000010111101011110010100111011111000010101100101010111001100011 */
+					//static const uint64_t P5 = 2870177450012600261ULL;   /* 0b0010011111010100111010110010111100010110010101100110011111000101 */
+
+					//uint64_t input = (state += 1);
+					//uint64_t hash = P5 + 8;
+					//uint64_t hash = (state++);
+					//hash ^= rotate64(hash, 21) ^ rotate64(hash, 41);
+					//hash += P1;
+					//hash ^= (hash << ((hash & 31) + 5));
+					//hash *= P5;
+					//input *= P2;
+					//input = rotate64(input, 31);
+					//input *= P1;
+					//hash ^= input;
+					//hash = rotate64(hash, 27) * P1 + P4;
+
+					//hash ^= hash >> 33;
+					//hash *= P2;
+					//hash ^= hash >> 29;
+					//hash *= P3;
+					//hash ^= hash >> 32;
+					//return hash;
+
+					uint64_t s0 = ++state * UINT64_C(0x369DEA0F31A53F85);
+					uint64_t s1 = rotate64(s0, 31) + UINT64_C(0xAEF17502108EF2D9);
+					//s0 = (s0 ^ rotate64(s0, 24) ^ rotate64(s0, 51));
+					s1 = (s1 ^ s1 >> 29) * UINT64_C(0xDB4F0B9175AE2165);// UINT64_C(0x7FF8A3ED) + UINT64_C(0x9E3779B97F4A7C15);
+					return (s0 ^ s1 ^ s1 >> 29) * UINT64_C(0x41C64E6D);
+
 
 					//uint64_t z = ((state += UINT64_C(0x9E3779B97F4A7C15)) ^ UINT64_C(0x369DEA0F31A53F85) * UINT64_C(0x61C8864680B583EB));
 					//z = (z ^ z >> 30u) * UINT64_C(0x632BE59BD9B4E019);// UINT64_C(0x369DEA0F31A53F85); // UINT64_C(0xAEF17502108EF2D9);
@@ -1740,7 +1822,10 @@ namespace PractRand {
 
 				Uint64 molerat64::raw64() {
 					//surprisingly, passes 32TB with one anomaly, seed = 0xde9b705d
-					return (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) * UINT64_C(0x41C64E6D);
+					// passes TestU01 in forwards and reverse, PractRand to at least 4TB
+					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * UINT64_C(0x818102004182A025);//
+					//const uint64_t b = a;
+					//return rotate64(b, 11) + (a = rotate64(b, 21) * UINT64_C(0x9E3779B9));
 					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5
 					//return (z << 29) + rotate64(z, 20);
 					//z = (z ^ z >> 28);
@@ -1756,10 +1841,10 @@ namespace PractRand {
 					//{
 					//	a = rotate64(a, 20) + (a << 27);
 					//}
-					a = UINT64_C(0x9E3779B9); //0x41C64E6B
-					for (uint64_t ra = (r & 0xFFFF); ra; ra--)
+					a &= 0x1fffff; //0x41C64E6B
+					for (uint64_t ra = (r & 0x3FF); ra; ra--)
 					{
-						a = rotate64(a, 21) * UINT64_C(0x9E3779B9);
+						a = rotate64(a, 29) * UINT64_C(0xAC564B05);
 					}
 
 				}
@@ -1767,16 +1852,19 @@ namespace PractRand {
 				Uint64 moverCounter64::raw64() {
 					//passes 32TB with no anomalies, seed = 0x8b2bfcb
 					//return (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) * (b += UINT64_C(0x9E3779B97F4A7AF6));// *((b += UINT64_C(0x9E3779B97F4A7AF5)) | UINT64_C(1));
-                    // 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83 0x6C8E9CF570932BD5
+					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83 0x6C8E9CF570932BD5
 					//return (b += (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) ^ UINT64_C(0x9E3779B97F4A7AF5));//* UINT64_C(0x41C64E6D)); //
 					//return (a = (rotate64(a, 21) ^ (b += UINT64_C(0x9E3779B97F4A7AF5))) * UINT64_C(0xC6BC279692B5CC83)) * UINT64_C(0x41C64E6B);
-					return (a = rotate64(a, 21) * (b += UINT64_C(0x9E3779B97F4A7AF6))) * UINT64_C(0x41C64E6B);
+					
+					//return (a = rotate64(a, 21) * (b += UINT64_C(0x9E3779B97F4A7AF6))) * UINT64_C(0x41C64E6B);
+					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05) ^ ++b) * UINT64_C(0x8181020042010415);
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
 					walker->handle(b);
-					b |= UINT64_C(1);
+					printf("Seed is 0x%016X, 0x%016X\r\n", a, b);
+					//b |= UINT64_C(1);
 					//b = b << 3 | UINT64_C(5);
 
 					//uint64_t r = a;
@@ -1790,6 +1878,43 @@ namespace PractRand {
 					//for (uint64_t ra = (r & 0xFFFF); ra; ra--)
 					//{
 					//	a = rotate64(a, 21) * UINT64_C(0x9E3779B9);
+					//}
+
+				}
+				Uint32 moverCounter32::raw32() {
+					//passes 32TB with no anomalies, seed = 0x8b2bfcb
+					//return (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) * (b += UINT64_C(0x9E3779B97F4A7AF6));// *((b += UINT64_C(0x9E3779B97F4A7AF5)) | UINT64_C(1));
+					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83 0x6C8E9CF570932BD5
+					//return (b += (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) ^ UINT64_C(0x9E3779B97F4A7AF5));//* UINT64_C(0x41C64E6D)); //
+					//return (a = (rotate64(a, 21) ^ (b += UINT64_C(0x9E3779B97F4A7AF5))) * UINT64_C(0xC6BC279692B5CC83)) * UINT64_C(0x41C64E6B);
+					
+					//return (a ^= (rotate32(a, 11) ^ (a << 13)) * (b += UINT32_C(0x9E3779BA)) + UINT32_C(0x6C8E9CF5)) * UINT32_C(0x41C64E6B);
+					return ((a = rotate32(a, 17) * UINT32_C(0xBCFD) ^ b) * (b += UINT32_C(0x9E3779BA)));
+					//return ((a = rotate32(a, 12) * (b *= UINT32_C(0x12D32D)) + UINT64_C(0x9E3779B9)) * UINT32_C(0xB1AD3));
+				}
+				std::string moverCounter32::get_name() const { return "moverCounter32"; }
+				void moverCounter32::walk_state(StateWalkingObject *walker) {
+					walker->handle(a);
+					//b = b << 3 | UINT64_C(5);
+
+					uint64_t r = a;
+
+					//////a = UINT64_C(0x9B1B51BEB2EFF7A1); //0x41C64E6B
+					//////for (uint64_t ra = (r & 0xFFFF); ra; ra--)
+					//////{
+					//////	a = rotate64(a, 20) + (a << 27);
+					//////}
+					a = UINT32_C(0x89A7); //0x41C64E6B 0x9E3779B9
+					for (uint32_t ra = (r & 0xFFFF); ra; ra--)
+					{
+						a = rotate32(a, 17) * UINT32_C(0xBCFD);
+					}
+					walker->handle(b);
+					b |= UINT32_C(1);
+					//b = UINT32_C(0x3F10AF16);
+					//for (uint32_t rb = (r >> 16); rb; rb--)
+					//{
+					//	b = rotate32(b, 25) + UINT32_C(0xC0EF50EB);
 					//}
 
 				}

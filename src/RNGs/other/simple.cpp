@@ -161,11 +161,27 @@ namespace PractRand {
 					if (!(x || y || z || w || v)) x = 1;
 				}
 				Uint64 xoroshiro128plus::raw64() {
-					Uint64 result = state0 + state1;
-					Uint64 tmp = state0 ^ state1;
-					state0 = ((state0 << 55) | (state0 >> (64 - 55))) ^ tmp ^ (tmp << 14);
-					state1 = ((tmp << 36) | (tmp >> (64 - 36)));
-					return result;
+					//const uint64_t s0 = state0;
+					//uint64_t s1 = state1;
+					//const uint64_t result = s0 + s1;
+					//s1 ^= s0;
+					//state0 = rotate64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+					//state1 = rotate64(s1, 37); // c
+					//return result;
+					//const uint64_t s0 = state0;
+					//const uint64_t s1 = state1 ^ s0;
+					//const uint64_t result = (s0 << 5) - s0;
+					//state0 = rotate64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+					//state1 = rotate64(s1, 37); // c
+					//return rotate64(result, 60) + UINT64_C(0x9E3779B97F4A7C15);
+
+					const uint64_t s0 = state0;
+					uint64_t s1 = state1;
+					const uint64_t result = s0 * 5;
+					s1 ^= s0;
+					state0 = rotate64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+					state1 = rotate64(s1, 37); // c
+					return rotate64(result, 59) * 17;
 				}
 				std::string xoroshiro128plus::get_name() const { return "xoroshiro128plus"; }
 				void xoroshiro128plus::walk_state(StateWalkingObject *walker) {

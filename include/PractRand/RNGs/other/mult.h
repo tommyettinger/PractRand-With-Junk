@@ -545,6 +545,14 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 					//void seed(Uint64 seed);
 				};
+				class moverCounter32 : public vRNG32 {
+					Uint32 a, b;
+				public:
+					Uint32 raw32();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+					//void seed(Uint64 seed);
+				};
 				class xrsr_rev_mul : public vRNG64 {
 					Uint64 state0, state1;
 				public:

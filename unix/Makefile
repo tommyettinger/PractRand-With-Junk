@@ -21,10 +21,10 @@ CXX = g++
 CXXFLAGS = -g $(addprefix -I,$(INCLUDES)) -O2
 LDFLAGS = $(CXXFLAGS)
 
-ifeq ($(shell uname -s),Linux)
+# ifeq ($(shell uname -s),Linux)
 CXXFLAGS += -std=c++11
 LDFLAGS += -lpthread
-endif
+# endif
 
 %.o: %.cpp
 	$(CXX) -o $@ $(CXXFLAGS) -c $<

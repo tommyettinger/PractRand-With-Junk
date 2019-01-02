@@ -605,6 +605,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(ta32)
 			REGISTER_RNG_0(molerat64)
 			REGISTER_RNG_0(moverCounter64)
+			REGISTER_RNG_0(moverCounter32)
 			REGISTER_RNG_0(xrsr_rev_mul)
 			REGISTER_RNG_0(twirl32)
 			REGISTER_RNG_0(zig32)
