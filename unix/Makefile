@@ -18,7 +18,7 @@ LIBS = $(BIN)/libpracrand
 CXX = g++
 # CXXFLAGS = -Wall -Werror -g $(addprefix -I,$(INCLUDES))
 # Many, many warnings. Too many to fix at the moment.
-CXXFLAGS = -g $(addprefix -I,$(INCLUDES)) -O2
+CXXFLAGS = -g $(addprefix -I,$(INCLUDES)) -Ofast
 LDFLAGS = $(CXXFLAGS)
 
 # ifeq ($(shell uname -s),Linux)
