@@ -576,6 +576,25 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 				};
 
+				class threefry : public vRNG64 {
+					Uint64 key[2];
+					Uint64 state[2];
+					Uint32 N_ROUNDS;
+				public:
+					threefry(int rounds) : N_ROUNDS((Uint32)rounds) {};
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
+
+				class threefin : public vRNG64 {
+					Uint64 K[3];
+					Uint64 x0, x1;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 
 			}
 		}
