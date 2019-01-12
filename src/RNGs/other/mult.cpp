@@ -1894,19 +1894,37 @@ namespace PractRand {
 				Uint64 moverCounter64::raw64() {
 					//passes 32TB with no anomalies, seed = 0x8b2bfcb
 					//return (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) * (b += UINT64_C(0x9E3779B97F4A7AF6));// *((b += UINT64_C(0x9E3779B97F4A7AF5)) | UINT64_C(1));
-					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83 0x6C8E9CF570932BD5
+					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5 0xC6BC279692B5CC83 0x6C8E9CF570932BD5 0xDB4F0B9175AE2165 0x369DEA0F31A53F85
 					//return (b += (a = rotate64(a, 21) * UINT64_C(0x9E3779B9)) ^ UINT64_C(0x9E3779B97F4A7AF5));//* UINT64_C(0x41C64E6D)); //
 					//return (a = (rotate64(a, 21) ^ (b += UINT64_C(0x9E3779B97F4A7AF5))) * UINT64_C(0xC6BC279692B5CC83)) * UINT64_C(0x41C64E6B);
 					
 					//return (a = rotate64(a, 21) * (b += UINT64_C(0x9E3779B97F4A7AF6))) * UINT64_C(0x41C64E6B);
-					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05) ^ ++b) * UINT64_C(0x8181020042010415);
+					//passes 32TB one anomaly, TestU01 BigCrush both ways
+					//return (a = rotate64(a, 29) * UINT64_C(0xAC564B05) ^ ++b) * UINT64_C(0x818102004182A025);
+					////passes at least 8TB and BigCrush both ways
+					//return (a = rotate64(a, 35) ^ (b = b * UINT64_C(0x369DEA0F31A53F85) + UINT64_C(0x9E3779B97F4A7AF5))) * UINT64_C(0xDB4F0B9175AE2165);
+					
+					//return (a = rotate64(a, 29) ^ (b = b * UINT64_C(0xD1B54A32D192ED03) ^ UINT64_C(0xDB4F0B9175AE2165))) * UINT64_C(0x2545F4914F6CDD1D);
+					
+					//const uint64_t a0 = a * 127ULL;
+					//return (a = (rotate64(a0, 35) ^ (b += UINT64_C(0xDB4F0B9175AE2165)))) + a0;
+
+					//const uint64_t a0 = a - (a << 19);
+					//return (a += (rotate64(a0, 35) ^ (b += 0xDB4F0B9175AE2165ULL)));
+
+					//return (a = (rotate64(a, 35) ^ (b += 0xDB4F0B9175AE2165ULL))) + (c = 0x9E3779B97F4A7AF5ULL - rotate64(c, 11));
+					//return (a = (rotate64(a, 35) ^ (b += 0xDB4F0B9175AE2165ULL))) + (c = (c >> 1 ^ (-(c & 1u) & 0xD800000000000000ULL)));
+					//// I think this one does well?
+					//return (a = (rotate64(a, 21) + (c = rotate64(c, 35) ^ (b += 0x9E3779B97F4A7AF5ULL))));
+					const uint64_t result = ~(a << 1) * (b = rotate64(b, 11) + 0x9E3779B97F4A7AF5ULL);
+					return (result ^ result >> 29) + (a = rotate64(a, 21) + 0xDB4F0B9175AE2165ULL);
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
 					walker->handle(b);
-					printf("Seed is 0x%016X, 0x%016X\r\n", a, b);
 					//b |= UINT64_C(1);
+					printf("Seed is 0x%016X, 0x%016X\r\n", a, b);
 					//b = b << 3 | UINT64_C(5);
 
 					//uint64_t r = a;
@@ -1931,28 +1949,29 @@ namespace PractRand {
 					//return (a = (rotate64(a, 21) ^ (b += UINT64_C(0x9E3779B97F4A7AF5))) * UINT64_C(0xC6BC279692B5CC83)) * UINT64_C(0x41C64E6B);
 					
 					//return (a ^= (rotate32(a, 11) ^ (a << 13)) * (b += UINT32_C(0x9E3779BA)) + UINT32_C(0x6C8E9CF5)) * UINT32_C(0x41C64E6B);
-					return ((a = rotate32(a, 17) * UINT32_C(0xBCFD) ^ b) * (b += UINT32_C(0x9E3779BA)));
+					//return ((a = rotate32(a, 17) * UINT32_C(0xBCFD) ^ b) * (b += UINT32_C(0x9E3779BA)));
+					const uint32_t b0 = b;
+					return (a = rotate32(a, 19) + (b0 ^ b0 >> 11)) * (b0 ^ (b += 0x6C8E9CF5u));
 					//return ((a = rotate32(a, 12) * (b *= UINT32_C(0x12D32D)) + UINT64_C(0x9E3779B9)) * UINT32_C(0xB1AD3));
 				}
 				std::string moverCounter32::get_name() const { return "moverCounter32"; }
 				void moverCounter32::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
+					walker->handle(b);
 					//b = b << 3 | UINT64_C(5);
 
-					uint64_t r = a;
-
+					//uint64_t r = a;
 					//////a = UINT64_C(0x9B1B51BEB2EFF7A1); //0x41C64E6B
 					//////for (uint64_t ra = (r & 0xFFFF); ra; ra--)
 					//////{
 					//////	a = rotate64(a, 20) + (a << 27);
 					//////}
-					a = UINT32_C(0x89A7); //0x41C64E6B 0x9E3779B9
-					for (uint32_t ra = (r & 0xFFFF); ra; ra--)
-					{
-						a = rotate32(a, 17) * UINT32_C(0xBCFD);
-					}
-					walker->handle(b);
-					b |= UINT32_C(1);
+					//a = UINT32_C(0x89A7); //0x41C64E6B 0x9E3779B9
+					//for (uint32_t ra = (r & 0xFFFF); ra; ra--)
+					//{
+					//	a = rotate32(a, 17) * UINT32_C(0xBCFD);
+					//}
+					//b |= UINT32_C(1);
 					//b = UINT32_C(0x3F10AF16);
 					//for (uint32_t rb = (r >> 16); rb; rb--)
 					//{
