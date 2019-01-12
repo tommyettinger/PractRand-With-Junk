@@ -1942,8 +1942,17 @@ namespace PractRand {
 					////left off here
 					//return ((a = rotate32(a, 17) * UINT32_C(0xBCFD) ^ b) * (b += UINT32_C(0x9E3779BA)));
 					//return ((a = rotate32(a, 12) * (b *= UINT32_C(0x12D32D)) + UINT64_C(0x9E3779B9)) * UINT32_C(0xB1AD3));
-					const uint64_t a0 = a * UINT32_C(0xA529D), b0 = b;
-					return (a = rotate32(a0, 19) ^ (b += UINT32_C(0x9E3779BD))) + a0 ^ b0;
+					////passes 32TB with 2 anomalies, unusual, worsening at the end 
+					//const uint64_t a0 = a * UINT32_C(0xA529D), b0 = b;
+					//return (a = rotate32(a0, 19) ^ (b += UINT32_C(0x9E3779BD))) + a0 ^ b0;
+					//b = rotate32(b, 13) * UINT32_C(0x89A7); // period is a multiple of 16
+					//return ((a = rotate32(a, 17) * UINT32_C(0xBCFD))) ^ (b = rotate32(b, 28) * UINT32_C(0xA01B));// * UINT32_C(0xA529D);
+					//return ((a = rotate32(a, 17) * UINT32_C(0xBCFD))) ^ (b = rotate32(b, 7) + UINT32_C(0xC0EF50EB));// * UINT32_C(0xA529D);
+					//// passes 32TB with one early anomaly, [Low8/32]FPF-14+6/16:(6,14-0), unusual, at 32GB.
+					//const uint32_t result = ((a = rotate32(a, 1) + 0x929E7143u) >> 11u | 1u) * (b = rotate32(b, 25) + 0xC4DE9951u);
+					//return (result ^ result >> 17) + a;
+					const uint32_t result = (b = rotate32(b, 25) + 0xC4DE9951u) * (a >> 11 | 1u);
+					return (result ^ result >> 14) + (a = rotate32(a, 1) + 0x929E7143u);
 				}
 				std::string moverCounter32::get_name() const { return "moverCounter32"; }
 				void moverCounter32::walk_state(StateWalkingObject *walker) {
@@ -1963,7 +1972,6 @@ namespace PractRand {
 					//	a = rotate32(a, 17) * UINT32_C(0xBCFD);
 					//}
 					walker->handle(b);
-					//b |= UINT32_C(1);
 					//b = UINT32_C(0x3F10AF16);
 					//for (uint32_t rb = (r >> 16); rb; rb--)
 					//{
@@ -2217,7 +2225,66 @@ namespace PractRand {
 					if (a == 0) a = 1;
 					walker->handle(b);
 				}
+#define KEY_LENGTH 3
+#define C240 0x1BD11BDAA9FC1A22
+				static const int ROTATION[] = { 16, 42, 12, 31, 16, 32, 24, 21 };
 
+				Uint64 threefry::raw64() {
+					Uint64 K[] = { key[0], key[1], C240^key[0] ^ key[1] };
+					Uint32 rmod4, rdiv4;
+					for (Uint32 r = 0; r<N_ROUNDS; r++) {
+						rmod4 = r & 3u;
+						if (rmod4 == 0) {
+							rdiv4 = r >> 2;
+							state[0] += K[rdiv4%KEY_LENGTH];
+							state[1] += K[(rdiv4 + 1) % KEY_LENGTH] + rdiv4;
+						}
+						state[0] += state[1];
+						state[1] = rotate64(state[1], ROTATION[r & 7]) ^ state[0];
+					}
+					state[0] += K[(N_ROUNDS >> 2) % KEY_LENGTH] + 1;
+					state[1] += K[((N_ROUNDS >> 2) + 1) % KEY_LENGTH] + (N_ROUNDS >> 2);
+					return state[0];
+				}
+				std::string threefry::get_name() const {
+					std::ostringstream tmp;
+					tmp << "threefry_" << (N_ROUNDS);
+					return tmp.str();
+				}
+				void threefry::walk_state(StateWalkingObject *walker) {
+					walker->handle(key[0]);
+					walker->handle(key[1]);
+					walker->handle(state[0]);
+					walker->handle(state[1]);
+				}
+
+				Uint64 threefin::raw64() {
+					x0 += K[0];
+					x1 += K[1];
+
+					x0 += x1;
+					x1 = rotate64(x1, 26) ^ x0;
+
+					x0 += K[2];
+					x1 += K[0];
+
+					x0 += x1;
+					x1 = rotate64(x1, 37) ^ x0;
+
+					return x1;
+				}
+				std::string threefin::get_name() const {
+					std::ostringstream tmp;
+					tmp << "threefin_2";
+					return tmp.str();
+				}
+				void threefin::walk_state(StateWalkingObject *walker) {
+					walker->handle(K[0]);
+					walker->handle(K[1]);
+					K[2] = (C240 ^ K[0] ^ K[1]) + 1u;
+					walker->handle(x0);
+					walker->handle(x1);
+				}
 			}
 		}
 	}
