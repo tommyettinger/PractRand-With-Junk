@@ -1976,8 +1976,9 @@ namespace PractRand {
 					//// passes 32TB with one early anomaly, [Low8/32]FPF-14+6/16:(6,14-0), unusual, at 32GB.
 					//const uint32_t result = ((a = rotate32(a, 1) + 0x929E7143u) >> 11u | 1u) * (b = rotate32(b, 25) + 0xC4DE9951u);
 					//return (result ^ result >> 17) + a;
+					// no anomalies up to 8TB; other versions have gone to "suspicious" (on the LSB only) at 32TB, so I'm waiting to see...
 					const uint32_t result = (b = rotate32(b, 25) + 0xC4DE9951u) * (a >> 11 | 1u);
-					return (result ^ result >> 14) + (a = rotate32(a, 1) + 0x929E7143u);
+					return result ^ (result >> 16) + (a = rotate32(a, 1) + 0x929E7143u);
 				}
 				std::string moverCounter32::get_name() const { return "moverCounter32"; }
 				void moverCounter32::walk_state(StateWalkingObject *walker) {
