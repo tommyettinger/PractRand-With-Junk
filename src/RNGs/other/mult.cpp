@@ -1976,9 +1976,28 @@ namespace PractRand {
 					//// passes 32TB with one early anomaly, [Low8/32]FPF-14+6/16:(6,14-0), unusual, at 32GB.
 					//const uint32_t result = ((a = rotate32(a, 1) + 0x929E7143u) >> 11u | 1u) * (b = rotate32(b, 25) + 0xC4DE9951u);
 					//return (result ^ result >> 17) + a;
-					// no anomalies up to 8TB; other versions have gone to "suspicious" (on the LSB only) at 32TB, so I'm waiting to see...
-					const uint32_t result = (b = rotate32(b, 25) + 0xC4DE9951u) * (a >> 11 | 1u);
-					return result ^ (result >> 16) + (a = rotate32(a, 1) + 0x929E7143u);
+					// no anomalies up to 8TB; other versions have gone to "suspicious" (on the LSB only) at 32TB, but it isn't especially fast.
+					//const uint32_t result = (b = rotate32(b, 25) + 0xC4DE9951u) * (a >> 11 | 1u);
+					//return result ^ (result >> 16) + (a = rotate32(a, 1) + 0xAA78EDD7u);
+					//// passes 32TB no anomalies
+					//const uint32_t b1 = (b += 0x9E3779BDu);
+					//return (a = rotate32(a, 21) * (b1 | 0xFFE00001u)) * 0xA5295u ^ b1;
+					
+					////passes 32TB no anomalies
+					//const uint32_t a1 = rotate32(a, 1) + 0xAA78EDD7u;//(rotate32(a, 1) + 0xAA78EDD7u);
+					//const uint32_t b1 = rotate32(b, 25) + 0xC4DE9951u;
+					//const uint32_t r = a1 ^ b1;
+					//a = b1 ^ rotate32(b1, 13) ^ rotate32(b1, 19);
+					//b ^= a1 + a;
+					//return r;
+					
+					//(a = rotate32(a, 1) + 0xAA78EDD7u);
+					uint32_t r = (a += 0xAA78EDD7u) + (b = rotate32(b, 25) + 0xC4DE9951u);
+					r ^= r >> 7;
+					r ^= r << 1;
+					return r ^ r >> 9;
+					//return r ^ rotate32(r, 13) ^ rotate32(r, 19);
+					//return r;
 				}
 				std::string moverCounter32::get_name() const { return "moverCounter32"; }
 				void moverCounter32::walk_state(StateWalkingObject *walker) {
@@ -2122,12 +2141,12 @@ namespace PractRand {
 					//XLCG style
 					//Uint32 z = (b = (b ^ 0xC74EAD55) * 0xA5CB3);
 
-					// Zog, passes 32TB with 1 "unusual"
-					Uint32 z = (b += 0xC74EAD55);
-					a ^= a >> 14;
-					z = (z ^ z >> 10) * 0xA5CB3;
-					a ^= a >> 15;
-					return (z ^ z >> 20) + (a ^= a << 13);
+					//// Zog, passes 32TB with 1 "unusual"
+					//Uint32 z = (b += 0xC74EAD55);
+					//a ^= a >> 14;
+					//z = (z ^ z >> 10) * 0xA5CB3;
+					//a ^= a >> 15;
+					//return (z ^ z >> 20) + (a ^= a << 13);
 
 
 					// passes 32TB with 2 "unusual"
@@ -2243,72 +2262,15 @@ namespace PractRand {
 					//return ((z << 21) | (z >> 11)) ^ (((z << 7) | (z >> 25)) * 0x62BD5);
 
 					//return Integer.rotateLeft((state = ((state = state * 0x62BD5 ^ 0x9E3779B9) ^ state >>> 13) * ((state & 0xFFFF8) ^ 0xCD7B5) ^ 0x632BE5AB), 21) ^ (Integer.rotateLeft(state, 7) * 0x62BD5 + 0x932BD);
+					const uint32_t y = (a += 0x9E3779B9);
+					const uint32_t z = ((b += (-(a > 0x52345670) & 0x632BE5AB)) ^ a) * 0xABCFD;
+					return (z ^ rotate32(z, 21) ^ rotate32(z, 9)) * (a >> 11 | 1u) ^ a;
 				}
 				std::string zig32::get_name() const { return "zig32"; }
 				void zig32::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
-					if (a == 0) a = 1;
+					//if (a == 0) a = 1;
 					walker->handle(b);
-				}
-#define KEY_LENGTH 3
-#define C240 0x1BD11BDAA9FC1A22
-				static const int ROTATION[] = { 16, 42, 12, 31, 16, 32, 24, 21 };
-
-				Uint64 threefry::raw64() {
-					Uint64 K[] = { key[0], key[1], C240^key[0] ^ key[1] };
-					Uint32 rmod4, rdiv4;
-					for (Uint32 r = 0; r<N_ROUNDS; r++) {
-						rmod4 = r & 3u;
-						if (rmod4 == 0) {
-							rdiv4 = r >> 2;
-							state[0] += K[rdiv4%KEY_LENGTH];
-							state[1] += K[(rdiv4 + 1) % KEY_LENGTH] + rdiv4;
-						}
-						state[0] += state[1];
-						state[1] = rotate64(state[1], ROTATION[r & 7]) ^ state[0];
-					}
-					state[0] += K[(N_ROUNDS >> 2) % KEY_LENGTH] + 1;
-					state[1] += K[((N_ROUNDS >> 2) + 1) % KEY_LENGTH] + (N_ROUNDS >> 2);
-					return state[0];
-				}
-				std::string threefry::get_name() const {
-					std::ostringstream tmp;
-					tmp << "threefry_" << (N_ROUNDS);
-					return tmp.str();
-				}
-				void threefry::walk_state(StateWalkingObject *walker) {
-					walker->handle(key[0]);
-					walker->handle(key[1]);
-					walker->handle(state[0]);
-					walker->handle(state[1]);
-				}
-
-				Uint64 threefin::raw64() {
-					x0 += K[0];
-					x1 += K[1];
-
-					x0 += x1;
-					x1 = rotate64(x1, 26) ^ x0;
-
-					x0 += K[2];
-					x1 += K[0];
-
-					x0 += x1;
-					x1 = rotate64(x1, 37) ^ x0;
-
-					return x1;
-				}
-				std::string threefin::get_name() const {
-					std::ostringstream tmp;
-					tmp << "threefin_2";
-					return tmp.str();
-				}
-				void threefin::walk_state(StateWalkingObject *walker) {
-					walker->handle(K[0]);
-					walker->handle(K[1]);
-					K[2] = (C240 ^ K[0] ^ K[1]) + 1u;
-					walker->handle(x0);
-					walker->handle(x1);
 				}
 			}
 		}
