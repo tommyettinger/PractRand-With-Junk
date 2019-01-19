@@ -1464,12 +1464,29 @@ namespace PractRand {
 					//stateA = rotate32(stateA, 13) * UINT32_C(0x89A7);
 					//stateB = rotate32(stateB, 17) * UINT32_C(0xBCFD);
 					//return stateA ^ stateB;
-					return (stateA = rotate32(stateA, 17) * UINT32_C(0xBCFD)) + (stateB = (stateB ^ UINT32_C(0x9E3779BD)) * UINT32_C(0xA952B));// ((stateB += UINT32_C(0x9E3779B9)) | UINT32_C(1));
-																																			   //stateC = UINT32_C(0xC3E157C1) - rotate32(stateC, 19);
-																																			   //stateB += stateB >> 19;
-																																			   //stateA += stateA << 8;
-																																			   //stateB += stateB << 11;
-																																			   //public class SimpleRandom extends Random {public int a=1,b=1; public int next(int bits){return ((a = (a << 13 | a >>> 19) * UINT32_C(0x89A7)) ^ (b = (b << 17 | b >>> 15) * UINT32_C(0xBCFD))) >>> -bits;}}
+					//return (stateA = rotate32(stateA, 17) * UINT32_C(0xBCFD)) + (stateB = (stateB ^ UINT32_C(0x9E3779BD)) * UINT32_C(0xA952B));
+					// ((stateB += UINT32_C(0x9E3779B9)) | UINT32_C(1));
+					//stateC = UINT32_C(0xC3E157C1) - rotate32(stateC, 19);
+					//stateB += stateB >> 19;
+					//stateA += stateA << 8;
+					//stateB += stateB << 11;
+					//public class SimpleRandom extends Random {public int a=1,b=1; public int next(int bits){return ((a = (a << 13 | a >>> 19) * UINT32_C(0x89A7)) ^ (b = (b << 17 | b >>> 15) * UINT32_C(0xBCFD))) >>> -bits;}}
+
+					uint32_t z = ++stateA;
+					//uint64_t z = ++state;
+					//z = ((z << ((z & 31) + 5)) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ (z >> ((z >> 60) + 16))) * UINT64_C(0x369DEA0F31A53F85);
+					//return z ^ z >> 27;
+					// * UINT32_C(0x1268C3) ^ UINT32_C(0x369DEA0D)
+					z = ((z ^ (z << (z & 15) + 4) ^ UINT32_C(0xDB4F0B95))) * UINT32_C(0x102473);
+					//z = (z ^ rotate32(z, 11) ^ rotate32(z, 21) ^ UINT32_C(0x369DEA0D)) * UINT32_C(0x102473);
+
+					//z = (z ^ (z >> ((z >> 28) + 4)) ^ UINT32_C(0x369DEA0D)) * UINT32_C(0x102473);
+					// * UINT32_C(0x188A23) ^ UINT32_C(0xD1B54A35)
+					// * UINT32_C(0x1400CB)
+					z = ((z ^ (z >> ((z >> 28) + 4)) ^ UINT32_C(0x9E3779BD))) * (z & 0x1FFFF8 | 0xA523u);
+					//return z ^ z >> 15;
+					return z ^ rotate32(z, 11) ^ rotate32(z, 21);
 
 				}
 				std::string linnorm32::get_name() const { return "linnorm32"; }
