@@ -1476,21 +1476,31 @@ namespace PractRand {
 					//stateB += stateB << 11;
 					//public class SimpleRandom extends Random {public int a=1,b=1; public int next(int bits){return ((a = (a << 13 | a >>> 19) * UINT32_C(0x89A7)) ^ (b = (b << 17 | b >>> 15) * UINT32_C(0xBCFD))) >>> -bits;}}
 
-					uint32_t z = ++stateA;
+					//z = (z ^ rotate32(z, 11) ^ rotate32(z, 21)) * (z | UINT32_C(0xFFFE0001)) + (z ^ z >> 14);
+					
+					uint32_t z = ((++stateA) ^ UINT32_C(0xD1B54A35)) * UINT32_C(0x102473);
+					z += (z ^ rotate32(z, 11) ^ rotate32(z, 21)) * ((z ^ z >> 15) | UINT32_C(0xFFE00001));// + (z >> 14);
+					return z ^ z >> 14;
+
+					// Java
+					//return (z = ((z = (z ^ 0xD1B54A35) * 0x102473) ^ (z << 11 | z >>> 21) ^ (z << 21 | z >>> 11)) * ((z ^ z >>> 15) | 0xFFE00001) + z) ^ z >>> 14;
+					//uint32_t z = (stateA += UINT32_C(0x62BD5));
+					//z = (z ^ z >> 13) * ((z & UINT32_C(0xFFFF8)) ^ UINT32_C(0xCD7B5));
+					//return (((z << 21) | (z >> 11)) ^ (((z << 7) | (z >> 25)) * UINT32_C(0x62BD5)));
+
 					//uint64_t z = ++state;
 					//z = ((z << ((z & 31) + 5)) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
 					//z = (z ^ (z >> ((z >> 60) + 16))) * UINT64_C(0x369DEA0F31A53F85);
 					//return z ^ z >> 27;
 					// * UINT32_C(0x1268C3) ^ UINT32_C(0x369DEA0D)
-					z = ((z ^ (z << (z & 15) + 4) ^ UINT32_C(0xDB4F0B95))) * UINT32_C(0x102473);
 					//z = (z ^ rotate32(z, 11) ^ rotate32(z, 21) ^ UINT32_C(0x369DEA0D)) * UINT32_C(0x102473);
 
 					//z = (z ^ (z >> ((z >> 28) + 4)) ^ UINT32_C(0x369DEA0D)) * UINT32_C(0x102473);
 					// * UINT32_C(0x188A23) ^ UINT32_C(0xD1B54A35)
 					// * UINT32_C(0x1400CB)
-					z = ((z ^ (z >> ((z >> 28) + 4)) ^ UINT32_C(0x9E3779BD))) * (z & 0x1FFFF8 | 0xA523u);
-					//return z ^ z >> 15;
-					return z ^ rotate32(z, 11) ^ rotate32(z, 21);
+					//z = ((z ^ (z << (z & 15) + 4) ^ UINT32_C(0xDB4F0B95))) * UINT32_C(0x102473);
+					//z = ((z ^ (z >> ((z >> 28) + 4)) ^ UINT32_C(0x9E3779BD))) * (z & 0x1FFFF8 | 0xA523u);
+					//return z ^ rotate32(z, 11) ^ rotate32(z, 21);
 
 				}
 				std::string linnorm32::get_name() const { return "linnorm32"; }
