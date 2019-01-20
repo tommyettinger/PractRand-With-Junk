@@ -1074,15 +1074,16 @@ namespace PractRand {
 					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
 					//return (z ^ z >> 25u);
 
+                    uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD1B54A32D192ED03);
+					z = (z ^ rotate64(z, 23) ^ rotate64(z, 42)) * UINT64_C(0xDB4F0B9175AE2165);
+						//^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xE19B01AA9D42C633);
+					//z = (z ^ z >> 28 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xE19B01AA9D42C633);
+					return (z ^ z >> 30);
 
-					uint64_t z = ++state;
-					//z = (z ^ z << 10 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					z = (z ^ rotate64(z, 21) ^ rotate64(z, 45) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					//z = (rotate64(z, 10) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					//z ^= rotate64(z, 21) ^ rotate64(z, 43);
-					z = (z ^ rotate64(z, 21) ^ rotate64(z, 45) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					//z = (z ^ z >> 29) * UINT64_C(0x369DEA0F31A53F85);
-					return (z ^ z >> 27);
+					//uint64_t z = ++state;
+					//z = (z ^ rotate64(z, 21) ^ rotate64(z, 45) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ rotate64(z, 21) ^ rotate64(z, 45) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//return (z ^ z >> 27);
 
 
 					// Quixotic determine attempt?
@@ -1355,11 +1356,11 @@ namespace PractRand {
 					//z = (z ^ z >> 27 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
 					//return (z ^ z >> 29);// ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
 
-					// passes at least 16TB no anomalies, not super-fast but faster than variable-shift unary hashes
+					// passes 32TB no anomalies, not super-fast but faster than variable-shift unary hashes
 					// similar to http://mostlymangling.blogspot.com/2018/07/on-mixing-functions-in-fast-splittable.html 
 					uint64_t z = ++state;
-					z = (z ^ rotate64(z, 12) ^ rotate64(z, 43) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xE0A28963); //0xE0A28963
-					z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x81383173); //0x81383173
+					z = (z ^ rotate64(z, 12) ^ rotate64(z, 43) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xE0A28963);
+					z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x81383173);
 					return z ^ z >> 28;
 					//z = (z ^ rotate64(z, 12) ^ rotate64(z, 43) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0x4823A80B2006E21B); //0xE0A28963
 					//z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x4C8148C08017D353); //0x81383173
@@ -1437,16 +1438,19 @@ namespace PractRand {
 					//hash ^= hash >> 32;
 					//return hash;
 
-					uint64_t s0 = ++state * UINT64_C(0x369DEA0F31A53F85);
-					uint64_t s1 = rotate64(s0, 31) + UINT64_C(0xAEF17502108EF2D9);
+					//uint64_t s0 = ++state * UINT64_C(0x369DEA0F31A53F85);
+					//uint64_t s1 = rotate64(s0, 31) + UINT64_C(0xAEF17502108EF2D9);
 					//s0 = (s0 ^ rotate64(s0, 24) ^ rotate64(s0, 51));
-					s1 = (s1 ^ s1 >> 29) * UINT64_C(0xDB4F0B9175AE2165);// UINT64_C(0x7FF8A3ED) + UINT64_C(0x9E3779B97F4A7C15);
-					return (s0 ^ s1 ^ s1 >> 29) * UINT64_C(0x41C64E6D);
-
+					//s1 = (s1 ^ s1 >> 29) * UINT64_C(0xDB4F0B9175AE2165);// UINT64_C(0x7FF8A3ED) + UINT64_C(0x9E3779B97F4A7C15);
+					//return (s0 ^ s1 ^ s1 >> 29) * UINT64_C(0x41C64E6D);
 
 					//uint64_t z = ((state += UINT64_C(0x9E3779B97F4A7C15)) ^ UINT64_C(0x369DEA0F31A53F85) * UINT64_C(0x61C8864680B583EB));
 					//z = (z ^ z >> 30u) * UINT64_C(0x632BE59BD9B4E019);// UINT64_C(0x369DEA0F31A53F85); // UINT64_C(0xAEF17502108EF2D9);
 					//return z ^ (z >> 31u);
+
+					uint64_t z = (++state ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0x4823A80B2006E21B);
+					z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x81383173);
+					return z ^ z >> 28;
 				}
 				std::string linnormB::get_name() const { return "LinnormB"; }
 				void linnormB::walk_state(StateWalkingObject *walker) {
