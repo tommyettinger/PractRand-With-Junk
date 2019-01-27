@@ -1364,13 +1364,26 @@ namespace PractRand {
 
 					// passes 32TB no anomalies, not super-fast but faster than variable-shift unary hashes
 					// similar to http://mostlymangling.blogspot.com/2018/07/on-mixing-functions-in-fast-splittable.html 
-					uint64_t z = ++state;
-					z = (z ^ rotate64(z, 12) ^ rotate64(z, 43) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xE0A28963);
-					z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x81383173);
-					return z ^ z >> 28;
+					//uint64_t z = ++state;
+					//z = (z ^ rotate64(z, 12) ^ rotate64(z, 43) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xE0A28963);
+					//z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x81383173);
+					//return z ^ z >> 28;
+					
 					//z = (z ^ rotate64(z, 12) ^ rotate64(z, 43) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0x4823A80B2006E21B); //0xE0A28963
 					//z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x4C8148C08017D353); //0x81383173
 					// * UINT64_C(0x9043);//UINT64_C(0x9fb21c651e98df25);
+
+					////passes 2TB without anomalies, then has issues at 4TB:
+					//// mildly suspicious : [Low1/64]BCFN(2+3,13-0,T)
+					//// unusual           : [Low1/64]BCFN(2+5,13-0,T)
+					//uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 27 ^ z >> 12) * UINT64_C(0xAEF17502108EF2D9);
+					//return (z ^ z >> 25);
+
+					uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
+					z = (z ^ z >> 27 ^ z >> 37 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					return (z ^ z >> 25 ^ z >> 39);
+
 
 					//z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
 					//z = ((z >> 30) ^ rotate64(z, 37)) * UINT64_C(0x369DEA0F31A53F85);
@@ -1409,6 +1422,14 @@ namespace PractRand {
 					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, 1);// stream);
 				}
 
+				uint64_t reverse(uint64_t n)
+				{
+					n = __bswap_64(n);
+                    n = ((n & UINT64_C(0xaaaaaaaaaaaaaaaa)) >> 1) | ((n & UINT64_C(0x5555555555555555)) << 1);
+                    n = ((n & UINT64_C(0xcccccccccccccccc)) >> 2) | ((n & UINT64_C(0x3333333333333333)) << 2);
+                    n = ((n & UINT64_C(0xf0f0f0f0f0f0f0f0)) >> 4) | ((n & UINT64_C(0x0f0f0f0f0f0f0f0f)) << 4);
+                    return n;
+				}
 				Uint64 linnormB::raw64() {
 					//UINT64_C(0x9E3779B97F4A7C15)
 					//uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(3));
@@ -1454,11 +1475,54 @@ namespace PractRand {
 					//z = (z ^ z >> 30u) * UINT64_C(0x632BE59BD9B4E019);// UINT64_C(0x369DEA0F31A53F85); // UINT64_C(0xAEF17502108EF2D9);
 					//return z ^ (z >> 31u);
 
-					uint64_t z = (++state ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0x4823A80B2006E21B);
-					z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x81383173);
-					return z ^ z >> 28;
+					//uint64_t z = (++state ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0x4823A80B2006E21B);
+					//z = (z ^ rotate64(z, 52) ^ rotate64(z, 21) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x81383173);
+					//return z ^ z >> 28;
+
+					//uint64_t z = (++state ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0x4823A80B2006E21B);
+					//z = (z ^ rotate64(z, 52) ^ rotate64(z, 21)) * UINT64_C(0x9E3779B97F4A7C15);
+					//return z ^ z >> 28;
+
+					//uint64_t z = ++state;
+					////passes 32TB no anomalies when R == 0 and not reversed, seed=0xbd75081b
+					uint64_t v = ++state;
+					// comment out next line to disable reversal and rotation
+					v = reverse(rotate64(v, R));
+
+                    v ^= rotate64(v, 39) ^ rotate64(v, 14);
+                    v *= 0xAEF17502108EF2D9UL;//0xA24BAED4963EE407UL; // second number was used by Evensen
+                    v ^=rotate64(v, 40) ^ rotate64(v, 15);
+                    v *= 0xDB4F0B9175AE2165UL;//0x9FB21C651E98DF25UL; // second number was used by Evensen
+                    return v ^ v >> 28;
+
+					//z = (z ^ rotate64(z, 42) ^ rotate64(z, 21) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					////z = (z ^ z << 6 ^ z >> 21 ^ z >> 37 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ z << 6 ^ z >> 21 ^ z >> 37) * UINT64_C(0xC6BC279692B5CC83);
+					//return (z ^ z << 6 ^ z >> 21 ^ z >> 37);
+					
+					//z = (z ^ z >> 26 ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0x81383173);
+					//return z ^ z >> 28;
+
+					//z = (z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0x4823A80B2006E21B);
+					//z = (z ^ z << 6 ^ z >> 21 ^ z >> 37) * UINT64_C(0xC6BC279692B5CC83);
+					//return z ^ z >> 28;
+
+					//uint64_t z = (++state ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ z << 5 ^ z >> 21 ^ z >> 23 ^ z >> 47) * UINT64_C(0xC6BC279692B5CC83);
+					//return z ^ z >> 31;
+					//uint64_t z = ++state;
+					//z = rotate64(z, R);
+					//z = (z ^ rotate64(z, 21) ^ rotate64(z, 42)) * UINT64_C(0x4823A80B2006E21B);
+					//uint64_t z = (++state ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//z = (z ^ z << 6 ^ z >> 21 ^ z >> 37) * UINT64_C(0x4C8148C08017D353);
+					//return z ^ z >> 28;
+
 				}
-				std::string linnormB::get_name() const { return "LinnormB"; }
+				std::string linnormB::get_name() const { 
+					std::ostringstream str;
+					str << "linnormB(" << R << ")";
+					return str.str();
+				}
 				void linnormB::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, 3);// stream);
@@ -1957,8 +2021,9 @@ namespace PractRand {
 					//return (a = (rotate64(a, 35) ^ (b += 0xDB4F0B9175AE2165ULL))) + (c = (c >> 1 ^ (-(c & 1u) & 0xD800000000000000ULL)));
 					//// I think this one does well?
 					//return (a = (rotate64(a, 21) + (c = rotate64(c, 35) ^ (b += 0x9E3779B97F4A7AF5ULL))));
-					const uint64_t result = ~(a << 1) * (b = rotate64(b, 11) + 0x9E3779B97F4A7AF5ULL);
-					return (result ^ result >> 29) + (a = rotate64(a, 21) + 0xDB4F0B9175AE2165ULL);
+					
+					//const uint64_t result = ~(a << 1) * (b = rotate64(b, 11) + 0x9E3779B97F4A7AF5ULL);
+					//return (result ^ result >> 29) + (a = rotate64(a, 21) + 0xDB4F0B9175AE2165ULL);
 
 					//// passes 32TB with one anomaly
 					//return (a = rotate64(a, 29) * UINT64_C(0x9E3779B9) ^ ++b) * UINT64_C(0x8181020042010415);
@@ -1969,6 +2034,17 @@ namespace PractRand {
 					////passes 32TB with one anomaly
 					//const uint64_t a0 = a * UINT64_C(0x2545F4914F6CDD1D);
 					//return (a = rotate64(a0, 35) ^ (b += UINT64_C(0xDB4F0B9175AE2165))) - a0;
+
+					//const uint64_t a0 = a * UINT64_C(0xAC564B05);
+
+					//passes 2TB at least with one anomaly at 512GB
+					//const uint64_t a0 = a + b + UINT64_C(0xD1B54A32D192ED03);
+					//return (a = rotate64(a0, 19) ^ (b += UINT64_C(0xDB4F0B9175AE2165))) * UINT64_C(0xDE4D);
+					// passes great up to 8TB, one anomaly at 16TB and 3 mildly suspicious + 1 unusual at 32TB
+					const uint64_t a0 = a + b;
+					return (a = rotate64(a0, 19) ^ (b += UINT64_C(0xDB4F0B9175AE2165))) * UINT64_C(0x8A35);
+
+					//final long ab = a + b; return (a = (ab << 19 | ab >>> 45) ^ (b += 0xDB4F0B9175AE2165L)) * 0x8A35L;
 
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
