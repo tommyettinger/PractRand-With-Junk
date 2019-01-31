@@ -1487,13 +1487,30 @@ namespace PractRand {
 					////passes 32TB no anomalies when R == 0 and not reversed, seed=0xbd75081b
 					uint64_t v = ++state;
 					// comment out next line to disable reversal and rotation
-					v = reverse(rotate64(v, R));
+					//v = reverse(rotate64(v, R));
+					// comment out next line to disable reversal but not rotation
+					v = rotate64(v, R);
 
                     v ^= rotate64(v, 39) ^ rotate64(v, 14);
                     v *= 0xAEF17502108EF2D9UL;//0xA24BAED4963EE407UL; // second number was used by Evensen
-                    v ^=rotate64(v, 40) ^ rotate64(v, 15);
+                    v ^= rotate64(v, 40) ^ rotate64(v, 15);
                     v *= 0xDB4F0B9175AE2165UL;//0x9FB21C651E98DF25UL; // second number was used by Evensen
                     return v ^ v >> 28;
+
+					//tested all 64 rotations and all 64 reversed rotations of a counter with -tf 2, up to 1TB for each test.
+					//results are in the etc folder.
+					//all passed using the same rotations as Pelle Evensen's rrxmrrxmsx_0, using the equivalent of 64-bit right rotations
+					//[25,50], then later [24,49], ending with a xorshift by 28, only changing the multipliers after each rotation pair.
+					//(the code I tested used the equivalent 64-bit left rotations [39,14] and later [40,15].)
+					//the multipliers used are 0xAEF17502108EF2D9UL and 0xDB4F0B9175AE2165UL, in that order.
+					//0xAEF17502108EF2D9UL (which replaces 0xA24BAED4963EE407UL) is a multiplier used in PCG-Random.
+					//0xDB4F0B9175AE2165UL (which replaces 0x9FB21C651E98DF25UL) is 2 to the 64 divided by the fourth harmonious number,
+					//which is the solution to pow(x, 5) = x + 1 (harmonious numbers include the golden ratio and generalize it).
+					//some intermediate results were mildly suspicious, and one was suspicious, but the suspicious one cleared up over
+					//time, soon having no current anomalies at the 1TB mark. The seed per test was random instead of sequential as in the
+					//original test done by Evensen; because the state of the generator always starts as a 32-bit number for each test
+					//and the state is only incremented 2^37 times per test, very large internal states weren't tested, but the rotations
+					//should have changed the range of bits being operated on to match all possible high and low affected bits.
 
 					//z = (z ^ rotate64(z, 42) ^ rotate64(z, 21) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
 					////z = (z ^ z << 6 ^ z >> 21 ^ z >> 37 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
