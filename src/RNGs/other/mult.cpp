@@ -1487,9 +1487,9 @@ namespace PractRand {
 					////passes 32TB no anomalies when R == 0 and not reversed, seed=0xbd75081b
 					uint64_t v = ++state;
 					// comment out next line to disable reversal and rotation
-					//v = reverse(rotate64(v, R));
+					v = reverse(rotate64(v, R));
 					// comment out next line to disable reversal but not rotation
-					v = rotate64(v, R);
+					//v = rotate64(v, R);
 
                     v ^= rotate64(v, 39) ^ rotate64(v, 14);
                     v *= 0xAEF17502108EF2D9UL;//0xA24BAED4963EE407UL; // second number was used by Evensen
@@ -1541,8 +1541,9 @@ namespace PractRand {
 					return str.str();
 				}
 				void linnormB::walk_state(StateWalkingObject *walker) {
-					walker->handle(state);
-					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, 3);// stream);
+					//walker->handle(state);
+					state = 0UL;
+					printf("Seed is 0x%016X\r\n", state);// stream);
 				}
 
 				Uint32 linnorm32::raw32() {

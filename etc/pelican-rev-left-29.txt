@@ -1,0 +1,116 @@
+[tommy@msi-hex unix]$ ../bin/RNG_test "linnormB(29)" -multithreaded -tf 2 -tlmax 1TB
+RNG_test using PractRand version 0.94
+Seed is 0x00000000853248E7, Stream is 0x3
+RNG = linnormB(29), seed = 0x38e5108f
+test set = core, folding = extra
+
+rng=linnormB(29), seed=0x38e5108f
+length= 1 gigabyte (2^30 bytes), time= 3.4 seconds
+  no anomalies in 600 test result(s)
+
+rng=linnormB(29), seed=0x38e5108f
+length= 2 gigabytes (2^31 bytes), time= 7.6 seconds
+  no anomalies in 646 test result(s)
+
+rng=linnormB(29), seed=0x38e5108f
+length= 4 gigabytes (2^32 bytes), time= 15.0 seconds
+  no anomalies in 688 test result(s)
+
+rng=linnormB(29), seed=0x38e5108f
+length= 8 gigabytes (2^33 bytes), time= 29.8 seconds
+  no anomalies in 730 test result(s)
+
+rng=linnormB(29), seed=0x38e5108f
+length= 16 gigabytes (2^34 bytes), time= 58.2 seconds
+  no anomalies in 769 test result(s)
+
+rng=linnormB(29), seed=0x38e5108f
+length= 32 gigabytes (2^35 bytes), time= 114 seconds
+  no anomalies in 805 test result(s)
+
+rng=linnormB(29), seed=0x38e5108f
+length= 64 gigabytes (2^36 bytes), time= 233 seconds
+  Test Name                         Raw       Processed     Evaluation
+  [Low1/64]Gap-16:B                 R=  +4.9  p =  3.8e-4   unusual          
+  ...and 842 test result(s) without anomalies
+
+rng=linnormB(29), seed=0x38e5108f
+length= 128 gigabytes (2^37 bytes), time= 466 seconds
+  no anomalies in 880 test result(s)
+
+^C
+[tommy@msi-hex unix]$ ../bin/RNG_test "linnormB(29)" -multithreaded -tf 2 -tlmax 1TB -seed 0
+RNG_test using PractRand version 0.94
+Seed is 0x00000000433826DB
+RNG = linnormB(29), seed = 0x0
+test set = core, folding = extra
+
+rng=linnormB(29), seed=0x0
+length= 1 gigabyte (2^30 bytes), time= 3.5 seconds
+  no anomalies in 600 test result(s)
+
+rng=linnormB(29), seed=0x0
+length= 2 gigabytes (2^31 bytes), time= 7.7 seconds
+  no anomalies in 646 test result(s)
+
+rng=linnormB(29), seed=0x0
+length= 4 gigabytes (2^32 bytes), time= 15.3 seconds
+  no anomalies in 688 test result(s)
+
+rng=linnormB(29), seed=0x0
+length= 8 gigabytes (2^33 bytes), time= 31.3 seconds
+  no anomalies in 730 test result(s)
+
+rng=linnormB(29), seed=0x0
+length= 16 gigabytes (2^34 bytes), time= 62.5 seconds
+  no anomalies in 769 test result(s)
+
+rng=linnormB(29), seed=0x0
+length= 32 gigabytes (2^35 bytes), time= 119 seconds
+  no anomalies in 805 test result(s)
+
+rng=linnormB(29), seed=0x0
+length= 64 gigabytes (2^36 bytes), time= 239 seconds
+  no anomalies in 843 test result(s)
+
+rng=linnormB(29), seed=0x0
+length= 128 gigabytes (2^37 bytes), time= 473 seconds
+  Test Name                         Raw       Processed     Evaluation
+  [Low8/64]BCFN(2+0,13-0,T)         R=  -8.0  p =1-3.8e-4   unusual          
+  ...and 879 test result(s) without anomalies
+
+^C
+[tommy@msi-hex unix]$ ../bin/RNG_test "linnormB(29)" -multithreaded -tf 2 -tlmax 1TB
+RNG_test using PractRand version 0.94
+Seed is 0x0000000000000000
+RNG = linnormB(29), seed = 0xe461766f
+test set = core, folding = extra
+
+rng=linnormB(29), seed=0xe461766f
+length= 1 gigabyte (2^30 bytes), time= 3.5 seconds
+  no anomalies in 600 test result(s)
+
+rng=linnormB(29), seed=0xe461766f
+length= 2 gigabytes (2^31 bytes), time= 7.8 seconds
+  no anomalies in 646 test result(s)
+
+rng=linnormB(29), seed=0xe461766f
+length= 4 gigabytes (2^32 bytes), time= 15.2 seconds
+  no anomalies in 688 test result(s)
+
+rng=linnormB(29), seed=0xe461766f
+length= 8 gigabytes (2^33 bytes), time= 30.2 seconds
+  no anomalies in 730 test result(s)
+
+rng=linnormB(29), seed=0xe461766f
+length= 16 gigabytes (2^34 bytes), time= 59.8 seconds
+  no anomalies in 769 test result(s)
+
+rng=linnormB(29), seed=0xe461766f
+length= 32 gigabytes (2^35 bytes), time= 117 seconds
+  no anomalies in 805 test result(s)
+
+rng=linnormB(29), seed=0xe461766f
+length= 64 gigabytes (2^36 bytes), time= 236 seconds
+  no anomalies in 843 test result(s)
+
