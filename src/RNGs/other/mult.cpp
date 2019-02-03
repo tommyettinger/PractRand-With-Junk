@@ -1380,9 +1380,11 @@ namespace PractRand {
 					//z = (z ^ z >> 27 ^ z >> 12) * UINT64_C(0xAEF17502108EF2D9);
 					//return (z ^ z >> 25);
 
+					////where we left off
 					uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
 					z = (z ^ z >> 27 ^ z >> 37 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
 					return (z ^ z >> 25 ^ z >> 39);
+
 
 
 					//z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
@@ -1419,7 +1421,7 @@ namespace PractRand {
 				std::string linnormA::get_name() const { return "LinnormA"; }
 				void linnormA::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
-					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, 1);// stream);
+					printf("Seed is 0x%016X\r\n", state);// stream);
 				}
 
 				uint64_t reverse(uint64_t n)
@@ -1485,17 +1487,31 @@ namespace PractRand {
 
 					//uint64_t z = ++state;
 					////passes 32TB no anomalies when R == 0 and not reversed, seed=0xbd75081b
-					uint64_t v = ++state;
+					//uint64_t v = ++state;
 					// comment out next line to disable reversal and rotation
-					v = reverse(rotate64(v, R));
+					//v = reverse(rotate64(v, R));
 					// comment out next line to disable reversal but not rotation
 					//v = rotate64(v, R);
 
-                    v ^= rotate64(v, 39) ^ rotate64(v, 14);
-                    v *= 0xAEF17502108EF2D9UL;//0xA24BAED4963EE407UL; // second number was used by Evensen
-                    v ^= rotate64(v, 40) ^ rotate64(v, 15);
-                    v *= 0xDB4F0B9175AE2165UL;//0x9FB21C651E98DF25UL; // second number was used by Evensen
-                    return v ^ v >> 28;
+                    //v ^= rotate64(v, 39) ^ rotate64(v, 14);
+                    //v *= 0xAEF17502108EF2D9UL;//0xA24BAED4963EE407UL; // second number was used by Evensen
+                    //v ^= rotate64(v, 40) ^ rotate64(v, 15);
+                    //v *= 0xDB4F0B9175AE2165UL;//0x9FB21C651E98DF25UL; // second number was used by Evensen
+                    //return v ^ v >> 28;
+					
+					uint64_t s = state++;
+					s = reverse(s);
+					s = rotate64(s, R);
+					s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+					s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
+					return s ^ s >> 28;
+					
+					
+					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+					//s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
+					//return s ^ s >> 28;
+
+
 
 					//tested all 64 rotations and all 64 reversed rotations of a counter with -tf 2, up to 1TB for each test.
 					//results are in the etc folder.
