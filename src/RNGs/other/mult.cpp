@@ -1500,12 +1500,18 @@ namespace PractRand {
                     //return v ^ v >> 28;
 					
 					uint64_t s = state++;
-					s = reverse(s);
+					//s = reverse(s);
 					s = rotate64(s, R);
-					s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+					//s = ~s;
+					/*
+					s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50)) * 0xAEF17502108EF2D9UL + 0xD1B54A32D192ED03UL;
 					s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
 					return s ^ s >> 28;
+					*/
 					
+					s = (s ^ (s << 41 | s >> 23) ^ (s << 18 | s >> 46) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+					s = (s ^ (s << 42 | s >> 22) ^ (s << 19 | s >> 45)) * 0xDB4F0B9175AE2165UL;
+					return s ^ s >> 28;
 					
 					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
 					//s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
