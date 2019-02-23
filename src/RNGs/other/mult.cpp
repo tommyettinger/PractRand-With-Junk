@@ -1498,19 +1498,24 @@ namespace PractRand {
                     //v ^= rotate64(v, 40) ^ rotate64(v, 15);
                     //v *= 0xDB4F0B9175AE2165UL;//0x9FB21C651E98DF25UL; // second number was used by Evensen
                     //return v ^ v >> 28;
-					
-					uint64_t s = state++;
-					//s = reverse(s);
-					s = rotate64(s, R);
-					//s = ~s;
+
 					/*
 					s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50)) * 0xAEF17502108EF2D9UL + 0xD1B54A32D192ED03UL;
 					s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
 					return s ^ s >> 28;
 					*/
-					
-					s = (s ^ (s << 41 | s >> 23) ^ (s << 18 | s >> 46) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
-					s = (s ^ (s << 42 | s >> 22) ^ (s << 19 | s >> 45)) * 0xDB4F0B9175AE2165UL;
+					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0x2127599BF4325C37UL;
+					//s = (s ^ rotate64(s, 40) ^ rotate64(s, 15)) * 0x880355F21E6D1965UL;
+					//return (s ^ s >> 28);
+
+
+
+					uint64_t s = state++;
+					//s = reverse(s); // this line was commented in and out for different test types
+					s = rotate64(s, R);
+					//s = ~s; // this line was commented in and out for different test types
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
 					return s ^ s >> 28;
 					
 					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
