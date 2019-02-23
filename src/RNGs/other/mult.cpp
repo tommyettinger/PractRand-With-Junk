@@ -5,6 +5,9 @@
 #include "PractRand/rng_basics.h"
 #include "PractRand/rng_helpers.h"
 #include "PractRand/rng_internals.h"
+#if defined _MSC_VER && _MSC_VER >= 1800
+#include <intrin.h>
+#endif
 
 #include "PractRand/RNGs/other/mult.h"
 //#include "PractRand/test_helpers.h"
@@ -15,7 +18,8 @@ namespace PractRand {
 		namespace Polymorphic {
 			namespace NotRecommended {
 				Uint32 lcg32of64_varqual::raw32() {
-					state = state * 1103515245 + 12345;
+					state = state * 0x5DEECE66D + 11;
+					//state = state * 1103515245 + 12345; 0x5DEECE66DL
 					return Uint32(state >> outshift);
 				}
 				std::string lcg32of64_varqual::get_name() const {
@@ -1555,21 +1559,27 @@ namespace PractRand {
 					uint64_t s = state++;
 					s = reverse(s);
 					s = rotate64(s, R);
-					s = ~s;
+					s ^= -X;
 					/*
 					s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50)) * 0xAEF17502108EF2D9UL + 0xD1B54A32D192ED03UL;
 					s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
 					return s ^ s >> 28;
 					*/
-					
-					s = (s ^ (s << 41 | s >> 23) ^ (s << 18 | s >> 46) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
-					s = (s ^ s >> 41 ^ s >> 28 ^ s >> 15) * 0xDB4F0B9175AE2165UL;
-					return s ^ s >> 28;
-					
+					//multipliers from Fast-Hash by Zilong Tan, https://github.com/ZilongTan/fast-hash
+					//s = (s ^ (s << 41 | s >> 23) ^ (s << 18 | s >> 46) ^ 0xD1B54A32D192ED03UL) * 0x2127599BF4325C37UL;
+					//s = (s ^ s >> 43 ^ s >> 34 ^ s >> 19) * 0x880355F21E6D1965UL;
+					//return s ^ s >> 28;
+
 					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
 					//s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
 					//return s ^ s >> 28;
 
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
+					return s ^ s >> 28;
+					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0x2127599BF4325C37UL;
+					//s = (s ^ s >> 34 ^ s >> 19) * 0x880355F21E6D1965UL;
+					//return s ^ s >> 43 ^ s >> 28;
 
 
 					//tested all 64 rotations and all 64 reversed rotations of a counter with -tf 2, up to 1TB for each test.
@@ -1612,7 +1622,7 @@ namespace PractRand {
 				}
 				std::string linnormB::get_name() const { 
 					std::ostringstream str;
-					str << "linnormB(" << R << ")";
+					str << "linnormB(" << R << "," << X << ")";
 					return str.str();
 				}
 				void linnormB::walk_state(StateWalkingObject *walker) {
@@ -2081,7 +2091,7 @@ namespace PractRand {
 				Uint64 molerat64::raw64() {
 					//surprisingly, passes 32TB with one anomaly, seed = 0xde9b705d
 					// passes TestU01 in forwards and reverse, PractRand to at least 4TB
-					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * UINT64_C(0x818102004182A025);//
+					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * UINT64_C(0x818102004182A025);
 					//const uint64_t b = a;
 					//return rotate64(b, 11) + (a = rotate64(b, 21) * UINT64_C(0x9E3779B9));
 					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5
@@ -2153,9 +2163,15 @@ namespace PractRand {
 					//const uint64_t a0 = a + b + UINT64_C(0xD1B54A32D192ED03);
 					//return (a = rotate64(a0, 19) ^ (b += UINT64_C(0xDB4F0B9175AE2165))) * UINT64_C(0xDE4D);
 					// passes great up to 8TB, one anomaly at 16TB and 3 mildly suspicious + 1 unusual at 32TB
-					const uint64_t a0 = a + b;
-					return (a = rotate64(a0, 19) ^ (b += UINT64_C(0xDB4F0B9175AE2165))) * UINT64_C(0x8A35);
-
+					//const uint64_t a0 = a + b;
+					//return (a = rotate64(a0, 19) ^ (b += UINT64_C(0xDB4F0B9175AE2165))) * UINT64_C(0x8A35);
+					
+					//return (a = (rotate64(a0, 47) ^ (b += 0x9E3779B97F4A7AF5ULL)));
+					b += a;
+					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * (b | 1);
+					//return (b += (a = rotate64(a, 47) * UINT64_C(0x818102004182A025)) ^ UINT64_C(0x9E3779B97F4A7AF5));
+					///return (b += (a = rotate64(a, 29) * UINT64_C(0xAC564B05)));
+					
 					//final long ab = a + b; return (a = (ab << 19 | ab >>> 45) ^ (b += 0xDB4F0B9175AE2165L)) * 0x8A35L;
 
 				}

@@ -441,8 +441,9 @@ namespace PractRand {
 				class linnormB : public vRNG64 {
 					Uint64 state;
 					int R;
+					uint64_t X;
 				public:
-				    linnormB(int rotation) : R(rotation) {};
+				    linnormB(int rotation, int xor) : R(rotation), X((uint64_t)xor) {};
 					Uint64 raw64();
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
