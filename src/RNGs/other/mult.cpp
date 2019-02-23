@@ -1555,11 +1555,12 @@ namespace PractRand {
                     //v ^= rotate64(v, 40) ^ rotate64(v, 15);
                     //v *= 0xDB4F0B9175AE2165UL;//0x9FB21C651E98DF25UL; // second number was used by Evensen
                     //return v ^ v >> 28;
-					
+
 					uint64_t s = state++;
-					s = reverse(s);
+					//s = reverse(s); // this line was commented in and out for different test types
 					s = rotate64(s, R);
-					s ^= -X;
+					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+
 					/*
 					s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50)) * 0xAEF17502108EF2D9UL + 0xD1B54A32D192ED03UL;
 					s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
@@ -1570,13 +1571,19 @@ namespace PractRand {
 					//s = (s ^ s >> 43 ^ s >> 34 ^ s >> 19) * 0x880355F21E6D1965UL;
 					//return s ^ s >> 28;
 
+					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0x2127599BF4325C37UL;
+					//s = (s ^ rotate64(s, 40) ^ rotate64(s, 15)) * 0x880355F21E6D1965UL;
+					//return (s ^ s >> 28);
+
+					// THIS ONE PASSES EVERYTHING! 256TB of tests, 64 rotations with/without reversal and/or bitwise NOT
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
+					return s ^ s >> 28;
+					
 					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
 					//s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
 					//return s ^ s >> 28;
 
-					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
-					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
-					return s ^ s >> 28;
 					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0x2127599BF4325C37UL;
 					//s = (s ^ s >> 34 ^ s >> 19) * 0x880355F21E6D1965UL;
 					//return s ^ s >> 43 ^ s >> 28;
