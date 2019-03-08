@@ -1426,14 +1426,14 @@ namespace PractRand {
 					printf("Seed is 0x%016X\r\n", state);// stream);
 				}
 
-				uint64_t reverse(uint64_t n)
-				{
-					n = _byteswap_uint64(n);
-					n = ((n & UINT64_C(0xaaaaaaaaaaaaaaaa)) >> 1) | ((n & UINT64_C(0x5555555555555555)) << 1);
-					n = ((n & UINT64_C(0xcccccccccccccccc)) >> 2) | ((n & UINT64_C(0x3333333333333333)) << 2);
-					n = ((n & UINT64_C(0xf0f0f0f0f0f0f0f0)) >> 4) | ((n & UINT64_C(0x0f0f0f0f0f0f0f0f)) << 4);
-					return n;
-				}
+				//uint64_t reverse(uint64_t n)
+				//{
+				//	n = _byteswap_uint64(n);
+				//	n = ((n & UINT64_C(0xaaaaaaaaaaaaaaaa)) >> 1) | ((n & UINT64_C(0x5555555555555555)) << 1);
+				//	n = ((n & UINT64_C(0xcccccccccccccccc)) >> 2) | ((n & UINT64_C(0x3333333333333333)) << 2);
+				//	n = ((n & UINT64_C(0xf0f0f0f0f0f0f0f0)) >> 4) | ((n & UINT64_C(0x0f0f0f0f0f0f0f0f)) << 4);
+				//	return n;
+				//}
 				Uint64 linnormB::raw64() {
 					//UINT64_C(0x9E3779B97F4A7C15)
 					//uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(3));
@@ -1563,14 +1563,25 @@ namespace PractRand {
 
 
 
+					//IT WORKS!
+//					uint64_t s = state++;
+//					//s = reverse(s); // this line was commented in and out for different test types
+//					s = rotate64(s, R);
+//					//s = ~s; // this line was commented in and out for different test types
+//					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+//					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
+//					return s ^ s >> 28;
+
+
 					uint64_t s = state++;
-					//s = reverse(s); // this line was commented in and out for different test types
+					s = reverse_bits64(s); // this line was commented in and out for different test types
 					s = rotate64(s, R);
-					//s = ~s; // this line was commented in and out for different test types
-					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+					s = ~s; // this line was commented in and out for different test types
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0xAEF17502108EF2D9UL;
 					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
 					return s ^ s >> 28;
-					
+
+
 					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
 					//s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
 					//return s ^ s >> 28;
