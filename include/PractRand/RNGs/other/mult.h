@@ -443,7 +443,7 @@ namespace PractRand {
 					int R;
 					uint64_t X;
 				public:
-				    linnormB(int rotation, int xor) : R(rotation), X((uint64_t)xor) {};
+				    linnormB(int, int);
 					Uint64 raw64();
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);

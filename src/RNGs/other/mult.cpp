@@ -1430,6 +1430,12 @@ namespace PractRand {
 					printf("Seed is 0x%016X\r\n", state);// stream);
 				}
 
+
+				linnormB::linnormB(int rotation, int x)
+				{
+					R = rotation;
+					X = (uint64_t)x;
+				}
 				//uint64_t reverse(uint64_t n)
 				//{
 				//	n = _byteswap_uint64(n);
@@ -1556,10 +1562,9 @@ namespace PractRand {
                     //v *= 0xDB4F0B9175AE2165UL;//0x9FB21C651E98DF25UL; // second number was used by Evensen
                     //return v ^ v >> 28;
 
-					uint64_t s = state++;
+					//uint64_t s = state++;
 					//s = reverse(s); // this line was commented in and out for different test types
-					s = rotate64(s, R);
-					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+					//s = rotate64(s, R);
 
 					/*
 					s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50)) * 0xAEF17502108EF2D9UL + 0xD1B54A32D192ED03UL;
@@ -1590,7 +1595,7 @@ namespace PractRand {
 					uint64_t s = state++;
 					s = reverse_bits64(s); // this line was commented in and out for different test types
 					s = rotate64(s, R);
-					s = ~s; // this line was commented in and out for different test types
+					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
 					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0xAEF17502108EF2D9UL;
 					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
 					return s ^ s >> 28;
