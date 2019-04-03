@@ -1384,11 +1384,26 @@ namespace PractRand {
 					//return (z ^ z >> 25);
 
 					////where we left off
-					uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
-					z = (z ^ z >> 27 ^ z >> 37 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-					return (z ^ z >> 25 ^ z >> 39);
+//					uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
+//					z = (z ^ z >> 27 ^ z >> 37 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+//					return (z ^ z >> 25 ^ z >> 39);
+
+//VelvetRNG, should also work as a simple determine()
+//passes 32TB, no anomalies, could be fast in Java, seems fast in MSVC...
+//uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+//z = (z ^ rotate64(z, 38) ^ rotate64(z, 23)) * 0x369DEA0F31A53F85ULL;
+//return z ^ z >> 39 ^ z >> 26;
 
 
+// 0xE7037ED1A0B428DBULL;//0xAEF17502108EF2D9ULL;
+////return (z ^ z >> 47 ^ z >> 23);
+
+//ThistleRNG, does not quite work in this form
+uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+//z = rotate64(z, 27u);
+z ^= z >> 25u ^ z >> 13u;
+z *= 0xDB4F0B9175AE2165ULL;
+return z ^ z >> 27u;
 
 					//z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
 					//z = ((z >> 30) ^ rotate64(z, 37)) * UINT64_C(0x369DEA0F31A53F85);
@@ -2120,6 +2135,9 @@ namespace PractRand {
 					//surprisingly, passes 32TB with one anomaly, seed = 0xde9b705d
 					// passes TestU01 in forwards and reverse, PractRand to at least 4TB
 					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * UINT64_C(0x818102004182A025);
+					
+					//has serious issues at 16TB
+					//return (a = rotate64(a, 29) * 0x10005ULL) * 0x818102004182A025ULL;
 					//const uint64_t b = a;
 					//return rotate64(b, 11) + (a = rotate64(b, 21) * UINT64_C(0x9E3779B9));
 					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5
@@ -2140,7 +2158,7 @@ namespace PractRand {
 					a &= 0x1fffff; //0x41C64E6B
 					for (uint64_t ra = (r & 0x3FF); ra; ra--)
 					{
-						a = rotate64(a, 29) * UINT64_C(0xAC564B05);
+						a = rotate64(a, 29) * 0x10005ULL;
 					}
 
 				}
@@ -2256,13 +2274,19 @@ namespace PractRand {
 					//return (a = rotate32(a, 21) * (b1 | 0xFFE00001u)) * 0xA5295u ^ b1;
 					
 					////passes 32TB no anomalies
-					const uint32_t a1 = rotate32(a, 1) + 0xAA78EDD7u;
-					const uint32_t b1 = rotate32(b, 25) + 0xC4DE9951u;
-					const uint32_t r = a1 ^ b1;
-					a = b1 ^ rotate32(b1, 13) ^ rotate32(b1, 19);
-					b ^= a1 + a;
-					return r;
+					//const uint32_t a1 = rotate32(a, 1) + 0xAA78EDD7u;
+					//const uint32_t b1 = rotate32(b, 25) + 0xC4DE9951u;
+					//const uint32_t r = a1 ^ b1;
+					//a = b1 ^ rotate32(b1, 13) ^ rotate32(b1, 19);
+					//b ^= a1 + a;
+					//return r;
 					
+					//const uint32_t b1 = (b += 0x9E3779BDu);
+					//const uint32_t c = a + 0xC4DE995Au;
+					return (a += 0x9E3779BDu + (b = rotate32(b, 17) * 0xBCFDu ^ rotate32(a, 11)));
+					
+
+
 					//(a = rotate32(a, 1) + 0xAA78EDD7u);
 					
 					//uint32_t r = (a += 0xAA78EDD7u) + (b = rotate32(b, 25) + 0xC4DE9951u);
