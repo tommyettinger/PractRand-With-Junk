@@ -3840,11 +3840,11 @@ void PractRand::Tests::FPF::test_blocks(TestBlock *data, int numblocks) {
 			Uint32 cur;
 			long start;
 			if (blocks_tested) {
-				cur = reverse_bits32(data->as32[-1]);
+				cur = PractRand::Internals::reverse_bits32(data->as32[-1]);
 				start = 0;
 			}
 			else {
-				cur = reverse_bits32(data->as32[0]);
+				cur = PractRand::Internals::reverse_bits32(data->as32[0]);
 				start = 1;
 			}
 			unsigned long word_parts = 32 >> stride_bits_L2;

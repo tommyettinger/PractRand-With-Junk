@@ -111,6 +111,11 @@ namespace PractRand {
 		Uint64 fast_forward_lcg64 ( Uint64 how_far, Uint64 val, Uint64 mul, Uint64 add );
 		Uint32 fast_forward_lcg32 ( Uint32 how_far, Uint32 val, Uint32 mul, Uint32 add );
 		Uint32 fast_forward_lcg32c ( Uint32 how_far, Uint32 val, Uint32 mul, Uint32 add, Uint32 mod );
+		Uint8 reverse_bits8( Uint8 a );
+		Uint16 reverse_bits16( Uint16 a );
+		Uint32 reverse_bits32( Uint32 a );
+		Uint64 reverse_bits64( Uint64 a );
+
 		/*class XorshiftMatrix {
 			//matrix representing a state transition function for an RNG that uses only shifts and xors
 			std::vector<bool> bits;

@@ -1405,9 +1405,25 @@ z = (z ^ z >> 30 ^ z >> 5 ^ 0xDB4F0B9175AE2165ULL) * 0xC6BC279692B5CC83ULL;
 return z ^ z >> 28u;
 //return z ^ z >> 31u ^ z >> 23u;
 
+//VelvetRNG, should also work as a simple determine()
+//passes 32TB, no anomalies, could be fast in Java, seems fast in MSVC...
+//uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+//z = (z ^ rotate64(z, 38) ^ rotate64(z, 23)) * 0x369DEA0F31A53F85ULL;
+//return z ^ z >> 39 ^ z >> 26;
 
 
 //z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
+// 0xE7037ED1A0B428DBULL;//0xAEF17502108EF2D9ULL;
+////return (z ^ z >> 47 ^ z >> 23);
+
+//ThistleRNG, does not quite work in this form
+//uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+//z = rotate64(z, 27u);
+//z ^= z >> 25u ^ z >> 13u;
+//z *= 0xDB4F0B9175AE2165ULL;
+//return z ^ z >> 27u;
+
+					//z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
 					//z = ((z >> 30) ^ rotate64(z, 37)) * UINT64_C(0x369DEA0F31A53F85);
 					//z = ((z >> 26) ^ z) * UINT64_C(0x9E3779B97F4A7C15);
 					//return z ^ z >> 26;
@@ -1447,14 +1463,20 @@ return z ^ z >> 28u;
 					printf("Seed is 0x%016X\r\n", state);// stream);
 				}
 
-				uint64_t reverse(uint64_t n)
+
+				linnormB::linnormB(int rotation, int x)
 				{
-					n = _byteswap_uint64(n);
-					n = ((n & UINT64_C(0xaaaaaaaaaaaaaaaa)) >> 1) | ((n & UINT64_C(0x5555555555555555)) << 1);
-					n = ((n & UINT64_C(0xcccccccccccccccc)) >> 2) | ((n & UINT64_C(0x3333333333333333)) << 2);
-					n = ((n & UINT64_C(0xf0f0f0f0f0f0f0f0)) >> 4) | ((n & UINT64_C(0x0f0f0f0f0f0f0f0f)) << 4);
-					return n;
+					R = rotation;
+					X = (uint64_t)x;
 				}
+				//uint64_t reverse(uint64_t n)
+				//{
+				//	n = _byteswap_uint64(n);
+				//	n = ((n & UINT64_C(0xaaaaaaaaaaaaaaaa)) >> 1) | ((n & UINT64_C(0x5555555555555555)) << 1);
+				//	n = ((n & UINT64_C(0xcccccccccccccccc)) >> 2) | ((n & UINT64_C(0x3333333333333333)) << 2);
+				//	n = ((n & UINT64_C(0xf0f0f0f0f0f0f0f0)) >> 4) | ((n & UINT64_C(0x0f0f0f0f0f0f0f0f)) << 4);
+				//	return n;
+				//}
 				Uint64 linnormB::raw64() {
 					//UINT64_C(0x9E3779B97F4A7C15)
 					//uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(3));
@@ -1573,10 +1595,9 @@ return z ^ z >> 28u;
                     //v *= 0xDB4F0B9175AE2165UL;//0x9FB21C651E98DF25UL; // second number was used by Evensen
                     //return v ^ v >> 28;
 
-					uint64_t s = state++;
+					//uint64_t s = state++;
 					//s = reverse(s); // this line was commented in and out for different test types
-					s = rotate64(s, R);
-					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+					//s = rotate64(s, R);
 
 					/*
 					s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50)) * 0xAEF17502108EF2D9UL + 0xD1B54A32D192ED03UL;
@@ -1592,11 +1613,27 @@ return z ^ z >> 28u;
 					//s = (s ^ rotate64(s, 40) ^ rotate64(s, 15)) * 0x880355F21E6D1965UL;
 					//return (s ^ s >> 28);
 
-					// THIS ONE PASSES EVERYTHING! 256TB of tests, 64 rotations with/without reversal and/or bitwise NOT
-					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+
+
+					//IT WORKS!
+//					uint64_t s = state++;
+//					//s = reverse(s); // this line was commented in and out for different test types
+//					s = rotate64(s, R);
+//					//s = ~s; // this line was commented in and out for different test types
+//					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+//					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
+//					return s ^ s >> 28;
+
+
+					uint64_t s = state++;
+					s = reverse_bits64(s); // this line was commented in and out for different test types
+					s = rotate64(s, R);
+					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0xAEF17502108EF2D9UL;
 					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
 					return s ^ s >> 28;
-					
+
+
 					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
 					//s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
 					//return s ^ s >> 28;
@@ -2116,6 +2153,9 @@ return z ^ z >> 28u;
 					//surprisingly, passes 32TB with one anomaly, seed = 0xde9b705d
 					// passes TestU01 in forwards and reverse, PractRand to at least 4TB
 					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * UINT64_C(0x818102004182A025);
+					
+					//has serious issues at 16TB
+					//return (a = rotate64(a, 29) * 0x10005ULL) * 0x818102004182A025ULL;
 					//const uint64_t b = a;
 					//return rotate64(b, 11) + (a = rotate64(b, 21) * UINT64_C(0x9E3779B9));
 					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5
@@ -2136,7 +2176,7 @@ return z ^ z >> 28u;
 					a &= 0x1fffff; //0x41C64E6B
 					for (uint64_t ra = (r & 0x3FF); ra; ra--)
 					{
-						a = rotate64(a, 29) * UINT64_C(0xAC564B05);
+						a = rotate64(a, 29) * 0x10005ULL;
 					}
 
 				}
@@ -2252,13 +2292,19 @@ return z ^ z >> 28u;
 					//return (a = rotate32(a, 21) * (b1 | 0xFFE00001u)) * 0xA5295u ^ b1;
 					
 					////passes 32TB no anomalies
-					const uint32_t a1 = rotate32(a, 1) + 0xAA78EDD7u;
-					const uint32_t b1 = rotate32(b, 25) + 0xC4DE9951u;
-					const uint32_t r = a1 ^ b1;
-					a = b1 ^ rotate32(b1, 13) ^ rotate32(b1, 19);
-					b ^= a1 + a;
-					return r;
+					//const uint32_t a1 = rotate32(a, 1) + 0xAA78EDD7u;
+					//const uint32_t b1 = rotate32(b, 25) + 0xC4DE9951u;
+					//const uint32_t r = a1 ^ b1;
+					//a = b1 ^ rotate32(b1, 13) ^ rotate32(b1, 19);
+					//b ^= a1 + a;
+					//return r;
 					
+					//const uint32_t b1 = (b += 0x9E3779BDu);
+					//const uint32_t c = a + 0xC4DE995Au;
+					return (a += 0x9E3779BDu + (b = rotate32(b, 17) * 0xBCFDu ^ rotate32(a, 11)));
+					
+
+
 					//(a = rotate32(a, 1) + 0xAA78EDD7u);
 					
 					//uint32_t r = (a += 0xAA78EDD7u) + (b = rotate32(b, 25) + 0xC4DE9951u);
