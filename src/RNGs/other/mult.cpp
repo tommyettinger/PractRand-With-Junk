@@ -1812,7 +1812,21 @@ return z ^ z >> 28u;
 					//return stateA ^ stateB;// ^ (stateB ^ stateB >> 32);
 
 					//return (stateA = (stateA << 5) + rotate32(stateA, 1)) * ((stateB += 0x41C64E6D) | 1);
-					return (stateA = (stateA << 5) + rotate64(stateA, 1)) * ((stateB += UINT64_C(0x9E3779B97F4A7C15)) | 1);
+					//return (stateA = (stateA << 5) + rotate64(stateA, 1)) * ((stateB += UINT64_C(0x9E3779B97F4A7C15)) | 1);
+
+					// DuelistRNG; high-quality, weirdly slow
+//					const uint64_t b = stateB += 0x9E3779B97F4A7C15ULL;
+//					const uint64_t a = stateA += ((b > 0x3C6EF372FE94F82AULL) ? 0x6C8E9CF570932BD5ULL : 0ULL);
+//					const uint64_t z = (a ^ a >> 28u) * (b | 1ULL);
+//					return z ^ z >> 28u;
+
+					//old but good; OrbitRNG seems generally faster than DuelistRNG and maybe also high-quality? It doesn't have anomalies early on...
+					const uint64_t s = (stateA += 0x6C8E9CF570932BD5ULL);
+					if (s == 0ULL)
+						stateB += 0x9E3779B97F4A7C15ULL;
+					const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15ULL) | 1ULL);
+					return z ^ z >> 25;
+
 
 					// where we left off
 					//stateA *= UINT64_C(0x41C64E6B);
@@ -1884,6 +1898,8 @@ return z ^ z >> 28u;
 				void mingler::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
+					//stateB |= 1ULL;
+					
 					//stateB = (stateB & UINT64_C(0x7FFFFFFF)) + (stateB >> 31);
 					//if (stateB == 0) stateB = 1;
 					printf("stateA is 0x%016X, stateB is 0x%016X\r\n", stateA, stateB);
