@@ -1039,9 +1039,9 @@ namespace PractRand {
 					//return z ^ (z >> 29);
 
 					//LinnormRNG normal
-					//					uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
-					//					z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
-					//					return z ^ z >> 25u;
+					uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
+					z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					return z ^ z >> 25u;
 
 					//uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0x41C64E6B));
 					//uint64_t z = (state += UINT64_C(0x9E3779B97F4A7C15));
@@ -1090,10 +1090,10 @@ namespace PractRand {
 					//z = (z ^ rotate64(z, 21) ^ rotate64(z, 45) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
 					//return (z ^ z >> 27);
 
-					uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD1B54A32D192ED03);
-					//z = (z ^ rotate64(z, 21) ^ rotate64(z, 11)) * UINT64_C(0xDB4F0B9175AE2165);
-					z = (z ^ rotate64(z, 38) ^ rotate64(z, 59) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83);
-					return z ^ z >> 27;
+					//uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xD1B54A32D192ED03);
+					////z = (z ^ rotate64(z, 21) ^ rotate64(z, 11)) * UINT64_C(0xDB4F0B9175AE2165);
+					//z = (z ^ rotate64(z, 38) ^ rotate64(z, 59) ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83);
+					//return z ^ z >> 27;
 
 
 					// Quixotic determine attempt?
@@ -1384,9 +1384,26 @@ namespace PractRand {
 					//return (z ^ z >> 25);
 
 					////where we left off
-//					uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
-//					z = (z ^ z >> 27 ^ z >> 37 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
-//					return (z ^ z >> 25 ^ z >> 39);
+					//uint64_t z = ((++state) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
+					//z = (z ^ z >> 27 ^ z >> 37 ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xD1B54A32D192ED03);
+					//return (z ^ z >> 25 ^ z >> 39);
+
+
+////passes 32TB no anomalies!
+//uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+//z = (z ^ rotate64(z, 23) ^ rotate64(z, 41)) * 0x369DEA0F31A53F85ULL;
+//return z ^ z >> 34 ^ z >> 26;
+
+//uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+//z ^= z >> 25u ^ z >> 13u;
+//z *= 0x2545F4914F6CDD1DULL;
+//return z ^ z >> 26u ^ z >> 31u;
+
+//fails at 4TB
+uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+z = (z ^ z >> 30 ^ z >> 5 ^ 0xDB4F0B9175AE2165ULL) * 0xC6BC279692B5CC83ULL;
+return z ^ z >> 28u;
+//return z ^ z >> 31u ^ z >> 23u;
 
 //VelvetRNG, should also work as a simple determine()
 //passes 32TB, no anomalies, could be fast in Java, seems fast in MSVC...
@@ -1395,6 +1412,7 @@ namespace PractRand {
 //return z ^ z >> 39 ^ z >> 26;
 
 
+//z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
 // 0xE7037ED1A0B428DBULL;//0xAEF17502108EF2D9ULL;
 ////return (z ^ z >> 47 ^ z >> 23);
 
@@ -1428,7 +1446,7 @@ return z ^ z >> 25u;
 					//uint64_t z = state++;
 					//z = (rotate64(z, 21) ^ rotate64(z, 35) ^ z ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xC6BC279692B5CC83);
 					//z = (z ^ z >> 26) * UINT64_C(0xD1B54A32D192ED03);
-					// 0xC6BC279692B5CC83
+					// 0xC6BC279692B5CC83  0x6C8E9CF570932BD5
                     //uint64_t z = (++state ^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0x4823A80B2006E21B);
 					//z = (z ^ z << 7 ^ z >> 23) * UINT64_C(0x4C8148C08017D353);
 					//return z ^ z >> 28;
