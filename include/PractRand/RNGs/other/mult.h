@@ -449,8 +449,12 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 				};
 				class linnorm32 : public vRNG32 {
-					Uint32 stateA, stateB, stateC;
+					Uint32 stateA;
+					int R;
+					uint32_t X;
+
 				public:
+				    linnorm32(int, int);
 					Uint32 raw32();
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);

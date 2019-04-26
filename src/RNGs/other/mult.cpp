@@ -1398,13 +1398,29 @@ namespace PractRand {
 // 0xE7037ED1A0B428DBULL;//0xAEF17502108EF2D9ULL;
 ////return (z ^ z >> 47 ^ z >> 23);
 
-//ThistleRNG, does not quite work in this form
-uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
-//z = rotate64(z, 27u);
-z ^= z >> 25u ^ z >> 13u;
-z *= 0xDB4F0B9175AE2165ULL;
-return z ^ z >> 27u;
+////passes 32TB no anomalies, not equidistributed
+//uint64_t y = state;
+//uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+////z = rotate64(z, 27u);
+//y ^= y >> 26u;
+//z ^= z >> 28u;
+//y *= 0xAEF17502108EF2D9ULL;
+//z *= 0x2545F4914F6CDD1DULL;
+//return y ^ z ^ y >> 28u ^ z >> 26u;
 
+
+////passes at least 8TB without anomalies, but can't produce 3/4 of all uint64_t
+//uint64_t z = (state *= 0x59071D96D81ECD35ULL);
+//z = (z ^ z >> 26u ^ 0xDB4F0B9175AE2165ULL) * 0xC6BC279692B5CC83ULL;
+//return z ^ z >> 23u;
+
+uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+z = (z ^ z >> 53u ^ z >> 29u ^ z >> 23u ^ z >> 42u) * 0xDB4F0B9175AE2165ULL;
+return z ^ z >> 25u;
+//0x818102004182A025ULL
+//return z ^ z >> 28u;
+
+//0x369DEA0F31A53F85ULL 0xC6BC279692B5CC83ULL 0x6C8E9CF570932BD5ULL 0x59071D96D81ECD35ULL
 					//z = ((z << ((++state & 31u) + 5u)) ^ rotate64(z, 4)) * UINT64_C(0xAEF17502108EF2D9);
 					//z = ((z >> 30) ^ rotate64(z, 37)) * UINT64_C(0x369DEA0F31A53F85);
 					//z = ((z >> 26) ^ z) * UINT64_C(0x9E3779B97F4A7C15);
@@ -1442,6 +1458,7 @@ return z ^ z >> 27u;
 				std::string linnormA::get_name() const { return "LinnormA"; }
 				void linnormA::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
+					state |= 1ULL;
 					printf("Seed is 0x%016X\r\n", state);// stream);
 				}
 
@@ -1673,6 +1690,11 @@ return z ^ z >> 27u;
 					state = 0UL;
 					printf("Seed is 0x%llX\r\n", state);// stream);
 				}
+				linnorm32::linnorm32(int rotation, int x)
+				{
+					R = rotation;
+					X = (uint32_t)x;
+				}
 
 				Uint32 linnorm32::raw32() {
 					//uint32_t z = (stateA = stateA * UINT32_C(0x41C64E6D) + UINT32_C(1));// + (stateC >> 1 ^ (-(stateC & 1) & UINT32_C(0xA3000000)));//stream);
@@ -1696,12 +1718,27 @@ return z ^ z >> 27u;
 					//public class SimpleRandom extends Random {public int a=1,b=1; public int next(int bits){return ((a = (a << 13 | a >>> 19) * UINT32_C(0x89A7)) ^ (b = (b << 17 | b >>> 15) * UINT32_C(0xBCFD))) >>> -bits;}}
 
 					//z = (z ^ rotate32(z, 11) ^ rotate32(z, 21)) * (z | UINT32_C(0xFFFE0001)) + (z ^ z >> 14);
-					
-					// passes as much as a 32-bit generator can
+
 					//uint32_t z = ((++stateA) ^ UINT32_C(0xD1B54A35)) * UINT32_C(0x102473);
-					uint32_t z = (stateA += UINT32_C(0x62BD5));
-					z = (z ^ z >> 11 ^ z >> 21) * (z | UINT32_C(0xFFE00001));
-					return z ^ z >> 13 ^ z >> 19;
+
+					//// passes as much as a 32-bit generator can
+					//uint32_t z = (stateA += UINT32_C(0x62BD5));
+					//z = (z ^ z >> 11 ^ z >> 21) * (z | UINT32_C(0xFFE00001));
+					//return z ^ z >> 13 ^ z >> 19;
+
+					uint32_t s = stateA++;
+					s = reverse_bits32(s); // this line was commented in and out for different test types
+					s = rotate32(s, R);
+					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+					s = (s ^ rotate32(s, 21) ^ rotate32(s, 11) ^ 0xD1B54A35U) * 0x1D2473U;
+					s = (s ^ s >> ((s >> 28) + 4) ^ 0x75AE2165U) * 0x190413U;
+					s = (s ^ rotate32(s, 19) ^ rotate32(s, 13) ^ 0xD1B54A35U) * 0x1D2473U;
+					s = (s ^ s >> ((s >> 28) + 4) ^ 0x9E3779BDU) * 0x1A952BU;
+//					return s ^ rotate32(s, 13) ^ rotate32(s, 19);
+					return s ^ s >> 23 ^ s >> 17 ^ s >> 11 ^ s >> 5;
+
+
+
 
 					//uint32_t z = ((++stateA) ^ UINT32_C(0xD1B54A35)) * UINT32_C(0x12D453);
 					//uint32_t z = (stateA += UINT32_C(0x62BD5));
@@ -1741,13 +1778,20 @@ return z ^ z >> 27u;
 					//return z ^ rotate32(z, 11) ^ rotate32(z, 21);
 
 				}
-				std::string linnorm32::get_name() const { return "linnorm32"; }
+				std::string linnorm32::get_name() const {
+					std::ostringstream str;
+					str << "linnormB(" << R << "," << X << ")";
+					return str.str();
+				}
+
 				void linnorm32::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
-					walker->handle(stateB);
-					walker->handle(stateC);
-					printf("Seed is 0x%X, 0x%X, 0x%X\r\n", stateA, stateB, stateC);// stream);
+					//walker->handle(stateB);
+					//walker->handle(stateC);
+					//printf("Seed is 0x%X, 0x%X, 0x%X\r\n", stateA, stateB, stateC);// stream);
+					printf("Seed is 0x%08X\r\n", stateA);// stream);
 				}
+
 				Uint16 linnormBounded::raw16() {
 					Uint64 z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
 					z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
@@ -1794,8 +1838,22 @@ return z ^ z >> 27u;
 					//return stateA ^ stateB;// ^ (stateB ^ stateB >> 32);
 
 					//return (stateA = (stateA << 5) + rotate32(stateA, 1)) * ((stateB += 0x41C64E6D) | 1);
-					return (stateA = (stateA << 5) + rotate64(stateA, 1)) * ((stateB += UINT64_C(0x9E3779B97F4A7C15)) | 1);
+					//return (stateA = (stateA << 5) + rotate64(stateA, 1)) * ((stateB += UINT64_C(0x9E3779B97F4A7C15)) | 1);
 
+//					const uint64_t b = stateB += 0x9E3779B97F4A7C16ULL;
+//					const uint64_t a = stateA += ((b > 0x3C6EF372FE94F82CULL) ? 0x6C8E9CF570932BD5ULL : 0ULL); //will be 0x3C6EF372FE94F82CL if signed
+//					const uint64_t z = (a ^ a >> 28) * b;
+//					return z ^ z >> 28u;
+
+//const uint64_t s = (stateA += 0x6C8E9CF570932BD5ULL);
+//if (s == 0ULL) stateB -= 0x9E3779B97F4A7C15ULL;
+//const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15ULL) | 1ULL);
+//return z ^ z >> 25;
+
+const uint64_t s = (stateA += 0xC6BC279692B5C323ULL);
+const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15ULL) | 1ULL);
+if (s == 0ULL) stateB -= 0x9E3779B97F4A7C15ULL;
+return z ^ z >> 27;
 					// where we left off
 					//stateA *= UINT64_C(0x41C64E6B);
 					//stateA = rotate64(stateA, 28);
@@ -1866,6 +1924,7 @@ return z ^ z >> 27u;
 				void mingler::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
+					//stateB |= 1ULL;
 					//stateB = (stateB & UINT64_C(0x7FFFFFFF)) + (stateB >> 31);
 					//if (stateB == 0) stateB = 1;
 					printf("stateA is 0x%016X, stateB is 0x%016X\r\n", stateA, stateB);
@@ -2560,9 +2619,16 @@ return z ^ z >> 27u;
 					//return ((z << 21) | (z >> 11)) ^ (((z << 7) | (z >> 25)) * 0x62BD5);
 
 					//return Integer.rotateLeft((state = ((state = state * 0x62BD5 ^ 0x9E3779B9) ^ state >>> 13) * ((state & 0xFFFF8) ^ 0xCD7B5) ^ 0x632BE5AB), 21) ^ (Integer.rotateLeft(state, 7) * 0x62BD5 + 0x932BD);
-					const uint32_t y = (a += 0x9E3779B9);
-					const uint32_t z = ((b += (-(a > 0x52345670) & 0x632BE5AB)) ^ a) * 0xABCFD;
-					return (z ^ rotate32(z, 21) ^ rotate32(z, 9)) * (a >> 11 | 1u) ^ a;
+
+					//const uint32_t y = (a += 0x9E3779B9);
+					//const uint32_t z = ((b += (-(a > 0x52345670) & 0x632BE5AB)) ^ a) * 0xABCFD;
+					//return (z ^ rotate32(z, 21) ^ rotate32(z, 9)) * (a >> 11 | 1u) ^ a;
+					const uint32_t s = (a += 0x632BE5ABU);
+					const uint64_t z = (s ^ s >> 13 ^ s >> 20) * (b >> 12 | 0x1U);
+					if (s != 0U)
+					    b += 0x9E3779BDU;
+					return z ^ z >> 21 ^ z >> 11;
+
 				}
 				std::string zig32::get_name() const { return "zig32"; }
 				void zig32::walk_state(StateWalkingObject *walker) {

@@ -598,7 +598,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_1(vortex64)
 			REGISTER_RNG_0(linnormA)
 			REGISTER_RNG_2(linnormB)
-			REGISTER_RNG_0(linnorm32)
+			REGISTER_RNG_2(linnorm32)
 			REGISTER_RNG_0(linnormBounded)
 			REGISTER_RNG_0(mingler)
 			REGISTER_RNG_0(ta32)

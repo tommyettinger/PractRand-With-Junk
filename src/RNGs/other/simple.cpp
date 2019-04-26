@@ -1333,10 +1333,20 @@ namespace PractRand {
 
 					//a = (a << 6) - rotate32(a, 4);
 
-					a = (a << 9) + rotate32(a, 8);
-					b = (b << 5) + rotate32(b, 1);
-					c = (c << 27) + rotate32(c, 20);
-					return a ^ b ^ c;
+					//a = (a << 9) + rotate32(a, 8);
+					//b = (b << 5) + rotate32(b, 1);
+					//c = (c << 27) + rotate32(c, 20);
+					//return a ^ b ^ c;
+					////passes 32TB with one "unusual" anomaly at 8TB
+					//// the subcycle generator (c = rotate32(c, 25) + 0xA5F152BFu) is a poor choice; the period of its subcycle generator
+					//// shares a factor with the longer period of (a = rotate32(a, 7) + 0xC0EF50EBu). should try (c = rotate32(c, 30) + 0x9E3779B9u)
+					//return (b = rotate32(b, 11) ^ (a = rotate32(a, 7) + 0xC0EF50EBu) ^ (d += (c = rotate32(c, 25) + 0xA5F152BFu)));
+
+					//// passes to at least 16TB with no anomalies, but the period will be smaller due to the aforementioned shared factor.
+					return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC0EF50EBu) + (c = rotate32(c, 25) + 0xA5F152BFu));
+					//// haven't tried this next one yet.
+					//return (b ^= b >> 11 ^ (a = rotate32(a, 7) + 0xC0EF50EBu) + (c = rotate32(c, 30) + 0x9E3779B9u));
+
 					//return (a = rotate32(a, 13)) + (b = rotate32(b, 17)) ^ (c = rotate32(c, 7));
 
 					//return a ^ b;
@@ -1359,9 +1369,11 @@ namespace PractRand {
 					walker->handle(a);
 					walker->handle(b);
 					walker->handle(c);
+					walker->handle(d);
 					if (a == 0) a = 1;
 					if (b == 0) b = 1;
 					if (c == 0) c = 1;
+					if (d == 0) d = 1;
 					//walker->handle(d);
 					//uint32_t r;
 					//r = a & 0xFFFF;
