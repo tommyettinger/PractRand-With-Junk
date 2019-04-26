@@ -1432,9 +1432,9 @@ return z ^ z >> 28u;
 //z = (z ^ z >> 26u ^ 0xDB4F0B9175AE2165ULL) * 0xC6BC279692B5CC83ULL;
 //return z ^ z >> 23u;
 
-uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
-z = (z ^ z >> 53u ^ z >> 29u ^ z >> 23u ^ z >> 42u) * 0xDB4F0B9175AE2165ULL;
-return z ^ z >> 25u;
+//uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+//z = (z ^ z >> 53u ^ z >> 29u ^ z >> 23u ^ z >> 42u) * 0xDB4F0B9175AE2165ULL;
+//return z ^ z >> 25u;
 //0x818102004182A025ULL
 //return z ^ z >> 28u;
 

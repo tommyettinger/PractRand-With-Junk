@@ -1343,9 +1343,9 @@ namespace PractRand {
 					//return (b = rotate32(b, 11) ^ (a = rotate32(a, 7) + 0xC0EF50EBu) ^ (d += (c = rotate32(c, 25) + 0xA5F152BFu)));
 
 					//// passes to at least 16TB with no anomalies, but the period will be smaller due to the aforementioned shared factor.
-					return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC0EF50EBu) + (c = rotate32(c, 25) + 0xA5F152BFu));
+					//return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC0EF50EBu) + (c = rotate32(c, 25) + 0xA5F152BFu));
 					//// haven't tried this next one yet.
-					//return (b ^= b >> 11 ^ (a = rotate32(a, 7) + 0xC0EF50EBu) + (c = rotate32(c, 30) + 0x9E3779B9u));
+					return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC4DE9951u) + (c = rotate32(c, 1) + 0xAA78EDD7u));
 
 					//return (a = rotate32(a, 13)) + (b = rotate32(b, 17)) ^ (c = rotate32(c, 7));
 
