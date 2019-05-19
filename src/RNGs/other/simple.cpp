@@ -1168,7 +1168,14 @@ namespace PractRand {
 					//const uint32_t result = (rotate32(state1 * 31U, 23) + UINT32_C(0x9E3779BD));
 					// *3U;//(state0 << 8) + state0;// +UINT32_C(0x9E3779BD);
 					// StarPhi32, passes 32TB with seed 0x6dcb1257
-					const uint32_t result = state1 * UINT32_C(31);
+//					const uint32_t result = state1 * UINT32_C(31);
+//					return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
+//                  // Sashimi32, passes 32TB with seed 0; one unusual anomaly at 4TB (Low4/16 BCFN)
+//					const uint32_t result = state1 + 0x9E3779BDu;
+//					return (result << 7) - rotate32(result, 4);
+
+
+					const uint32_t result = state1 + 0x9E3779B9u;
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1179,7 +1186,8 @@ namespace PractRand {
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-					return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
+					return (result << 7) - rotate32(result, 3);
+					//return (rotate32(result, 23));
 
 					//return result ^ result >> 11;
 					//return ((result << 11) - rotate32(result, 9));
@@ -1342,10 +1350,12 @@ namespace PractRand {
 					//// shares a factor with the longer period of (a = rotate32(a, 7) + 0xC0EF50EBu). should try (c = rotate32(c, 30) + 0x9E3779B9u)
 					//return (b = rotate32(b, 11) ^ (a = rotate32(a, 7) + 0xC0EF50EBu) ^ (d += (c = rotate32(c, 25) + 0xA5F152BFu)));
 
-					//// passes to at least 16TB with no anomalies, but the period will be smaller due to the aforementioned shared factor.
+					//// passes to 32TB with no anomalies, but the period will be smaller due to the aforementioned shared factor.
 					//return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC0EF50EBu) + (c = rotate32(c, 25) + 0xA5F152BFu));
-					//// haven't tried this next one yet.
-					return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC4DE9951u) + (c = rotate32(c, 1) + 0xAA78EDD7u));
+					//// passes 32TB, I'm pretty sure? Speed isn't very good, probably doesn't warrant more checks.
+					//return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC4DE9951u) + (c = rotate32(c, 1) + 0xAA78EDD7u));
+
+					return (a = rotate32(a, 23) * 0x402AB) ^ (b = rotate32(b, 28) * 0x01621) ^ (c = rotate32(c, 24) * 0x808E9) ^ (d = rotate32(d, 29) * 0x8012D);
 
 					//return (a = rotate32(a, 13)) + (b = rotate32(b, 17)) ^ (c = rotate32(c, 7));
 
