@@ -1039,9 +1039,9 @@ namespace PractRand {
 					//return z ^ (z >> 29);
 
 					//LinnormRNG normal
-					uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
-					z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
-					return z ^ z >> 25u;
+					//uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
+					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					//return z ^ z >> 25u;
 
 					//uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0x41C64E6B));
 					//uint64_t z = (state += UINT64_C(0x9E3779B97F4A7C15));
@@ -1074,8 +1074,8 @@ namespace PractRand {
 					//return (z ^ z >> 29u);
 
 					//// LinnormRNG.determine()
-					//uint64_t z = ((state += UINT64_C(0x632BE59BD9B4E019)) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
-					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					//uint64_t z = ((state += 0x632BE59BD9B4E019UL) ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL;
+					//z = (z ^ z >> 27u) * 0xAEF17502108EF2D9UL;
 					//return (z ^ z >> 25u);
 
 					//^ UINT64_C(0xDB4F0B9175AE2165)) * UINT64_C(0xE19B01AA9D42C633);
@@ -1264,11 +1264,27 @@ namespace PractRand {
 					//return (z ^ rotate64(z, 46) ^ rotate64(z, 19));
 					// return (state = ((state *= 0xD2B74407B1CE6E93L) ^ (state << 19 | state >>> 45) ^ (state << 37 | state >>> 27)) * 0xCA5A826395121157L) ^ state >>> 28;
 					// return ((s = ((s *= 0x9E3779B97F4A7C15L) ^ s >>> 27 ^ 0xDB4F0B9175AE2165L) * 0xC6BC279692B5CC83L) ^ (s << 11 | s >>> 53) ^ (s << 23 | s >>> 41));
+				    //uint64_t r = (state += 0x6C8E9CF570932BD5ULL);
+					//r = (r | 0xA529ULL) * (r ^ (r >> 25));//(r ^ 0xe7037ed1a0b428dbull); // (r | 0xA529ull)
+					//return r ^ (r >> 23);
+					
+					//uint64_t z = ((state += 0x632BE59BD9B4E019UL) ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL;
+
+					//// MizuchiRNG retry, passes 32TB when PractRand seed is 0xafec9d14 (3 "unusual" anomalies)
+					uint64_t z = (state = state * 0x369DEA0F31A53F85ULL + stream);
+					z = (z ^ z >> 23u ^ z >> 47u) * 0xAEF17502108EF2D9UL;
+					return (z ^ z >> 25u);
+					//uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
+					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
+					//return z ^ z >> 25u;
+
+					//0x369DEA0F31A53F85ULL
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe64"; }
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
+					stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
 					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, stream);
@@ -2210,14 +2226,18 @@ return z ^ z >> 27;
 
 				Uint64 molerat64::raw64() {
 					//surprisingly, passes 32TB with one anomaly, seed = 0xde9b705d
-					// passes TestU01 in forwards and reverse, PractRand to at least 4TB
-					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * UINT64_C(0x818102004182A025);
+					// passes TestU01 in forwards and reverse as well
+					//return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * UINT64_C(0x818102004182A025);
+					return (a += 0x589965CC75374CC3ULL - rotate64(a, 37)) * 0xE7037ED1A0B428DBULL;
+					//a = 0x9E3779B97F4A7AF5ULL - rotate64(a, 41);
+					//return (a ^ a >> 26) * 0xE7037ED1A0B428DBULL;
 					
+
 					//has serious issues at 16TB
 					//return (a = rotate64(a, 29) * 0x10005ULL) * 0x818102004182A025ULL;
 					//const uint64_t b = a;
 					//return rotate64(b, 11) + (a = rotate64(b, 21) * UINT64_C(0x9E3779B9));
-					// 0xAEF17502108EF2D9; 0x9E3779B97F4A7AF5
+					// 0xAEF17502108EF2D9ULL; 0x9E3779B97F4A7AF5ULL 0xE7037ED1A0B428DBULL 0x8EBC6AF09C88C6E3ULL 0xA0761D6478BD642FULL 0x589965CC75374CC3ULL
 					//return (z << 29) + rotate64(z, 20);
 					//z = (z ^ z >> 28);
 					//return z;
@@ -2233,9 +2253,11 @@ return z ^ z >> 27;
 					//	a = rotate64(a, 20) + (a << 27);
 					//}
 					a &= 0x1fffff; //0x41C64E6B
-					for (uint64_t ra = (r & 0x3FF); ra; ra--)
+					++a;
+					for (uint64_t ra = (r & 0x7FF); ra; ra--)
 					{
-						a = rotate64(a, 29) * 0x10005ULL;
+						//a = rotate64(a, 29) * 0xAC564B05ULL;
+						a += 0x589965CC75374CC3ULL - rotate64(a, 37);
 					}
 
 				}
@@ -2654,6 +2676,25 @@ return z ^ z >> 27;
 					//if (a == 0) a = 1;
 					walker->handle(b);
 				}
+
+
+				Uint64 twinLinear::raw64() {
+					uint64_t r = rotate64(s0, 32) ^ s1;
+					uint64_t t = s0 >> 58;
+					r = rotate64(r, (int)t);
+					//r += 0x2545F4914F6CDD1DULL;
+					s0 = s0 * 0x2C6FE96EE78B6955ULL + r;
+					s1 = s1 * 0x369DEA0F31A53F85ULL + 1ULL;
+					return r ^ r >> 32;
+				}
+				std::string twinLinear::get_name() const { return "twinLinear"; }
+				void twinLinear::walk_state(StateWalkingObject *walker) {
+					walker->handle(s0);
+					walker->handle(s1);
+				}
+
+
+
 			}
 		}
 	}

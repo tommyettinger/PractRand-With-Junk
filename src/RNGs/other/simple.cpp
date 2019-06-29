@@ -1173,9 +1173,12 @@ namespace PractRand {
 //                  // Sashimi32, passes 32TB with seed 0; one unusual anomaly at 4TB (Low4/16 BCFN)
 //					const uint32_t result = state1 + 0x9E3779BDu;
 //					return (result << 7) - rotate32(result, 4);
+//                  // Sushi32, passes 32TB with seed 0, no anomalies
+//					const uint32_t result = state1 + 0x9E3779B9u;
+//					return (result << 7) - rotate32(result, 3);
 
 
-					const uint32_t result = state1 + 0x9E3779B9u;
+					const uint32_t result = state1 + 0x41C64E6Du;// + 0x9E3779B9u;
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1186,8 +1189,10 @@ namespace PractRand {
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-					return (result << 7) - rotate32(result, 3);
-					//return (rotate32(result, 23));
+					//return result;
+					//return rotate32(state3, 23) + (state0 ^ 0x41C64E6Du) * 0x9E3779BBu;
+					//return (result << 7) - rotate32(result, 3);
+					return rotate32(result, 17) + 0x9E3779B9u;
 
 					//return result ^ result >> 11;
 					//return ((result << 11) - rotate32(result, 9));
@@ -1264,7 +1269,8 @@ namespace PractRand {
 					//return (a = rotate32(a * 0x89A7, 13)) ^ (b = rotate32(b * 0xBCFD, 17));
 					//public class Mover32 extends java.util.Random{public int a=1, b=1; public Mover32(){} public Mover32(int seed){for(int i=(seed&0xFFFF);i>0;i--)a=Integer.rotateLeft(a*0x89A7,13);for(int i=seed>>>16;i>0;i--)b=Integer.rotateLeft(b*0xBCFD,17);} protected int next(int bits){return((a=Integer.rotateLeft(a*0x89A7,13))^(b=Integer.rotateLeft(b*0xBCFD,17)))>>> -bits;}}
 
-					return (a = rotate32(a * 0x89A7, 13)) ^ (b = UINT32_C(0xC3E157C1) - rotate32(b, 19));
+					uint32_t r = ((a = rotate32(a + 0xAA78EDD7UL, 1)) ^ (b = rotate32(b + 0xC4DE9951UL, 25))) * 0x9E37BUL;
+					return r ^ r >> 11 ^ r >> 21;
 
 					// fails at 32GB, various 1/64 bit tests
 					//return (a = (a ^ 0x632BE5AD) * 0x9E373) ^ (b = rotate32(b * 0xBCFD, 17));
@@ -1276,15 +1282,16 @@ namespace PractRand {
 					a = 1;
 					for (; r; r--)
 					{
-						a *= UINT32_C(0x89A7);
-						a = rotate32(a, 13);
+						a += UINT32_C(0xAA78EDD7);
+						a = rotate32(a, 1);
 					}
 					walker->handle(b);
 					r = b & 0xFFFF;
 					b = 0;
 					for (; r; r--)
 					{
-						b = UINT32_C(0xC3E157C1) - rotate32(b, 19);
+						b += UINT32_C(0xC4DE9951);
+						b = rotate32(b, 25);
 						//b *= UINT32_C(0xBCFD);
 						//b = rotate32(b, 17);
 					}
