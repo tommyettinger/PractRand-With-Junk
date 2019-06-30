@@ -582,6 +582,13 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				class twinLinear : public vRNG64 {
+					Uint64 s0, s1;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 			}
 		}
 	}

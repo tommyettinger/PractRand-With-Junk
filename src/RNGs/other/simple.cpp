@@ -1168,7 +1168,17 @@ namespace PractRand {
 					//const uint32_t result = (rotate32(state1 * 31U, 23) + UINT32_C(0x9E3779BD));
 					// *3U;//(state0 << 8) + state0;// +UINT32_C(0x9E3779BD);
 					// StarPhi32, passes 32TB with seed 0x6dcb1257
-					const uint32_t result = state1 * UINT32_C(31);
+//					const uint32_t result = state1 * UINT32_C(31);
+//					return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
+//                  // Sashimi32, passes 32TB with seed 0; one unusual anomaly at 4TB (Low4/16 BCFN)
+//					const uint32_t result = state1 + 0x9E3779BDu;
+//					return (result << 7) - rotate32(result, 4);
+//                  // Sushi32, passes 32TB with seed 0, no anomalies
+//					const uint32_t result = state1 + 0x9E3779B9u;
+//					return (result << 7) - rotate32(result, 3);
+
+
+					const uint32_t result = state1 + 0x41C64E6Du;// + 0x9E3779B9u;
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1179,7 +1189,10 @@ namespace PractRand {
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-					return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
+					//return result;
+					//return rotate32(state3, 23) + (state0 ^ 0x41C64E6Du) * 0x9E3779BBu;
+					//return (result << 7) - rotate32(result, 3);
+					return rotate32(result, 17) + 0x9E3779B9u;
 
 					//return result ^ result >> 11;
 					//return ((result << 11) - rotate32(result, 9));
@@ -1256,7 +1269,8 @@ namespace PractRand {
 					//return (a = rotate32(a * 0x89A7, 13)) ^ (b = rotate32(b * 0xBCFD, 17));
 					//public class Mover32 extends java.util.Random{public int a=1, b=1; public Mover32(){} public Mover32(int seed){for(int i=(seed&0xFFFF);i>0;i--)a=Integer.rotateLeft(a*0x89A7,13);for(int i=seed>>>16;i>0;i--)b=Integer.rotateLeft(b*0xBCFD,17);} protected int next(int bits){return((a=Integer.rotateLeft(a*0x89A7,13))^(b=Integer.rotateLeft(b*0xBCFD,17)))>>> -bits;}}
 
-					return (a = rotate32(a * 0x89A7, 13)) ^ (b = UINT32_C(0xC3E157C1) - rotate32(b, 19));
+					uint32_t r = ((a = rotate32(a + 0xAA78EDD7UL, 1)) ^ (b = rotate32(b + 0xC4DE9951UL, 25))) * 0x9E37BUL;
+					return r ^ r >> 11 ^ r >> 21;
 
 					// fails at 32GB, various 1/64 bit tests
 					//return (a = (a ^ 0x632BE5AD) * 0x9E373) ^ (b = rotate32(b * 0xBCFD, 17));
@@ -1268,15 +1282,16 @@ namespace PractRand {
 					a = 1;
 					for (; r; r--)
 					{
-						a *= UINT32_C(0x89A7);
-						a = rotate32(a, 13);
+						a += UINT32_C(0xAA78EDD7);
+						a = rotate32(a, 1);
 					}
 					walker->handle(b);
 					r = b & 0xFFFF;
 					b = 0;
 					for (; r; r--)
 					{
-						b = UINT32_C(0xC3E157C1) - rotate32(b, 19);
+						b += UINT32_C(0xC4DE9951);
+						b = rotate32(b, 25);
 						//b *= UINT32_C(0xBCFD);
 						//b = rotate32(b, 17);
 					}
@@ -1342,10 +1357,12 @@ namespace PractRand {
 					//// shares a factor with the longer period of (a = rotate32(a, 7) + 0xC0EF50EBu). should try (c = rotate32(c, 30) + 0x9E3779B9u)
 					//return (b = rotate32(b, 11) ^ (a = rotate32(a, 7) + 0xC0EF50EBu) ^ (d += (c = rotate32(c, 25) + 0xA5F152BFu)));
 
-					//// passes to at least 16TB with no anomalies, but the period will be smaller due to the aforementioned shared factor.
+					//// passes to 32TB with no anomalies, but the period will be smaller due to the aforementioned shared factor.
 					//return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC0EF50EBu) + (c = rotate32(c, 25) + 0xA5F152BFu));
-					//// haven't tried this next one yet.
-					return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC4DE9951u) + (c = rotate32(c, 1) + 0xAA78EDD7u));
+					//// passes 32TB, I'm pretty sure? Speed isn't very good, probably doesn't warrant more checks.
+					//return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC4DE9951u) + (c = rotate32(c, 1) + 0xAA78EDD7u));
+
+					return (a = rotate32(a, 23) * 0x402AB) ^ (b = rotate32(b, 28) * 0x01621) ^ (c = rotate32(c, 24) * 0x808E9) ^ (d = rotate32(d, 29) * 0x8012D);
 
 					//return (a = rotate32(a, 13)) + (b = rotate32(b, 17)) ^ (c = rotate32(c, 7));
 
