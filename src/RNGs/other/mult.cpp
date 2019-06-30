@@ -1646,9 +1646,11 @@ return z ^ z >> 28u;
 					s = reverse_bits64(s); // this line was commented in and out for different test types
 					s = rotate64(s, R);
 					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
-					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0xAEF17502108EF2D9UL;
-					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
-					return s ^ s >> 28;
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x9E3779B97F4A7C15UL;
+					s = (s ^ s >> 28) * 0xAEF17502108EF2D9UL;
+					return s ^ s >> 26;
+//					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
+//					return s ^ s >> 28;
 
 
 					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
@@ -2037,18 +2039,30 @@ return z ^ z >> 27;
 					walker->handle(state);
 				}
 				Uint32 mulberry32::raw32() {
-					uint32_t z = (j += 0x6D2B79F5UL) ^ 0x9E3779B5;
-					z = (z ^ z >> 11) * 0xFFF + 0x9E3779B5;
-					z = (z ^ z >> 13) * 0x1FF - 0x9E3779B5;
-					z = (z ^ z >> 12) * 0x3FF + 0x9E3779B5;
-					z = (z ^ z >> 14) * 0x7FF - 0x9E3779B5;
-					return z ^ z >> 15;
+					//uint32_t z = (j += 0x6D2B79F5UL) ^ 0x9E3779B5;
+					//z = (z ^ z >> 11) * 0xFFF + 0x9E3779B5;
+					//z = (z ^ z >> 13) * 0x1FF - 0x9E3779B5;
+					//z = (z ^ z >> 12) * 0x3FF + 0x9E3779B5;
+					//z = (z ^ z >> 14) * 0x7FF - 0x9E3779B5;
+					//return z ^ z >> 15;
+					//uint32_t z = (j += 0x9E3779B9);
+					//        z = (z ^ z >> 13) * 0x7FFFF;
+					//        z = (z ^ z >> 12) * 0x1FFFF;
+					//        z = (z ^ z >> 14) * 0x1FFF;
+					//return z ^ z >> 12;
 
-					//Uint32 z = (j += 0x6D2B79F5UL);
-					//z = (z ^ (z >> 15)) * (z | 61UL);
+					uint32_t z = (j += 0xB79F5u);
+					z = (z ^ (z >> 15)) * (z | 0xFFF0003D);
+					z ^= z >> 8;
+					z = ((z ^ (z >> 7)) * (j >> 12 | 1u));
+					return z ^ (z >> 14);
+
+					//uint32_t z = (j += 0x6D2B79F5u);
+					//z = (z ^ (z >> 15)) * (z | 61u);
 					//z ^= z >> 8;
-					//z += ((z ^ (z >> 7)) * (j | 0xA529UL));
+					//z += ((z ^ (z >> 7)) * (j | 0xA529u));
 					//return z ^ (z >> 14);
+
 				}
 				std::string mulberry32::get_name() const { return "mulberry32"; }
 				void mulberry32::walk_state(StateWalkingObject *walker) {
