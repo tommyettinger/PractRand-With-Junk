@@ -1270,13 +1270,44 @@ namespace PractRand {
 					
 					//uint64_t z = ((state += 0x632BE59BD9B4E019UL) ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL;
 
-					//// MizuchiRNG retry, passes 32TB when PractRand seed is 0xafec9d14 (3 "unusual" anomalies)
-					uint64_t z = (state = state * 0x369DEA0F31A53F85ULL + stream);
-					z = (z ^ z >> 23u ^ z >> 47u) * 0xAEF17502108EF2D9UL;
-					return (z ^ z >> 25u);
+					//// MizuchiRNG retry, passes 32TB (when PractRand seed is 0xafec9d14, 3 "unusual" anomalies)
+					//// (when PractRand seed is 0x339d439a and stream is fixed at 1, no anomalies)
+					//uint64_t z = (state = state * 0x369DEA0F31A53F85ULL + stream);
+					//z = (z ^ z >> 23u ^ z >> 47u) * 0xAEF17502108EF2D9UL;
+					//return (z ^ z >> 25u);
+
+					//uint64_t z = (state += 0xEB44ACCAB455D165ULL);
+					//z = (z ^ z >> 23 ^ z >> 47) * (z ^ z * 0x369DEA0F31A53F85ULL + stream);
+					//return (z ^ z >> 25);
+					
+					
 					//uint64_t z = (state = state * UINT64_C(0x41C64E6D) + UINT64_C(1));
 					//z = (z ^ z >> 27u) * UINT64_C(0xAEF17502108EF2D9);
 					//return z ^ z >> 25u;
+
+					//// passes 32TB with no anomalies; slower than SplitMix64 on recent Intel
+					//uint64_t z = (state += 0xEB44ACCAB455D165ULL);
+					//z = (z ^ z >> 29 ^ z >> 43 ^ z << 7 ^ z << 53) * 0xDB4F0B9175AE2165ULL;
+					//return z ^ z >> 26;
+
+					//// passes 32TB, one unusual anomaly at 16TB
+					//uint64_t z = (state += 0xEB44ACCAB455D165ULL);
+					//z = (z ^ z >> 29 ^ z >> 43 ^ z << 7 ^ z << 53) * 0xDB4F0B9175AE2165ULL;
+					//return z ^ z >> 23 ^ z >> 41;
+
+					uint64_t z = state++ ^ 0xEB44ACCAB455D165ULL;
+					z = (z ^ z >> 29 ^ z >> 43 ^ z << 7 ^ z << 53) * 0xDB4F0B9175AE2165ULL;
+					return z ^ z >> 26;
+
+
+					//return z ^ z >> 19 ^ z >> 53 ^ z << 24;
+					//z = (z ^ z >> 23u ^ z >> 47u) * 0xDB4F0B9175AE2165ULL;//0xD1B54A32D192ED03ULL;
+					//return (z ^ z >> 26);
+
+//					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
+//					z = (z ^ z >> 43 ^ z >> 31 ^ z >> 23) * 0xDB4F0B9175AE2165UL;
+//					return s ^ s >> 28;
+
 
 					//0x369DEA0F31A53F85ULL
 				}
@@ -1658,13 +1689,29 @@ return z ^ z >> 28u;
 //					return s ^ s >> 28;
 
 
-					uint64_t s = state++;
-					s = reverse_bits64(s); // this line was commented in and out for different test types
-					s = rotate64(s, R);
-					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
-					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x9E3779B97F4A7C15UL;
-					s = (s ^ s >> 28) * 0xAEF17502108EF2D9UL;
-					return s ^ s >> 26;
+					////PulleyRNG
+					////WORKS, 32 TB no anomalies!
+					//uint64_t s = state++;
+					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
+					//s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
+					//return s ^ s >> 28;
+
+//0x2127599BF4325C37ULL;//0x9E3779B97F4A7C15ULL;//0xEB44ACCAB455D165ULL;
+
+					//s = reverse_bits64(s); // this line was commented in and out for different test types
+					//s = rotate64(s, R);
+					//s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+
+					//test correlation between gamma 3 and gamma 5
+					uint64_t s = state * 5, t = state++ * 3;
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
+					s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
+					t = (t ^ rotate64(t, 41) ^ rotate64(t, 17)) * 0x369DEA0F31A53F85ULL;
+					t = (t ^ t >> 25 ^ t >> 37) * 0xDB4F0B9175AE2165UL;
+					return s ^ s >> 28 ^ t ^ t >> 28;
+
+					//return s ^ s >> 43 ^ s >> 21;
+
 //					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
 //					return s ^ s >> 28;
 
