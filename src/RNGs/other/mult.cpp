@@ -1696,19 +1696,32 @@ return z ^ z >> 28u;
 					//s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
 					//return s ^ s >> 28;
 
+
+					// 0xBE21F44C6018E14DULL * 0x369DEA0F31A53F85ULL == 1ULL
+
+					////ToppingRNG, passes 32TB with no anomalies.
+					////Literally just a different start to SplitMix64 that allows it to pass tests with gamma=1.
+					uint64_t s = state++;
+					s = (s ^ rotate64(s, 23) ^ rotate64(s, 47)) * 0xEB44ACCAB455D165ULL;
+					s = (s ^ s >> 30) * 0xBF58476D1CE4E5B9ULL;
+					s = (s ^ s >> 27) * 0x94D049BB133111EBULL;
+					return (s ^ s >> 31);
+
 //0x2127599BF4325C37ULL;//0x9E3779B97F4A7C15ULL;//0xEB44ACCAB455D165ULL;
+//(s ^ s >> 29 ^ s >> 43 ^ s << 7 ^ s << 53)
+//					s = (s ^ s << 23 ^ s << 47 ^ s >> 26) * 0x369DEA0F31A53F85ULL;
 
 					//s = reverse_bits64(s); // this line was commented in and out for different test types
 					//s = rotate64(s, R);
 					//s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
 
-					//test correlation between gamma 3 and gamma 5
-					uint64_t s = state * 5, t = state++ * 3;
-					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
-					s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
-					t = (t ^ rotate64(t, 41) ^ rotate64(t, 17)) * 0x369DEA0F31A53F85ULL;
-					t = (t ^ t >> 25 ^ t >> 37) * 0xDB4F0B9175AE2165UL;
-					return s ^ s >> 28 ^ t ^ t >> 28;
+					//test correlation between gamma 3 and gamma (multiplicative inverse of 3, mod 2 to the 64)
+					//uint64_t s = state * 0xAAAAAAAAAAAAAAABULL, t = state++ * 3ULL;
+					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
+					//s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
+					//t = (t ^ rotate64(t, 41) ^ rotate64(t, 17)) * 0x369DEA0F31A53F85ULL;
+					//t = (t ^ t >> 25 ^ t >> 37) * 0xDB4F0B9175AE2165UL;
+					//return s ^ s >> 28 ^ t ^ t >> 28;
 
 					//return s ^ s >> 43 ^ s >> 21;
 
