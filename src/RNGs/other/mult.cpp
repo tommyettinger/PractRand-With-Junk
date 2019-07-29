@@ -1701,19 +1701,40 @@ return z ^ z >> 28u;
 
 					////ToppingRNG, passes 32TB with no anomalies.
 					////Literally just a different start to SplitMix64 that allows it to pass tests with gamma=1.
-					uint64_t s = state++;
-					s = (s ^ rotate64(s, 23) ^ rotate64(s, 47)) * 0xEB44ACCAB455D165ULL;
-					s = (s ^ s >> 30) * 0xBF58476D1CE4E5B9ULL;
-					s = (s ^ s >> 27) * 0x94D049BB133111EBULL;
-					return (s ^ s >> 31);
+					//uint64_t s = state++;
+					//s = (s ^ rotate64(s, 23) ^ rotate64(s, 47)) * 0xEB44ACCAB455D165ULL;
+					//s = (s ^ s >> 30) * 0xBF58476D1CE4E5B9ULL;
+					//s = (s ^ s >> 27) * 0x94D049BB133111EBULL;
+					//return (s ^ s >> 31);
 
 //0x2127599BF4325C37ULL;//0x9E3779B97F4A7C15ULL;//0xEB44ACCAB455D165ULL;
 //(s ^ s >> 29 ^ s >> 43 ^ s << 7 ^ s << 53)
 //					s = (s ^ s << 23 ^ s << 47 ^ s >> 26) * 0x369DEA0F31A53F85ULL;
 
+					uint64_t s = state++;
+
 					//s = reverse_bits64(s); // this line was commented in and out for different test types
-					//s = rotate64(s, R);
-					//s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+					s = rotate64(s, R);
+					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+					
+					s = (s ^ rotate64(s, 23) ^ rotate64(s, 47)) * 0xEB44ACCAB455D165ULL;
+					s = (s ^ rotate64(s, 25) ^ rotate64(s, 50)) * 0xEB44ACCAB455D165ULL;
+					return (s ^ s >> 26);
+
+//					s = (s ^ rotate64(s, 23) ^ rotate64(s, 51)) * 0xDB4F0B9175AE2165UL;
+//					s = (s ^ s >> 28) * 0xEB44ACCAB455D165ULL;
+//					return (s ^ s >> 26);
+					//s = (s ^ s >> 23 ^ s << 42);// * 0xEB44ACCAB455D165ULL;
+//					s = (s ^ rotate64(s, 23) ^ rotate64(s, 47));
+//					s = (s ^ s >> 30) * 0xBF58476D1CE4E5B9ULL;
+//					s = (s ^ s >> 27) * 0x94D049BB133111EBULL;
+//					return (s ^ s >> 26);
+
+//					s = (s ^ rotate64(s, 23) ^ rotate64(s, 47)) * 0xEB44ACCAB455D165ULL;
+//					s = (s ^ s >> 30) * 0xBF58476D1CE4E5B9ULL;
+//					s = (s ^ s >> 27) * 0x94D049BB133111EBULL;
+//					return (s ^ s >> 31);
+
 
 					//test correlation between gamma 3 and gamma (multiplicative inverse of 3, mod 2 to the 64)
 					//uint64_t s = state * 0xAAAAAAAAAAAAAAABULL, t = state++ * 3ULL;
@@ -1728,7 +1749,34 @@ return z ^ z >> 28u;
 //					s = (s ^ s >> 43 ^ s >> 31 ^ s >> 23) * 0xDB4F0B9175AE2165UL;
 //					return s ^ s >> 28;
 
+    //// score = 1.8856880829987859
+    //x ^= x >> 31;
+    //x *= UINT64_C(0x1efc5d7c770fc6e9);
+    //x ^= x >> 28;
+    //x *= UINT64_C(0xda03b996b1182b23);
+    //x ^= x >> 30;
 
+    //// score = 1.8849632548546522
+    //x ^= x >> 32;
+    //x  = ~x * UINT64_C(0xFD3865EC82F016D1);
+    //x ^= x >> 28;
+    //x *= UINT64_C(0x4E82519D4F727C6D);
+    //x ^= x >> 30;
+	
+	//// score = 1.868895541670708
+	//x ^= x >> 33;
+    //x  = ~x;
+    //x *= UINT64_C(0x906c1c3e34da24ed);
+    //x ^= x >> 28;
+    //x *= UINT64_C(0x91fcf1c613ff4f85);
+    //x ^= x >> 30;
+    //return x;
+	/* // java
+	long x = (state += 0x9E3779B97F4A7C15L);
+	x = (x ^ x >>> 33 ^ -1L) * 0x906C1C3E34DA24EDL;
+	x = (x ^ x >>> 28) * 0x91FCF1C613FF4F85L;
+	return x ^ x >>> 30;
+	*/
 					//s = (s ^ (s << 39 | s >> 25) ^ (s << 14 | s >> 50) ^ 0xD1B54A32D192ED03UL) * 0xAEF17502108EF2D9UL;
 					//s = (s ^ (s << 40 | s >> 24) ^ (s << 15 | s >> 49)) * 0xDB4F0B9175AE2165UL;
 					//return s ^ s >> 28;
