@@ -1717,9 +1717,13 @@ return z ^ z >> 28u;
 					s = rotate64(s, R);
 					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
 					
-					s = (s ^ rotate64(s, 23) ^ rotate64(s, 47)) * 0xEB44ACCAB455D165ULL;
-					s = (s ^ rotate64(s, 25) ^ rotate64(s, 50)) * 0xEB44ACCAB455D165ULL;
-					return (s ^ s >> 26);
+					//s = (s ^ rotate64(s, 23) ^ rotate64(s, 47)) * 0xE7037ED1A0B428DBULL;
+					//s = (s ^ rotate64(s, 39) ^ rotate64(s, 14)) * 0xEB44ACCAB455D165ULL;//0xA0761D6478BD642FULL;
+					//s = (s ^ s >> 25 ^ s >> 37) * 0xA0761D6478BD642FULL;
+					//return s ^ s >> 28;
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
+					s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
+					return s ^ s >> 28;
 
 //					s = (s ^ rotate64(s, 23) ^ rotate64(s, 51)) * 0xDB4F0B9175AE2165UL;
 //					s = (s ^ s >> 28) * 0xEB44ACCAB455D165ULL;
@@ -1994,10 +1998,10 @@ return z ^ z >> 28u;
 //const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15ULL) | 1ULL);
 //return z ^ z >> 25;
 
-const uint64_t s = (stateA += 0xC6BC279692B5C323ULL);
-const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15ULL) | 1ULL);
-if (s == 0ULL) stateB -= 0x9E3779B97F4A7C15ULL;
-return z ^ z >> 27;
+//const uint64_t s = (stateA += 0xC6BC279692B5C323ULL);
+//const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15ULL) | 1ULL);
+//if (s == 0ULL) stateB -= 0x9E3779B97F4A7C15ULL;
+//return z ^ z >> 27;
 					// where we left off
 					//stateA *= UINT64_C(0x41C64E6B);
 					//stateA = rotate64(stateA, 28);
@@ -2063,6 +2067,13 @@ return z ^ z >> 27;
 					//					uint64_t z = ((stateA += UINT64_C(0x632BE59BD9B4E019)) ^ UINT64_C(0x9E3779B97F4A7C15)) * UINT64_C(0xC6BC279692B5CC83);
 					//					z = ((z ^ z >> 27) + _pext_u64(z + 0x9E3779B97F4A7C15, rotate64(z, 41))) * UINT64_C(0xAEF17502108EF2D9);
 					//					return z ^ z >> 25;
+
+
+					uint64_t s = (stateA += (stateB = (stateB >> 1 ^ (-(stateB & 1ULL) & 0xD800000000000000ULL))) + 0x9E3779B97F4A7C15ULL);
+					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
+					//s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
+					return s ^ s >> 28;
+
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
@@ -2070,7 +2081,7 @@ return z ^ z >> 27;
 					walker->handle(stateB);
 					//stateB |= 1ULL;
 					//stateB = (stateB & UINT64_C(0x7FFFFFFF)) + (stateB >> 31);
-					//if (stateB == 0) stateB = 1;
+					if (stateB == 0) stateB = 1;
 					printf("stateA is 0x%016X, stateB is 0x%016X\r\n", stateA, stateB);
 				}
 
@@ -2153,10 +2164,12 @@ return z ^ z >> 27;
 				void splitmix64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 				}
+				//0x6C8E9CF570932BD5
 				Uint64 thrustAlt64::raw64() {
-					Uint64 z = (state += UINT64_C(0x6C8E9CF570932BD5));
+					Uint64 z = (state += UINT64_C(0x9E3779B97F4A7C15));
+					//z = (z ^ z >> 25) * z - (z ^ z >> 30) * (z + 0xEB44ACCAB455D165ULL);
 					z = (z ^ z >> 25) * (z | 0xA529L);
-					return z ^ z >> 22;
+					return z ^ (z >> 23);
 				}
 				std::string thrustAlt64::get_name() const { return "thrustAlt64"; }
 				void thrustAlt64::walk_state(StateWalkingObject *walker) {
