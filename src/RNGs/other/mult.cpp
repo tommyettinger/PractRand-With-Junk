@@ -2069,10 +2069,19 @@ return z ^ z >> 28u;
 					//					return z ^ z >> 25;
 
 
+					//// TroutRNG, passes 32TB with no anomalies, period of (2 to the 128) minus (2 to the 64)
+					//uint64_t s = (stateA += (stateB = (stateB >> 1 ^ (-(stateB & 1ULL) & 0xD800000000000000ULL))) + 0x9E3779B97F4A7C15ULL);
+					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
+					//return s ^ s >> 28;
+
+					//// BellRNG, passes at least 1TB with no anomalies, tests still running. Same period as Trout.
 					uint64_t s = (stateA += (stateB = (stateB >> 1 ^ (-(stateB & 1ULL) & 0xD800000000000000ULL))) + 0x9E3779B97F4A7C15ULL);
-					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
-					//s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
+					s = (s ^ s >> 30) * 0x369DEA0F31A53F85ULL;
 					return s ^ s >> 28;
+
+					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
+					
+					//s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
 
 				}
 				std::string mingler::get_name() const { return "mingler"; }
