@@ -2074,10 +2074,19 @@ return z ^ z >> 28u;
 					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
 					//return s ^ s >> 28;
 
-					//// BellRNG, passes at least 1TB with no anomalies, tests still running. Same period as Trout.
-					uint64_t s = (stateA += (stateB = (stateB >> 1 ^ (-(stateB & 1ULL) & 0xD800000000000000ULL))) + 0x9E3779B97F4A7C15ULL);
-					s = (s ^ s >> 30) * 0x369DEA0F31A53F85ULL;
-					return s ^ s >> 28;
+					//// BellRNG, passes 32TB with one "unusual" anomaly. Same period as Trout.
+					//uint64_t s = (stateA += (stateB = (stateB >> 1 ^ (-(stateB & 1ULL) & 0xD800000000000000ULL))) + 0x9E3779B97F4A7C15ULL);
+					//s = (s ^ s >> 30) * 0x369DEA0F31A53F85ULL;
+					//return s ^ s >> 28;
+
+					//// OrbitRNG from Sarong.
+					//// Passes 32TB with no anomalies on two seeds, 3 "unusual" on another, one "mildly suspicious" on another.
+					//// Tested heavily due to similarity with ThrustAltRNG; no TMFn issues here, or any others.
+					//// Should have a period of exactly 2 to the 128, and allow all states; one-dimensionally equidistributed.
+					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+					const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15UL) | 1UL);
+					if (!s) stateB -= 0x9E3779B97F4A7C15UL;
+					return z ^ z >> 27;
 
 					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
 					
@@ -2090,7 +2099,9 @@ return z ^ z >> 28u;
 					walker->handle(stateB);
 					//stateB |= 1ULL;
 					//stateB = (stateB & UINT64_C(0x7FFFFFFF)) + (stateB >> 31);
-					if (stateB == 0) stateB = 1;
+					//if (stateB == 0) stateB = 1;
+					//stateA = 0;
+					//stateB = 0;
 					printf("stateA is 0x%016X, stateB is 0x%016X\r\n", stateA, stateB);
 				}
 
@@ -2173,9 +2184,12 @@ return z ^ z >> 28u;
 				void splitmix64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 				}
-				//0x6C8E9CF570932BD5
+				
+				//// Be careful, has late-occuring TMFn issues that can sometimes result in failures.
+				//// Not equidistributed at all; cannot produce some outputs and produces others more often.
+				//// Period is 2 to the 64; all states are allowed.
 				Uint64 thrustAlt64::raw64() {
-					Uint64 z = (state += UINT64_C(0x9E3779B97F4A7C15));
+					Uint64 z = (state += UINT64_C(0x6C8E9CF570932BD5));
 					//z = (z ^ z >> 25) * z - (z ^ z >> 30) * (z + 0xEB44ACCAB455D165ULL);
 					z = (z ^ z >> 25) * (z | 0xA529L);
 					return z ^ (z >> 23);
