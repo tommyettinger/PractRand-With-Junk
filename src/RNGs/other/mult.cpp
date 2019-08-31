@@ -2106,18 +2106,37 @@ return z ^ z >> 28u;
 				}
 
 				Uint32 ta32::raw32() {
-					const Uint32 INCR = 0x6C8E9CF5, ADJ = 0x1;
-					enum { SHIFT_A = 13, SHIFT_B = 11 };
-					stateB ^= stateB >> 6;
-					stateA += INCR;
-					Uint64 z = (stateA ^ stateA >> SHIFT_A) * ((stateB ^= stateB << 1) | ADJ);
-					return (z ^ (z >> SHIFT_B)) + (stateB ^= stateB >> 11);
+//					const Uint32 INCR = 0x6C8E9CF5, ADJ = 0x1;
+//					enum { SHIFT_A = 13, SHIFT_B = 11 };
+//					stateB ^= stateB >> 6;
+//					stateA += INCR;
+//					Uint64 z = (stateA ^ stateA >> SHIFT_A) * ((stateB ^= stateB << 1) | ADJ);
+//					return (z ^ (z >> SHIFT_B)) + (stateB ^= stateB >> 11);
+
+//					const uint32_t s = (stateA += 0xC1C64E6DU);
+//				    uint32_t x = (s ^ s >> 16) * ((stateB += 0x9E3779BBU) | 1U);
+//					if (!s) stateB -= 0x9E3779BBU;
+//				    x = (x ^ x >> 15) * 0x846CA68BU;
+//				    return x ^ x >> 16;
+
+                    const uint32_t s = (stateA += 0xC1C64E6DU);
+				    uint32_t x = (s ^ s >> 17) * ((stateB += 0xed5ad4bbU) | 1U);
+					if (!s) stateB -= 0xed5ad4bbU;
+					x ^= x >> 16;
+					x *= UINT32_C(0x7feb352d);
+					x ^= x >> 15;
+//					x ^= x >> 11;
+//					x *= UINT32_C(0xac4c1b51);
+//					x ^= x >> 15;
+//					x *= UINT32_C(0x31848bab);
+//					x ^= x >> 14;
+					return x;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
-					stateB |= (stateB == 0);
+					//stateB |= (stateB == 0);
 					printf("Seed is 0x%08X, 0x%08X\r\n", stateA, stateB);
 				}
 
