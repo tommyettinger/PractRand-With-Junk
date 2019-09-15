@@ -2083,21 +2083,36 @@ return z ^ z >> 28u;
 					//// Passes 32TB with no anomalies on two seeds, 3 "unusual" on another, one "mildly suspicious" on another.
 					//// Tested heavily due to similarity with ThrustAltRNG; no TMFn issues here, or any others.
 					//// Should have a period of exactly 2 to the 128, and allow all states; one-dimensionally equidistributed.
-					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
-					const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15UL) | 1UL);
-					if (!s) stateB -= 0x9E3779B97F4A7C15UL;
-					return z ^ z >> 27;
+					//const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+					//const uint64_t z = (s ^ s >> 27) * ((stateB += 0x9E3779B97F4A7C15UL) | 1UL);
+					//if (!s) stateB -= 0x9E3779B97F4A7C15UL;
+					//return z ^ z >> 27;
 
 					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
 					
 					//s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
+
+					//fails TMFn at 2TB
+					//const uint64_t s = (stateA += 0x6C8E9CF570932BD5UL);
+        			//const uint64_t z = (s ^ s >> 25) * (stateB += 0x9E3779B97F4A7C16UL);
+					//return z ^ z >> 22;
+
+					//this one got "very suspicious" at 32TB; switching to shifts of 29 and 27 helps a little
+					//const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+        			//const uint64_t z = (s ^ s >> 27) * (stateB += 0x9E3779B97F4A7C16UL);
+					//return z ^ z >> 27;
+
+					////works; passes 32TB with one minor anomaly at 16GB: Low8/64]DC6-9x1Bytes-1 , unusual
+					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x9E3779B97F4A7C16UL);
+					return z ^ z >> 26;
 
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
-					//stateB |= 1ULL;
+					stateB |= 1ULL;
 					//stateB = (stateB & UINT64_C(0x7FFFFFFF)) + (stateB >> 31);
 					//if (stateB == 0) stateB = 1;
 					//stateA = 0;
@@ -2119,18 +2134,36 @@ return z ^ z >> 28u;
 //				    x = (x ^ x >> 15) * 0x846CA68BU;
 //				    return x ^ x >> 16;
 
-                    const uint32_t s = (stateA += 0xC1C64E6DU);
-				    uint32_t x = (s ^ s >> 17) * ((stateB += 0xed5ad4bbU) | 1U);
-					if (!s) stateB -= 0xed5ad4bbU;
-					x ^= x >> 16;
-					x *= UINT32_C(0x7feb352d);
+                    ////YOWZA, passes 32TB with no anomalies.
+					////Variants came close to failing at 32TB; this doesn't have issues.
+					//const uint32_t s = (stateA += 0xC1C64E6DU);
+				    //uint32_t x = (s ^ s >> 17) * ((stateB += 0x9E3779BBU) | 1U);
+					//if (!s) stateB -= 0x9E3779BBU;
+					//x ^= x >> 16;
+					//x *= UINT32_C(0xAC4C1B51);
+					//x ^= x >> 15;
+					//return x;
+
+
+					const uint32_t s = (stateA += 0xC1C64E6DU);
+					const uint32_t t = (stateB += 0x9E3779BBU);
+					uint32_t x = (s ^ s >> 16) * (t | 1U);
+				    if (!s) stateB -= 0x9E3779BBU;
+					//x *= 0x7feb352dU;
 					x ^= x >> 15;
-//					x ^= x >> 11;
-//					x *= UINT32_C(0xac4c1b51);
+					x *= 0x846ca68bU;
+				    //uint32_t x = (s ^ s >> 17) * (t | 1U);
+					////if (s >= 0xAC4C1B51U) stateB++;
+					////x ^= x >> 16;
+					////x *= 0xAC4C1B51U;
+					return x ^ x >> 16;
+					//return x ^ x >> 16 ^ x >> 11 ^ x >> 21;
+
+//					x *= UINT32_C(0x7feb352d);
 //					x ^= x >> 15;
+//					x ^= x >> 11;
 //					x *= UINT32_C(0x31848bab);
 //					x ^= x >> 14;
-					return x;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
