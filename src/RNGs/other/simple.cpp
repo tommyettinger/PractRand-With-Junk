@@ -1426,6 +1426,59 @@ namespace PractRand {
 					////}
 				}
 
+				
+				// Cloud values (shift constants).
+				uint8_t clouds[8] = {3, 6, 1, 5, 3, 7, 3, 5};
+				// Tested values, all good.
+				//{1, 2, 6, 5, 4, 1, 6, 1};
+				//{1, 2, 3, 4, 5, 1, 2, 3};
+				//{1, 1, 1, 1, 1, 1, 1, 1};
+				//{3, 1, 3, 1, 3, 1, 3, 1};
+				//{3, 7, 5, 1, 4, 3, 5, 1};
+				//{7, 3, 6, 1, 3, 1, 3, 1};
+				//{1, 3, 5, 2, 1, 5, 7, 3};
+				//{3, 6, 1, 5, 3, 7, 3, 5};
+				uint8_t masks[8] = {
+				    0, 1, 3, 7, 15, 31, 63, 127
+				};
+				uint32_t cloud::raw32()
+				{
+					int line = 0;
+				    int nbytes = 0;
+				    uint8_t bytes[4] = {0, 0, 0, 0};
+				    while (nbytes < 4) {
+				        if (line == 7) {
+				            bytes[nbytes] = result();
+				            nbytes++;
+						}
+					    board[line] ^= board[((line + 1) & 7)];
+					    board[((line + 7) & 7)] ^= (board[line] & masks[clouds[line]]) << (8 - clouds[line]);
+				   		board[line] >>= clouds[line];
+
+				        line = ((line + 1) & 7);
+				    }
+				    return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | (bytes[3]);
+				}
+
+				uint8_t cloud::result()
+				{
+				    uint8_t total = 0;
+				    for (int x = 0; x < 8; ++x) {
+				        total |= ((board[x] & 1U) << x);
+				    }
+				    return total;
+				}
+				std::string cloud::get_name() const { return "cloud"; }
+				void cloud::walk_state(StateWalkingObject *walker) {
+					walker->handle(board[0]);
+					walker->handle(board[1]);
+					walker->handle(board[2]);
+					walker->handle(board[3]);
+					walker->handle(board[4]);
+					walker->handle(board[5]);
+					walker->handle(board[6]);
+					walker->handle(board[7]);
+				}
 			}
 		}
 	}

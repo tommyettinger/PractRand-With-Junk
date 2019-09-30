@@ -531,6 +531,15 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 				};
 
+				class cloud : public vRNG32 {
+					uint8_t board[8];
+				public:
+					Uint32 raw32();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				private:
+					uint8_t result();
+				};
 			}
 		}
 	}

@@ -2103,9 +2103,14 @@ return z ^ z >> 28u;
 					//return z ^ z >> 27;
 
 					////works; passes 32TB with one minor anomaly at 16GB: Low8/64]DC6-9x1Bytes-1 , unusual
-					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
-        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x9E3779B97F4A7C16UL);
+					//const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+        			//const uint64_t z = (s ^ s >> 31) * (stateB += 0x9E3779B97F4A7C16UL);
+					//return z ^ z >> 26;
+
+					const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
+        			const uint64_t z = (s ^ s >> 31 ^ s >> 7) * 0xE7037ED1A0B428DBULL;
 					return z ^ z >> 26;
+					// mul:C6BC279692B5C323,xorr:31,xorr:17,mul,xorr:26
 
 				}
 				std::string mingler::get_name() const { return "mingler"; }
