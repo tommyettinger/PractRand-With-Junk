@@ -2108,8 +2108,8 @@ return z ^ z >> 28u;
 					//return z ^ z >> 26;
 
 					const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
-        			const uint64_t z = (s ^ s >> 31 ^ s >> 7) * 0xE7037ED1A0B428DBULL;
-					return z ^ z >> 26;
+        			const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
+					return z ^ z >> 27;
 					// mul:C6BC279692B5C323,xorr:31,xorr:17,mul,xorr:26
 
 				}
@@ -2149,19 +2149,22 @@ return z ^ z >> 28u;
 					//x ^= x >> 15;
 					//return x;
 
-
+					////GWT-optimized SilkRNG; so far has passed 4TB with no anomalies.
 					const uint32_t s = (stateA += 0xC1C64E6DU);
-					const uint32_t t = (stateB += 0x9E3779BBU);
-					uint32_t x = (s ^ s >> 16) * (t | 1U);
-				    if (!s) stateB -= 0x9E3779BBU;
+				    if (s) stateB += 0x9E3779BBU;
+					uint32_t x = (s ^ s >> 17) * (stateB >> 12 | 1U);
+					x ^= x >> 16;
+					x *= 0xAC451U;
+					return x ^ x >> 15;
+
+
+					//uint32_t x = (s ^ s >> 17) * (stateB | 0xFFF00001U);
+
 					//x *= 0x7feb352dU;
-					x ^= x >> 15;
-					x *= 0x846ca68bU;
+					//x ^= x >> 15;
+					//x *= 0x846ca68bU;
 				    //uint32_t x = (s ^ s >> 17) * (t | 1U);
 					////if (s >= 0xAC4C1B51U) stateB++;
-					////x ^= x >> 16;
-					////x *= 0xAC4C1B51U;
-					return x ^ x >> 16;
 					//return x ^ x >> 16 ^ x >> 11 ^ x >> 21;
 
 //					x *= UINT32_C(0x7feb352d);
