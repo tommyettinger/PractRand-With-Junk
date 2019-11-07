@@ -1874,16 +1874,90 @@ return z ^ z >> 28u;
 					//z = (z ^ z >> 11 ^ z >> 21) * (z | UINT32_C(0xFFE00001));
 					//return z ^ z >> 13 ^ z >> 19;
 
-					uint32_t s = stateA++;
-					s = reverse_bits32(s); // this line was commented in and out for different test types
-					s = rotate32(s, R);
-					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
-					s = (s ^ rotate32(s, 21) ^ rotate32(s, 11) ^ 0xD1B54A35U) * 0x1D2473U;
-					s = (s ^ s >> ((s >> 28) + 4) ^ 0x75AE2165U) * 0x190413U;
-					s = (s ^ rotate32(s, 19) ^ rotate32(s, 13) ^ 0xD1B54A35U) * 0x1D2473U;
-					s = (s ^ s >> ((s >> 28) + 4) ^ 0x9E3779BDU) * 0x1A952BU;
-//					return s ^ rotate32(s, 13) ^ rotate32(s, 19);
-					return s ^ s >> 23 ^ s >> 17 ^ s >> 11 ^ s >> 5;
+					uint32_t x = stateA + 1U;
+					//x = reverse_bits32(x); // this line was commented in and out for different test types
+					x = rotate32(x, R);
+					x ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+//					x ^= x >> 17;
+//    				x *= UINT32_C(0xed5ad4bb);
+//    				x ^= x >> 11;
+//    				x *= UINT32_C(0xac4c1b51);
+//    				x ^= x >> 15;
+//    				x *= UINT32_C(0x31848bab);
+//    				x ^= x >> 14;
+//					x += -(x << 6);
+//					x ^= 0xD1B54A35U;
+//					x *= 0x94D041EBU;
+//					x ^= x >> 17;
+//					x += -(x << 9);
+//					x ^= 0xD1B54A35U;
+//					x *= 0x94D041EBU;
+//					x ^= x << 4;
+//					x ^= 0xD1B54A35U;
+//					x *= 0x94D041EBU;
+//					x += -(x << 3);
+//					x ^= x << 10;
+//					x ^= x >> 15;
+
+					x ^= x >> 17;
+					x *= UINT32_C(0xed5ad4bb);
+					x ^= x >> 11;
+					x *= UINT32_C(0xac4c1b51);
+					x ^= x >> 15;
+					x *= UINT32_C(0x31848bab);
+					x ^= x >> 14;
+					stateA = x;
+
+					x += -(x << 6);
+					x ^= 0xD1B54A35U;
+					x *= 0x94D041EBU;
+					x ^= x >> 17;
+					x += -(x << 9);
+					x ^= 0xD1B54A35U;
+					x *= 0x94D041EBU;
+					x ^= x << 4;
+					x ^= 0xD1B54A35U;
+					x *= 0x94D041EBU;
+					x += -(x << 3);
+					x ^= x << 10;
+					x ^= x >> 15;
+//					x ^= x >> 17;
+////					x *= UINT32_C(0xed5ad4bb);
+////					x ^= x >> 11;
+////					x *= UINT32_C(0xac4c1b51);
+////					x ^= x >> 15;
+////					x *= UINT32_C(0x31848bab);
+////					x ^= x >> 14;
+//
+//					x ^= x >> 17;
+//					x *= UINT32_C(0xed5ad4bb);
+//					x ^= x >> 11;
+//					x *= UINT32_C(0xac4c1b51);
+//					x ^= x >> 15;
+//					x *= UINT32_C(0x31848bab);
+//					x ^= x >> 14;
+//
+//					x += -(x << 6);
+//					x ^= 0xD1B54A35U;
+//					x *= 0x94D041EBU;
+//					x ^= x >> 17;
+//					x += -(x << 9);
+//					x ^= 0xD1B54A35U;
+//					x *= 0x94D041EBU;
+//					x ^= x << 4;
+//					x ^= 0xD1B54A35U;
+//					x *= 0x94D041EBU;
+//					x += -(x << 3);
+//					x ^= x << 10;
+//					x ^= x >> 15;
+
+    				return x;
+//					s = (s ^ rotate32(s, 21) ^ rotate32(s, 11) ^ 0xD1B54A35U) * 0x1D2473U;
+//					s = (s ^ s >> ((s >> 28) + 4) ^ 0x75AE2165U) * 0x190413U;
+//					s = (s ^ rotate32(s, 19) ^ rotate32(s, 13) ^ 0xD1B54A35U) * 0x1D2473U;
+//					s = (s ^ s >> ((s >> 28) + 4) ^ 0x9E3779BDU) * 0x1A952BU;
+////					return s ^ rotate32(s, 13) ^ rotate32(s, 19);
+//					return s ^ s >> 23 ^ s >> 17 ^ s >> 11 ^ s >> 5;
 
 
 
@@ -1928,7 +2002,7 @@ return z ^ z >> 28u;
 				}
 				std::string linnorm32::get_name() const {
 					std::ostringstream str;
-					str << "linnormB(" << R << "," << X << ")";
+					str << "linnorm32(" << R << "," << X << ")";
 					return str.str();
 				}
 
@@ -2149,10 +2223,24 @@ return z ^ z >> 28u;
 					//x ^= x >> 15;
 					//return x;
 
-					////GWT-optimized SilkRNG; so far has passed 4TB with no anomalies.
-					const uint32_t s = (stateA += 0xC1C64E6DU);
-				    if (s) stateB += 0x9E3779BBU;
-					uint32_t x = (s ^ s >> 17) * (stateB >> 12 | 1U);
+					////GWT-optimized SilkRNG; has passed 32TB with no anomalies.
+					//const uint32_t s = (stateA += 0xC1C64E6DU);
+				    //if (s) stateB += 0x9E3779BBU;
+					//uint32_t x = (s ^ s >> 17) * (stateB >> 12 | 1U);
+					//x ^= x >> 16;
+					//x *= 0xAC451U;
+					//return x ^ x >> 15;
+
+					////Same as above but with branchless opt
+					//const uint32_t s = (stateA += 0xC1C64E6DU);
+				    //uint32_t x = (s ^ s >> 17) * ((stateB += -((s | -s) >> 31) & 0x9E3779BBU) >> 12 | 1U);
+					//x ^= x >> 16;
+					//x *= 0xAC451U;
+					//return x ^ x >> 15;
+
+
+					const uint32_t s = (stateA = stateA + 0xC1C64E6DU | 0);
+				    uint32_t x = (s ^ s >> 17) * ((stateB = stateB - (-((s | -s) >> 31) & 0x279BU) | 0U) >> 12 | 1U);
 					x ^= x >> 16;
 					x *= 0xAC451U;
 					return x ^ x >> 15;

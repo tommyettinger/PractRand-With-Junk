@@ -542,13 +542,21 @@ namespace PractRand {
 					walker->handle(b);
 					walker->handle(c);
 				}
+
 				Uint32 simpleG::raw32() {
-					Uint32 old = a ^ (b >> 7);
-					a = b + c + d;
-					b = c ^ d;
-					c = d + old;
-					d = old;
-					return a + c;
+					////Passes 32TB with no anomalies. WHY??? I dunno.
+					Uint32 t = a + b ^ d++;
+					a ^= rotate32(b, 13);
+					b += rotate32(c, 3);
+					c += rotate32(t, 25);
+					return t;
+					////original simpleG
+//					Uint32 old = a ^ (b >> 7);
+//					a = b + c + d;
+//					b = c ^ d;
+//					c = d + old;
+//					d = old;
+//					return a + c;
 				}
 				std::string simpleG::get_name() const { return "simpleG"; }
 				void simpleG::walk_state(StateWalkingObject *walker) {
@@ -1362,7 +1370,21 @@ namespace PractRand {
 					//// passes 32TB, I'm pretty sure? Speed isn't very good, probably doesn't warrant more checks.
 					//return (b ^= b << 5 ^ b >> 11 ^ (a = rotate32(a, 7) + 0xC4DE9951u) + (c = rotate32(c, 1) + 0xAA78EDD7u));
 
-					return (a = rotate32(a, 23) * 0x402AB) ^ (b = rotate32(b, 28) * 0x01621) ^ (c = rotate32(c, 24) * 0x808E9) ^ (d = rotate32(d, 29) * 0x8012D);
+					//return (a = rotate32(a, 23) * 0x402AB) ^ (b = rotate32(b, 28) * 0x01621) ^ (c = rotate32(c, 24) * 0x808E9) ^ (d = rotate32(d, 29) * 0x8012D);
+					const uint32_t s = (a += 0xC1C64E6DU), t = (b += -((s | -s) >> 31) & 0x9E3779BBU),
+					               u = (c += -((s | -s | t | -t) >> 31) & 0xC4DE9951U), v = (d += -((s | -s | t | -t | u | -u) >> 31) & 0x6C8E9CF7U);
+				    uint32_t x = (s ^ s >> 17) * (t >> 12 | 1U) ^ v + u;
+					x ^= x >> 16;
+					x *= 0xAC451U;
+					return x ^ x >> 15;
+
+					//const uint32_t s = (stateA += 0xC1C64E6DU);
+				    //uint32_t x = (s ^ s >> 17) * ((stateB += -((s | -s) >> 31) & 0x9E3779BBU) >> 12 | 1U);
+					//x ^= x >> 16;
+					//x *= 0xAC451U;
+					//return x ^ x >> 15;
+
+
 
 					//return (a = rotate32(a, 13)) + (b = rotate32(b, 17)) ^ (c = rotate32(c, 7));
 
@@ -1387,10 +1409,11 @@ namespace PractRand {
 					walker->handle(b);
 					walker->handle(c);
 					walker->handle(d);
-					if (a == 0) a = 1;
-					if (b == 0) b = 1;
-					if (c == 0) c = 1;
-					if (d == 0) d = 1;
+					//if (a == 0) a = 1;
+					//if (b == 0) b = 1;
+					//if (c == 0) c = 1;
+					//if (d == 0) d = 1;
+
 					//walker->handle(d);
 					//uint32_t r;
 					//r = a & 0xFFFF;
