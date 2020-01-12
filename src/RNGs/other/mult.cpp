@@ -2281,35 +2281,33 @@ return z ^ z >> 28u;
 					//z *= ((z >> 25) ^ z);
 					//return (z >> 28) ^ z;
 
-					// passes 32TB, but with issues at the end, no failures though
-					uint64_t z = (state += UINT64_C(0x3C6EF372FE94F82A));
-					z *= ((z >> 21) ^ z);
-					return z - (z >> 29);
+					//// passes 32TB, but with issues at the end, no failures though
+					//uint64_t z = (state += UINT64_C(0x3C6EF372FE94F82A));
+					//z *= ((z >> 21) ^ z);
+					//return z - (z >> 29);
+					state *= state + (state >> 26); state ^= state >> 31; return state;
 
 					//uint64_t z = (state += UINT64_C(0x9E3779B97F4A7C16)); z *= (z >> 25 ^ z); return z - (z >> 22); // 0x6C6EF372FB7CD85A
-																															  //uint64_t z = (state += UINT64_C(0x3C6EF372FE94F82A));
-																															  //z *= ((z >> 21) ^ z);
-																															  //return z - (z >> 25);
 
-																															  // 0xD91D39EAE12657AA
-																															  //0xAD91D39EAE12657A
-																															  // 0x4F1BBCDCBFA53E0A maybe?
-
-																															  // 0x6A5D39EAE127586AULL works, but fails some gjrand tests
-																															  // 0x6A5D39EAE12657AAULL works on both gjrand and PractRand, with shifts 25 then 22
-																															  //const uint64_t s = state;
-																															  //const uint64_t z = (s ^ (s >> 25)) * (state += 0x6A5D39EAE12657AAULL);// 0x6A5D39EAE116586AULL);// 0x6C138EB769B56EBAULL); // 0x6A5D39EAE126579AULL
-																															  //return z ^ (z >> 22);
-
-
-																															  //z = (s ^ (s >> 25)) * (j += 0x7C139EB769B97F32ULL);
-																															  //z ^= (z >> 25);
+                    //uint64_t z = (state += UINT64_C(0x3C6EF372FE94F82A));
+                    //z *= ((z >> 21) ^ z);
+                    //return z - (z >> 25);
+                    // 0xD91D39EAE12657AA
+                    //0xAD91D39EAE12657A
+                    // 0x4F1BBCDCBFA53E0A maybe?
+                    // 0x6A5D39EAE127586AULL works, but fails some gjrand tests
+                    // 0x6A5D39EAE12657AAULL works on both gjrand and PractRand, with shifts 25 then 22
+                    //const uint64_t s = state;
+                    //const uint64_t z = (s ^ (s >> 25)) * (state += 0x6A5D39EAE12657AAULL);// 0x6A5D39EAE116586AULL);// 0x6C138EB769B56EBAULL); // 0x6A5D39EAE126579AULL
+                    //return z ^ (z >> 22);
+                    //z = (s ^ (s >> 25)) * (j += 0x7C139EB769B97F32ULL);
+                    //z ^= (z >> 25);
 
 				}
 				std::string thrust63::get_name() const { return "thrust63"; }
 				void thrust63::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
-					state |= 1;
+					//state |= 1;
 				}
 				void thrust63::seed(Uint64 seed)
 				{
@@ -2999,7 +2997,23 @@ return z ^ z >> 28u;
 					walker->handle(s1);
 				}
 
-
+				// passes at least 16TB with no anomalies
+				// slightly slower than SplitMix64, but allows any gamma
+				Uint64 moremur64::raw64() {
+					Uint64 x = (state++);
+					x ^= x >> 27;
+					x *= 0x3C79AC492BA7B653UL;
+					x ^= x >> 33 ^ x >> 25;
+					x *= 0x1C69B3F74AC4AE35UL;
+					x ^= x >> 27;
+					return x;
+				}
+				std::string moremur64::get_name() const { return "moremur64"; }
+				void moremur64::walk_state(StateWalkingObject *walker) {
+					state = 0UL;
+					//walker->handle(state);
+				}
+				
 
 			}
 		}

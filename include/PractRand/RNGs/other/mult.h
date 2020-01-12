@@ -589,6 +589,14 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				class moremur64 : public vRNG64 {
+					Uint64 state;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
+
 			}
 		}
 	}

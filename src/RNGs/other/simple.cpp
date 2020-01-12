@@ -141,6 +141,19 @@ namespace PractRand {
 					walker->handle(a);
 				}
 				Uint32 xorwow32x6::raw32() {
+//					//kotlin's version
+//					Uint32 t = x;
+//					t ^= t >> 2;
+//					x = y;
+//					y = z;
+//					z = w;
+//					Uint32 v0 = v;
+//					w = v0;
+//					t ^= t << 1 ^ v0 ^ v0 << 4;
+//					v = t;
+//					d += 362437;
+//					return t + d;
+					////original
 					Uint32 tmp = x;
 					x = y;
 					y = z;
@@ -545,10 +558,17 @@ namespace PractRand {
 
 				Uint32 simpleG::raw32() {
 					////Passes 32TB with no anomalies. WHY??? I dunno.
-					Uint32 t = a + b ^ d++;
+//					Uint32 t = a + b ^ d++;
+//					a ^= rotate32(b, 13);
+//					b += rotate32(c, 3);
+//					c += rotate32(t, 25);
+//					return t;
+
+//					Uint32 t = (a + b ^ (d += 0x6C8E9CF5U));
+					Uint32 t = (a + b ^ d++);
 					a ^= rotate32(b, 13);
-					b += rotate32(c, 3);
-					c += rotate32(t, 25);
+					b += c;
+					c -= rotate32(t, 25); 
 					return t;
 					////original simpleG
 //					Uint32 old = a ^ (b >> 7);

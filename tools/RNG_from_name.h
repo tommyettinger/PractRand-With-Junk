@@ -611,6 +611,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(zig32)
 			REGISTER_RNG_0(thrustAlt64)
 			REGISTER_RNG_0(twinLinear)
+			REGISTER_RNG_0(moremur64)
 
 		// include/PractRand/RNGs/other/fibonacci.h
 		RNG_Factories::RNG_factory_index["bigbadlcg"] = bigbadlcg_factory;
