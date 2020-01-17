@@ -2997,13 +2997,14 @@ return z ^ z >> 28u;
 					walker->handle(s1);
 				}
 
-				// passes at least 16TB with no anomalies
-				// slightly slower than SplitMix64, but allows any gamma
+				// passes at least 32TB with no anomalies
+				// slightly slower than SplitMix64, but should allow any gamma
 				Uint64 moremur64::raw64() {
 					Uint64 x = (state++);
 					x ^= x >> 27;
 					x *= 0x3C79AC492BA7B653UL;
-					x ^= x >> 33 ^ x >> 25;
+					x ^= x >> 33;
+					x ^= x >> 11; // only change between this and Pelle Evensen's moremur64
 					x *= 0x1C69B3F74AC4AE35UL;
 					x ^= x >> 27;
 					return x;
