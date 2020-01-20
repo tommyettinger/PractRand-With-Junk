@@ -1715,15 +1715,36 @@ return z ^ z >> 28u;
 
 					//s = reverse_bits64(s); // this line was commented in and out for different test types
 					s = rotate64(s, R);
-					s ^= -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
+					uint64_t x = s ^ -X; // change X as a parameter to the generator to 0 to disable any bit flips, 1 to flip all, other (32-bit max, assigned to 64-bit) numbers are allowed
 					
+					x ^= rotate64(x, 39) ^ rotate64(x, 14); // rotl; they correspond to right rotations of 25 and 50
+					x *= 0x3C79AC492BA7B653UL;
+					x ^= x >> 33;
+					x ^= x >> 13;
+					x *= 0x1C69B3F74AC4AE35UL;
+					x ^= x >> 27;
+					return x;
+
+////works well, except for BRank issues on rotation 47, reversed and all flipped
+//					x ^= rotate64(x, 39) ^ rotate64(x, 17);
+//					x *= 0x3C79AC492BA7B653UL;
+//					x ^= x >> 33;
+//					x ^= x >> 11;
+//					x *= 0x1C69B3F74AC4AE35UL;
+//					x ^= x >> 27;
+//					return x;
+
+
+
 					//s = (s ^ rotate64(s, 23) ^ rotate64(s, 47)) * 0xE7037ED1A0B428DBULL;
 					//s = (s ^ rotate64(s, 39) ^ rotate64(s, 14)) * 0xEB44ACCAB455D165ULL;//0xA0761D6478BD642FULL;
 					//s = (s ^ s >> 25 ^ s >> 37) * 0xA0761D6478BD642FULL;
 					//return s ^ s >> 28;
-					s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
-					s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
-					return s ^ s >> 28;
+
+					////PulleyRNG
+					//s = (s ^ rotate64(s, 41) ^ rotate64(s, 17)) * 0x369DEA0F31A53F85ULL;
+					//s = (s ^ s >> 25 ^ s >> 37) * 0xDB4F0B9175AE2165UL;
+					//return s ^ s >> 28;
 
 //					s = (s ^ rotate64(s, 23) ^ rotate64(s, 51)) * 0xDB4F0B9175AE2165UL;
 //					s = (s ^ s >> 28) * 0xEB44ACCAB455D165ULL;
@@ -2997,21 +3018,32 @@ return z ^ z >> 28u;
 					walker->handle(s1);
 				}
 
-				// passes at least 32TB with no anomalies
-				// slightly slower than SplitMix64, but should allow any gamma
-				Uint64 moremur64::raw64() {
+				// passes at least 32TB with one early "unusual" anomaly
+				// passes 32GB for each test of 64 rotations, with or without bit flips, with or without bit-reversal.
+				// gets 5 "mildly suspicious" in those 8TB of tests, nothing worse
+				// slower than SplitMix64, but should allow any gamma
+				Uint64 moremur64::raw64() { // named incorrectly, may name later... quarterback64 , due to use of 25 as a rotation?
 					Uint64 x = (state++);
-					x ^= x >> 27;
-					x *= 0x3C79AC492BA7B653UL;
+					x ^= rotate64(x, 39) ^ rotate64(x, 14); // rotl; they correspond to right rotations of 25 and 50
+					x *= 0x3C79AC492BA7B653UL; // from Evensen's improvement on MurmurHash3's mixer, moremur64 
 					x ^= x >> 33;
-					x ^= x >> 11; // only change between this and Pelle Evensen's moremur64
-					x *= 0x1C69B3F74AC4AE35UL;
-					x ^= x >> 27;
+					x ^= x >> 13;
+					x *= 0x1C69B3F74AC4AE35UL; // also from moremur64
+					x ^= x >> 27; // one less shift than NASAM, seems to do well
 					return x;
+//				// passes at least 32TB with no anomalies
+//				// slightly slower than SplitMix64, but should allow any odd gamma
+//					x ^= x >> 27;
+//					x *= 0x3C79AC492BA7B653UL;
+//					x ^= x >> 33;
+//					x ^= x >> 11; // only change between this and Pelle Evensen's moremur64
+//					x *= 0x1C69B3F74AC4AE35UL;
+//					x ^= x >> 27;
+//					return x;
 				}
 				std::string moremur64::get_name() const { return "moremur64"; }
 				void moremur64::walk_state(StateWalkingObject *walker) {
-					state = 0UL;
+					state = 0UL; // should only be used during the intensive many-short-tests period
 					//walker->handle(state);
 				}
 				
