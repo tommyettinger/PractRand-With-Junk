@@ -3018,21 +3018,39 @@ return z ^ z >> 28u;
 					walker->handle(s1);
 				}
 
+				Uint64 moremur64::raw64() { // named incorrectly, may name later... quarterback64 , due to use of 25 as a rotation?
+
+				    // passes 32TB with two "unusual" anomalies, both BCFN, at 2TB and 4TB.
+					// mostly interesting because it is almost as good as the last one here, but
+					// not quite, and the only difference is the last uses a shift by 11, while
+					// this one uses 13.
+                    // Note that this won't pass the full rotated/reversed/flipped battery.
+					Uint64 x = (state++);
+					x ^= x >> 27;
+					x *= 0x3C79AC492BA7B653UL;
+					x ^= x >> 33;
+					x ^= x >> 13;
+					x *= 0x1C69B3F74AC4AE35UL;
+					x ^= x >> 27;
+					return x;
+
+					//x ^= 0x9E3779B97F4A7C15UL;
+
 				// passes at least 32TB with one early "unusual" anomaly
 				// passes 32GB for each test of 64 rotations, with or without bit flips, with or without bit-reversal.
 				// gets 5 "mildly suspicious" in those 8TB of tests, nothing worse
 				// slower than SplitMix64, but should allow any gamma
-				Uint64 moremur64::raw64() { // named incorrectly, may name later... quarterback64 , due to use of 25 as a rotation?
-					Uint64 x = (state++);
-					x ^= rotate64(x, 39) ^ rotate64(x, 14); // rotl; they correspond to right rotations of 25 and 50
-					x *= 0x3C79AC492BA7B653UL; // from Evensen's improvement on MurmurHash3's mixer, moremur64 
-					x ^= x >> 33;
-					x ^= x >> 13;
-					x *= 0x1C69B3F74AC4AE35UL; // also from moremur64
-					x ^= x >> 27; // one less shift than NASAM, seems to do well
-					return x;
+//					Uint64 x = (state++);
+//					x ^= rotate64(x, 39) ^ rotate64(x, 14); // rotl; they correspond to right rotations of 25 and 50
+//					x *= 0x3C79AC492BA7B653UL; // from Evensen's improvement on MurmurHash3's mixer, moremur64 
+//					x ^= x >> 33;
+//					x ^= x >> 13;
+//					x *= 0x1C69B3F74AC4AE35UL; // also from moremur64
+//					x ^= x >> 27; // one less shift than NASAM, seems to do well
+//					return x;
 //				// passes at least 32TB with no anomalies
 //				// slightly slower than SplitMix64, but should allow any odd gamma
+//              // Note that this won't pass the full rotated/reversed/flipped battery.
 //					x ^= x >> 27;
 //					x *= 0x3C79AC492BA7B653UL;
 //					x ^= x >> 33;
