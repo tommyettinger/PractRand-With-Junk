@@ -2988,11 +2988,19 @@ return z ^ z >> 28u;
 					//const uint32_t y = (a += 0x9E3779B9);
 					//const uint32_t z = ((b += (-(a > 0x52345670) & 0x632BE5AB)) ^ a) * 0xABCFD;
 					//return (z ^ rotate32(z, 21) ^ rotate32(z, 9)) * (a >> 11 | 1u) ^ a;
-					const uint32_t s = (a += 0x632BE5ABU);
-					const uint64_t z = (s ^ s >> 13 ^ s >> 20) * (b >> 12 | 0x1U);
-					if (s != 0U)
-					    b += 0x9E3779BDU;
-					return z ^ z >> 21 ^ z >> 11;
+					//const uint32_t s = (a += 0x632BE5ABU);
+					//const uint64_t z = (s ^ s >> 13 ^ s >> 20) * (b >> 12 | 0x1U);
+					//if (s != 0U)
+					//    b += 0x9E3779BDU;
+					//return z ^ z >> 21 ^ z >> 11;
+
+
+					//// passes 32TB with no anomalies
+                    uint32_t s = (a += 0xC1C64E6Du);
+                    uint32_t t = (s == 0u) ? b : (b += 0x9E3779BDu);// (b += -((s | -s) >> 31) & 0x9E3779BBu);
+                    uint32_t x = (s ^ s >> 17) * ~((t ^ t >> 12) & 0x1FFFFEu);
+                    x = (x ^ x >> 16) * 0xAC451u;
+                    return (x ^ x >> 15);
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
@@ -3019,20 +3027,26 @@ return z ^ z >> 28u;
 				}
 
 				Uint64 moremur64::raw64() { // named incorrectly, may name later... quarterback64 , due to use of 25 as a rotation?
+					Uint64 x = (state++);
+					x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
+					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					x ^= x >> 27;
+					return x;
+					// 0x9E3779B97F4A7C15UL
 
 				    // passes 32TB with two "unusual" anomalies, both BCFN, at 2TB and 4TB.
 					// mostly interesting because it is almost as good as the last one here, but
 					// not quite, and the only difference is the last uses a shift by 11, while
 					// this one uses 13.
                     // Note that this won't pass the full rotated/reversed/flipped battery.
-					Uint64 x = (state++);
-					x ^= x >> 27;
-					x *= 0x3C79AC492BA7B653UL;
-					x ^= x >> 33;
-					x ^= x >> 13;
-					x *= 0x1C69B3F74AC4AE35UL;
-					x ^= x >> 27;
-					return x;
+//					Uint64 x = (state++);
+//					x ^= x >> 27;
+//					x *= 0x3C79AC492BA7B653UL;
+//					x ^= x >> 33;
+//					x ^= x >> 13;
+//					x *= 0x1C69B3F74AC4AE35UL;
+//					x ^= x >> 27;
+//					return x;
 
 					//x ^= 0x9E3779B97F4A7C15UL;
 
