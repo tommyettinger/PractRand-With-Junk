@@ -1325,10 +1325,19 @@ namespace PractRand {
 					}
 				}
 				Uint64 mover64::raw64() {
+					// this is Romu Duo
+					uint64_t ap = a;
+					//0xD3833E804F4C574Bu == 15241094284759029579u
+					a = 0xD3833E804F4C574Bu * b;
+					b = rotate64(b,36) + rotate64(b,15) - ap;
+					return ap;
+					
 					//return (a = rotate64(a, 28) * UINT64_C(0x41C64E6B)) + (b = rotate64(b, 37) + UINT64_C(0x9E3779B97F4A7C15)); //0x9E3779B97F4A7C15 //  * UINT64_C(0x9E3779B9)
-					const uint64_t aa = a * UINT64_C(0x41C64E6B);
-					const uint64_t bb = b * UINT64_C(0x9E3779B9);
-					return (a = rotate64(aa, 42)) ^ (b = rotate64(bb, 23));
+					
+					//const uint64_t aa = a * UINT64_C(0x41C64E6B);
+					//const uint64_t bb = b * UINT64_C(0x9E3779B9);
+					//return (a = rotate64(aa, 42)) ^ (b = rotate64(bb, 23));
+					
 					// works, passes 32TB with 2 anomalies
 					//return (a = rotate64(a, 26) * UINT64_C(0x41C64E6B)) ^ (b = rotate64(b, 37) + UINT64_C(0x9E3779B97F4A7C15));
 				}
@@ -1336,19 +1345,22 @@ namespace PractRand {
 				std::string mover64::get_name() const { return "mover64"; }
 				void mover64::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
-					uint64_t r = a;
-					a = 1;
-					b = 1;
-					for (uint64_t ra = (r & 0xFFFF); ra; ra--)
-					{
-						a *= UINT64_C(0x41C64E6B);
-						a = rotate64(a, 42);
-					}
-					for (uint64_t rb = (r >> 16 & 0xFFFF); rb; rb--)
-					{
-						b *= UINT64_C(0x9E3779B9);
-						b = rotate64(b, 23);
-					}
+					walker->handle(b);
+					if((a | b) == 0u) a = 1u;
+					//walker->handle(a);
+					//uint64_t r = a;
+					//a = 1;
+					//b = 1;
+					//for (uint64_t ra = (r & 0xFFFF); ra; ra--)
+					//{
+					//	a *= UINT64_C(0x41C64E6B);
+					//	a = rotate64(a, 42);
+					//}
+					//for (uint64_t rb = (r >> 16 & 0xFFFF); rb; rb--)
+					//{
+					//	b *= UINT64_C(0x9E3779B9);
+					//	b = rotate64(b, 23);
+					//}
 				}
 
 				Uint32 multimover32::raw32() {

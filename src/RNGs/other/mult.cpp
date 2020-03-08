@@ -2202,9 +2202,23 @@ return z ^ z >> 28u;
         			//const uint64_t z = (s ^ s >> 31) * (stateB += 0x9E3779B97F4A7C16UL);
 					//return z ^ z >> 26;
 
-					const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
-        			const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
-					return z ^ z >> 27;
+					//// passes 32TB, one anomaly at 8TB, extremely minor
+					//// Low8/64]FPF-14+6/16:cross        R=  -2.5  p =1-1.6e-4   unusual
+					//const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+        			//const uint64_t z = (s ^ s >> 31) * (stateB += 0x9E3779B97F4A7C16UL);
+					//return z ^ z >> 26 ^ z >> 6;
+
+					//// New OrbitRNG
+					//// passes 32TB with one anomaly at 32GB, "[Low8/64]BCFN(2+4,13-1,T)" rated as "unusual"
+					//// also unusually fast in Quick-Bench benchmarks... Faster than SplitMix64, Xoroshiro128+, Romu...
+					uint64_t s = (stateA += 0xC6BC279692B5C323u);
+  					uint64_t t = ((s == 0u) ? stateB : (stateB += 0x9E3779B97F4A7C15u));
+  					uint64_t z = (s ^ s >> 31) * ((t ^ t >> 22) | 1u);
+					return z ^ z >> 26;
+
+					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
+        			//const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
+					//return z ^ z >> 27;
 					// mul:C6BC279692B5C323,xorr:31,xorr:17,mul,xorr:26
 
 				}
@@ -2212,7 +2226,7 @@ return z ^ z >> 28u;
 				void mingler::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
-					stateB |= 1ULL;
+					//stateB |= 1ULL;
 					//stateB = (stateB & UINT64_C(0x7FFFFFFF)) + (stateB >> 31);
 					//if (stateB == 0) stateB = 1;
 					//stateA = 0;
