@@ -2211,10 +2211,16 @@ return z ^ z >> 28u;
 					//// New OrbitRNG
 					//// passes 32TB with one anomaly at 32GB, "[Low8/64]BCFN(2+4,13-1,T)" rated as "unusual"
 					//// also unusually fast in Quick-Bench benchmarks... Faster than SplitMix64, Xoroshiro128+, Romu...
+					//uint64_t s = (stateA += 0xC6BC279692B5C323u);
+  					//uint64_t t = ((s == 0u) ? stateB : (stateB += 0x9E3779B97F4A7C15u));
+  					//uint64_t z = (s ^ s >> 31) * ((t ^ t >> 22) | 1u);
+					//return z ^ z >> 26;
+
+					// Passes 32TB, one "unusual" at 32TB, BCFN(2+1,13-0,T)
 					uint64_t s = (stateA += 0xC6BC279692B5C323u);
   					uint64_t t = ((s == 0u) ? stateB : (stateB += 0x9E3779B97F4A7C15u));
-  					uint64_t z = (s ^ s >> 31) * ((t ^ t >> 22) | 1u);
-					return z ^ z >> 26;
+  					uint64_t z = (s ^ s >> 29) * (t | 1u);
+					return z ^ z >> 28;
 
 					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
         			//const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
