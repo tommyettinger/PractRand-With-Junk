@@ -2216,11 +2216,24 @@ return z ^ z >> 28u;
   					//uint64_t z = (s ^ s >> 31) * ((t ^ t >> 22) | 1u);
 					//return z ^ z >> 26;
 
-					// Passes 32TB, one "unusual" at 32TB, BCFN(2+1,13-0,T)
+					//// Passes 32TB, one "unusual" at 32TB, BCFN(2+1,13-0,T)
+					//uint64_t s = (stateA += 0xC6BC279692B5C323u);
+  					//uint64_t t = ((s == 0u) ? stateB : (stateB += 0x9E3779B97F4A7C15u));
+  					//uint64_t z = (s ^ s >> 29) * (t | 1u);
+					//return z ^ z >> 28;
+
+					//uint64_t s = (stateA += 0x9E3779B97F4A7C15u);
+
+					// passes 32TB but just barely, getting "unusual" at 32TB
+					// exact anomaly:
+					// length= 32 terabytes (2^45 bytes), time= 113425 seconds
+  					//   Test Name                         Raw       Processed     Evaluation
+  					//   BCFN(2+1,13-0,T)                  R= +10.2  p =  5.5e-5   unusual          
+  					//   ...and 1133 test result(s) without anomalies
 					uint64_t s = (stateA += 0xC6BC279692B5C323u);
-  					uint64_t t = ((s == 0u) ? stateB : (stateB += 0x9E3779B97F4A7C15u));
-  					uint64_t z = (s ^ s >> 29) * (t | 1u);
-					return z ^ z >> 28;
+  					uint64_t t = ((s < 0x18DAF2Du) ? stateB : (stateB += 0x9479D2858AF899E6u));
+  					uint64_t z = (s ^ s >> 31) * t;
+					return z ^ z >> 26;
 
 					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
         			//const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
@@ -2232,7 +2245,7 @@ return z ^ z >> 28u;
 				void mingler::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
-					//stateB |= 1ULL;
+					stateB |= 1U;
 					//stateB = (stateB & UINT64_C(0x7FFFFFFF)) + (stateB >> 31);
 					//if (stateB == 0) stateB = 1;
 					//stateA = 0;
