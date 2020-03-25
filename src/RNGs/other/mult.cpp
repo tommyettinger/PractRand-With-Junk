@@ -2224,16 +2224,30 @@ return z ^ z >> 28u;
 
 					//uint64_t s = (stateA += 0x9E3779B97F4A7C15u);
 
-					// passes 32TB but just barely, getting "unusual" at 32TB
-					// exact anomaly:
-					// length= 32 terabytes (2^45 bytes), time= 113425 seconds
-  					//   Test Name                         Raw       Processed     Evaluation
-  					//   BCFN(2+1,13-0,T)                  R= +10.2  p =  5.5e-5   unusual          
-  					//   ...and 1133 test result(s) without anomalies
+					//// passes 32TB but just barely, getting "unusual" at 32TB
+					//// exact anomaly:
+					//// length= 32 terabytes (2^45 bytes), time= 113425 seconds
+  					////   Test Name                         Raw       Processed     Evaluation
+  					////   BCFN(2+1,13-0,T)                  R= +10.2  p =  5.5e-5   unusual          
+  					////   ...and 1133 test result(s) without anomalies
+					//uint64_t s = (stateA += 0xC6BC279692B5C323u);
+  					//uint64_t t = ((s < 0x18DAF2Du) ? stateB : (stateB += 0x9479D2858AF899E6u));
+  					//uint64_t z = (s ^ s >> 31) * t;
+					//return z ^ z >> 26;
+
+					////A new variant on Orbit that passes 32TB, and not just by a hair!
+					////
+					////length= 16 terabytes (2^44 bytes), time= 55924 seconds
+					////  Test Name                         Raw       Processed     Evaluation
+					////  BCFN(2+1,13-0,T)                  R=  +9.0  p =  2.2e-4   unusual          
+					////  ...and 1106 test result(s) without anomalies
+					////...
+					////length= 32 terabytes (2^45 bytes), time= 112975 seconds
+					////  no anomalies in 1134 test result(s)
 					uint64_t s = (stateA += 0xC6BC279692B5C323u);
-  					uint64_t t = ((s < 0x18DAF2Du) ? stateB : (stateB += 0x9479D2858AF899E6u));
+  					uint64_t t = ((s < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u));
   					uint64_t z = (s ^ s >> 31) * t;
-					return z ^ z >> 26;
+					return z ^ z >> 25;
 
 					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
         			//const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
