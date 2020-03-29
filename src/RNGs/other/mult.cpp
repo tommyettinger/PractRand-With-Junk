@@ -2244,9 +2244,9 @@ return z ^ z >> 28u;
 					////...
 					////length= 32 terabytes (2^45 bytes), time= 112975 seconds
 					////  no anomalies in 1134 test result(s)
-					const uint64_t s = (stateA += 0xC6BC279692B5C323u);
-  					const uint64_t z = ((s < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u)) * (s ^ s >> 31);
-					return z ^ z >> 25;
+					//const uint64_t s = (stateA += 0xC6BC279692B5C323u);
+  					//const uint64_t z = ((s < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u)) * (s ^ s >> 31);
+					//return z ^ z >> 25;
 
 					////has no anomalies before 32TB, but...
 					////has trouble at 32TB, getting a "suspicious" BCFN(2+1,13-0,T) as well as two "unusual" TMFn
@@ -2254,6 +2254,12 @@ return z ^ z >> 28u;
                     //const uint64_t t = ((s == 0u) ? stateB : (stateB += 0x9479D2858AF899E6u)) * (s ^ s >> 31);
                 	//return t ^ t >> 25;
 
+					//// meant to mimic the behavior of signed comparisons on long values in Java
+					//// passes 32TB with no anomalies (!)
+					//// other than an offset in the comparison, this is identical to the generator above that also compares against 0x6F17146Du
+					const uint64_t s = (stateA += 0xC6BC279692B5C323u);
+  					const uint64_t z = ((s + 0x8000000000000000u < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u)) * (s ^ s >> 31);
+					return z ^ z >> 25;
 
 					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
         			//const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
