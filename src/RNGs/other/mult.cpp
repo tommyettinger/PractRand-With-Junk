@@ -2257,9 +2257,15 @@ return z ^ z >> 28u;
 					//// meant to mimic the behavior of signed comparisons on long values in Java
 					//// passes 32TB with no anomalies (!)
 					//// other than an offset in the comparison, this is identical to the generator above that also compares against 0x6F17146Du
-					const uint64_t s = (stateA += 0xC6BC279692B5C323u);
-  					const uint64_t z = ((s + 0x8000000000000000u < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u)) * (s ^ s >> 31);
-					return z ^ z >> 25;
+					//const uint64_t s = (stateA += 0xC6BC279692B5C323u);
+  					//const uint64_t z = ((s + 0x8000000000000000u < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u)) * (s ^ s >> 31);
+					//return z ^ z >> 25;
+
+					//// passes 32TB with one "unusual" anomaly at 16TB
+					uint64_t s = (stateA += 0xC6BC279692B5C323u);
+					s ^= s >> 31;
+  					s *= ((s < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u));
+					return s ^ s >> 25;
 
 					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
         			//const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
@@ -3055,11 +3061,51 @@ return z ^ z >> 28u;
 
 
 					//// passes 32TB with no anomalies
-                    uint32_t s = (a += 0xC1C64E6Du);
-                    uint32_t t = (s == 0u) ? b : (b += 0x9E3779BDu);// (b += -((s | -s) >> 31) & 0x9E3779BBu);
-                    uint32_t x = (s ^ s >> 17) * ~((t ^ t >> 12) & 0x1FFFFEu);
-                    x = (x ^ x >> 16) * 0xAC451u;
-                    return (x ^ x >> 15);
+                    //uint32_t s = (a += 0xC1C64E6Du);
+                    //uint32_t t = (s == 0u) ? b : (b += 0x9E3779BDu);// (b += -((s | -s) >> 31) & 0x9E3779BBu);
+                    //uint32_t x = (s ^ s >> 17) * ~((t ^ t >> 12) & 0x1FFFFEu);
+                    //x = (x ^ x >> 16) * 0xAC451u;
+                    //return (x ^ x >> 15);
+					
+
+					//(a = a * 0x7E57Du + 1u);//(b = b * 0x6EBD5u - 1u)
+					//const uint32_t z = (((s + 0x80000000u < 0x65C5u) ? b : (b += 0xD8AB2475u)) | 1u) * (s ^ s >> 15);
+
+					const uint32_t s = (a += 0xC1C64E6Du);
+				    uint32_t z = ((s + 0x80000000u < 0x5C5u) ? b : (b += 0xD8AB2475u)) ^ s ^ s >> 15;
+					z ^= rotate32(z, (s >> 28) + 16) ^ rotate32(z, (s >> 24 & 15) + 1);
+					//const uint32_t s = (a = a * 0xFB85u + 1u);
+				    //uint32_t z = ((s == 0u) ? b : (b = b * 0xD09Du + 1u)) ^ s ^ s >> 14;
+					//z ^= z >> 15;
+
+					//z ^= z >> (s >> 28) + 4;
+					//s ^= s >> (z >> 28) + 6;
+					//z ^= z << (s >> 24 & 15) + 4;
+					//s ^= s << (z >> 24 & 15) + 1;
+					//z ^= z >> (s >> 20 & 15) + 4;
+					//s ^= s >> (z >> 20 & 15) + 11;
+					//return z;
+					//s ^= rotate32(s, (z >> 28) + 4) ^ rotate32(s, (z >> 24 & 15) + 16);
+//					s ^= rotate32(s, (z >> 20 & 15) + 8) ^ rotate32(s, (z >> 16 & 15) + 12);
+//					z ^= rotate32(z, (s >> 20 & 15) + 8) ^ rotate32(z, (s >> 16 & 15) + 12);
+// rotate32(z, (s >> 20 & 15) + 11) ^ rotate32(z, (s >> 16 & 15) + 6)
+					//return z ^ rotate32(z, 11) ^ rotate32(z, 23) ^ rotate32(z, 7) ^ rotate32(z, 19);
+
+					//return rotate32(z, (s >> 29)) ^ rotate32(z, (s >> 23 & 7) + 16) ^ rotate32(z, (s >> 17 & 7) + 8);
+					return z ^ rotate32(z, (s >> 20 & 15) + 16) ^ rotate32(z, (s >> 16 & 15) + 1);
+					
+					
+					//uint64_t r = rotate32(a, 16) ^ b;
+					//r = rotate32(r, a >> 27);
+					//r ^= r >> 13;
+					//r ^= r << 17;
+					//r ^= r >> 15;
+					//a = a * 0xFB83u ^ r;
+					//b = b * 0xD09Bu ^ 0xC1C64E6Du;
+					////a = a * 0xFB85u + r;
+					////b = b * 0xD09Du + 1u;
+					//return r;
+
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
@@ -3072,11 +3118,14 @@ return z ^ z >> 28u;
 
 				Uint64 twinLinear::raw64() {
 					uint64_t r = rotate64(s0, 32) ^ s1;
-					uint64_t t = s0 >> 58;
-					r = rotate64(r, (int)t);
+					r = rotate64(r, s0 >> 58);
 					//r += 0x2545F4914F6CDD1DULL;
-					s0 = s0 * 0x2C6FE96EE78B6955ULL + r;
-					s1 = s1 * 0x369DEA0F31A53F85ULL + 1ULL;
+					s0 = s0 * 0xFF2826ADULL + r;
+					s1 = s1 * 0xFF1CD035ULL + 1ULL;
+//					s0 = s0 * 0xB67A49A5466DULL + r;
+//					s1 = s1 * 0x87338161EF95ULL + 1ULL;
+//					s0 = s0 * 0x2C6FE96EE78B6955ULL + r;
+//					s1 = s1 * 0x369DEA0F31A53F85ULL + 1ULL;
 					return r ^ r >> 32;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
