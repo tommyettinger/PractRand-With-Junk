@@ -2261,10 +2261,29 @@ return z ^ z >> 28u;
   					//const uint64_t z = ((s + 0x8000000000000000u < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u)) * (s ^ s >> 31);
 					//return z ^ z >> 25;
 
-					//// passes 32TB with one "unusual" anomaly at 16TB
-					uint64_t s = (stateA += 0xC6BC279692B5C323u);
-					s ^= s >> 31;
-  					s *= ((s < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u));
+					//// passes 32TB with one "unusual" anomaly at 16TB. Can sometimes get a "mildly suspicious" at 32TB.
+					//uint64_t s = (stateA += 0xC6BC279692B5C323u);
+					//s ^= s >> 31;
+  					//s *= ((s < 0x6F17146Du) ? stateB : (stateB += 0x9479D2858AF899E6u));
+					//return s ^ s >> 25;
+
+					//0x9E3779B97F4A7C15u weight 38 // 0xB1E131D6149D9795u weight 32 // 0xC15E014828F41863u weight 24 // 0xD1342543DE82EF95u weight 32
+
+					//// has frustrating late issues at 32TB and later, even though it passes 32TB with one "unusual," it gets a "very suspicious" at 64TB.
+					//// BCFN(2+1,13-0,T)
+					//uint64_t s = (stateA += 0xB1E131D6149D9795u);
+					//s ^= s >> 31;
+  					//s *= ((s < 0xB0BAFE77u) ? stateB : (stateB += 0x9479D2858AF899E6u));
+					//return s ^ s >> 25;
+
+					////GoatRNG (I just like goats...)
+					////Passes 32TB with one "unusual" anomaly, [Low1/16]DC6-9x1Bytes-1 , at 512GB.
+					////Seems to be much more resistant to the BCFN issues that plague Gear.
+					////Also allows all 2 to the 128 states possible and should mitigate the seed correlation in similar versions.
+					////This is also very fast in Quick-Bench benchmarks using GCC; faster than SplitMix64 and on-par with Gear.
+					uint64_t s = (stateA += 0xD1342543DE82EF95u);
+					const uint64_t t = ((s ^= s >> 31) < 0xB1E131D6149D9795u ? (stateB += 0xC6BC279692B5C323u) : stateB);
+					s *= ((t ^ t >> 29 ^ t << 11) | 1u);
 					return s ^ s >> 25;
 
 					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
