@@ -2277,13 +2277,23 @@ return z ^ z >> 28u;
 					//return s ^ s >> 25;
 
 					////GoatRNG (I just like goats...)
-					////Passes 32TB with one "unusual" anomaly, [Low1/16]DC6-9x1Bytes-1 , at 512GB.
-					////Seems to be much more resistant to the BCFN issues that plague Gear.
+					////Passes 32TB with one "unusual" anomaly, [Low1/16]DC6-9x1Bytes-1 , at 512GB. Gets "VERY SUSPICIOUS" BCFN at 64 TB...
 					////Also allows all 2 to the 128 states possible and should mitigate the seed correlation in similar versions.
 					////This is also very fast in Quick-Bench benchmarks using GCC; faster than SplitMix64 and on-par with Gear.
+					//uint64_t s = (stateA += 0xD1342543DE82EF95u);
+					//const uint64_t t = ((s ^= s >> 31) < 0xB1E131D6149D9795u ? (stateB += 0xC6BC279692B5C323u) : stateB);
+					//s *= ((t ^ t >> 29 ^ t << 11) | 1u);
+					//return s ^ s >> 25;
+
+					////GhoulRNG (running out of G-related words...)
+					////Passes 32TB with no anomalies. Tests still running for 64TB and later, hopefully, 128TB.
+					////This is a very slight tweak on GoatRNG and should have similar speed, or be a bit faster due to its strict conditional.
+					////Also allows all 2 to the 128 states possible and should mitigate the seed correlation in similar versions.
+					////Where GoatRNG updates stateB roughly 11/16 times, this only updates it less than 1/4 times.
+					////Instead of using one of the Evensen-discovered invertible shift pairs, this just uses a paired right shift on stateA.
 					uint64_t s = (stateA += 0xD1342543DE82EF95u);
-					const uint64_t t = ((s ^= s >> 31) < 0xB1E131D6149D9795u ? (stateB += 0xC6BC279692B5C323u) : stateB);
-					s *= ((t ^ t >> 29 ^ t << 11) | 1u);
+					const uint64_t t = ((s ^= s >> 31 ^ s >> 23 ) >= 0xC6BC279692B5C323u ? (stateB += 0xB1E131D6149D9795u) : stateB);
+					s *= ((t ^ t << 9) | 1u);
 					return s ^ s >> 25;
 
 					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
