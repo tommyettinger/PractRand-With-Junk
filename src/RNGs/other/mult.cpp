@@ -2286,15 +2286,50 @@ return z ^ z >> 28u;
 					//return s ^ s >> 25;
 
 					////GhoulRNG (running out of G-related words...)
-					////Passes 32TB with no anomalies. Tests still running for 64TB and later, hopefully, 128TB.
+					////Passes 64TB with no anomalies. Ran out of memory (had 16GB available) trying to test 128TB.
 					////This is a very slight tweak on GoatRNG and should have similar speed, or be a bit faster due to its strict conditional.
 					////Also allows all 2 to the 128 states possible and should mitigate the seed correlation in similar versions.
 					////Where GoatRNG updates stateB roughly 11/16 times, this only updates it less than 1/4 times.
 					////Instead of using one of the Evensen-discovered invertible shift pairs, this just uses a paired right shift on stateA.
-					uint64_t s = (stateA += 0xD1342543DE82EF95u);
-					const uint64_t t = ((s ^= s >> 31 ^ s >> 23 ) >= 0xC6BC279692B5C323u ? (stateB += 0xB1E131D6149D9795u) : stateB);
-					s *= ((t ^ t << 9) | 1u);
-					return s ^ s >> 25;
+					//uint64_t s = (stateA += 0xD1342543DE82EF95u);
+					//const uint64_t t = ((s ^= s >> 31 ^ s >> 23 ) >= 0xC6BC279692B5C323u ? (stateB += 0xB1E131D6149D9795u) : stateB);
+					//s *= ((t ^ t << 9) | 1u);
+					//return s ^ s >> 25;
+
+
+//					uint64_t s = (stateA += 0xD1342543DE82EF95u);
+//					s ^= s >> 31 ^ s >> 23;
+//  					const uint64_t t = (stateB += 0xB1E131D6149D9796u);
+////  					const uint64_t t = (((s ^= s >> 31) == 0u) ? stateB : (stateB += 0xB1E131D6149D9795u));
+//					s *= (t ^ t << 13);
+//					return s ^ s >> 25;
+
+
+//					const uint64_t s = (stateA += 0xD1342543DE82EF95u);
+//    				const uint64_t z = (s ^ s >> 31) * (stateB += 0xB1E131D6149D9796u);
+//      			return z ^ z >> 25;
+
+////  BCFN(2+1,13-0,T)                  R= +17.9  p =  4.3e-9   very suspicious  
+//					const uint64_t s = (stateA += 0xCB9C59B3F9F87D4Du);
+//    				const uint64_t z = (s ^ s >> 31) * (stateB += 0xF468D97FAB12104Au);
+//      			return z ^ z >> 25;
+
+//// No anomalies through 32TB, but at 64TB it gets 4 TMFn anomalies plus:
+////  BCFN(2+1,13-0,T)                  R= +13.8  p =  6.6e-7   suspicious
+//					const uint64_t s = (stateA += 0xCB9C59B3F9F87D4DL);
+//    				const uint64_t z = (s ^ s >> 31) * (stateB += 0x9738B367F3F0FA9Au);
+//					return z ^ z >> 26;
+
+					const uint64_t s = (stateA += 0xD1342543DE82EF95u);
+    				const uint64_t z = (s ^ s >> 31) * (stateB += 0x9738B367F3F0FA9Au);
+					return z ^ z >> 26;
+
+//0xCC62FCEB9202FAADu
+//0x9738B367F3F0FA9Au
+
+//0xCB9C59B3F9F87D4DL 0xF468D97FAB12104AL
+
+//0x9E3779B97F4A7C15u
 
 					//const uint64_t s = (stateA += 0xEB44ACCAB455D165ULL);
         			//const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
@@ -2307,11 +2342,17 @@ return z ^ z >> 28u;
 					walker->handle(stateA);
 					walker->handle(stateB);
 					stateB |= 1U;
+//					walker->handle(incA);
+//					incA |= 1U;
+//					walker->handle(incB);
+//					incB *= 2U;
+//					incB |= 2U;
 					//stateB = (stateB & UINT64_C(0x7FFFFFFF)) + (stateB >> 31);
 					//if (stateB == 0) stateB = 1;
 					//stateA = 0;
 					//stateB = 0;
-					printf("stateA is 0x%016X, stateB is 0x%016X\r\n", stateA, stateB);
+//					printf("stateA is 0x%016LX, stateB is 0x%016LX, incA is 0x%016LX, incB is 0x%016LX\r\n", stateA, stateB, incA, incB);
+					printf("stateA is 0x%016LX, stateB is 0x%016LX\r\n", stateA, stateB);
 				}
 
 				Uint32 ta32::raw32() {

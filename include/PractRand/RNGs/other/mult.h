@@ -467,7 +467,7 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 				};
 				class mingler : public vRNG64 {
-					Uint64 stateA, stateB;
+					Uint64 stateA, stateB, incA, incB;
 				public:
 					Uint64 raw64();
 					std::string get_name() const;
