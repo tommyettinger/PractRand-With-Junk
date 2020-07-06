@@ -2320,10 +2320,22 @@ return z ^ z >> 28u;
 //    				const uint64_t z = (s ^ s >> 31) * (stateB += 0x9738B367F3F0FA9Au);
 //					return z ^ z >> 26;
 
-					const uint64_t s = (stateA += 0xD1342543DE82EF95u);
-    				const uint64_t z = (s ^ s >> 31) * (stateB += 0x9738B367F3F0FA9Au);
-					return z ^ z >> 26;
+//// This one's very strong, with no anomalies in the first 32TB and just one "unusual" at 64TB:
 
+////rng=mingler, seed=0x0
+////length= 64 terabytes (2^46 bytes), time= 234778 seconds
+////  Test Name                         Raw       Processed     Evaluation
+////  BCFN(2+1,13-0,T)                  R= +10.2  p =  5.7e-5   unusual          
+////  ...and 1158 test result(s) without anomalies
+
+					const uint64_t s = (stateA += 0xCB9C59B3F9F87D4Du);
+    				const uint64_t z = (s ^ s >> 31) * (stateB += 0x3463A64C060782B2u);
+					return z ^ z >> 27;
+
+////tmfn at 32, failures at 64
+//0x98C5F9D72405F55Au
+
+//0xFA346CBFD5890825u
 //0xCC62FCEB9202FAADu
 //0x9738B367F3F0FA9Au
 
