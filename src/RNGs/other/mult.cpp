@@ -2328,9 +2328,23 @@ return z ^ z >> 28u;
 ////  BCFN(2+1,13-0,T)                  R= +10.2  p =  5.7e-5   unusual          
 ////  ...and 1158 test result(s) without anomalies
 
-					const uint64_t s = (stateA += 0xCB9C59B3F9F87D4Du);
-    				const uint64_t z = (s ^ s >> 31) * (stateB += 0x3463A64C060782B2u);
-					return z ^ z >> 27;
+//// But, on a different seed, it's a different story.
+////rng=mingler, seed=0x1
+////length= 64 terabytes (2^46 bytes), time= 235817 seconds
+////  Test Name                         Raw       Processed     Evaluation
+////  BCFN(2+1,13-0,T)                  R= +17.2  p =  9.5e-9   very suspicious  
+////  [Low1/64]TMFn(2+12):wl            R= +22.1  p~=   8e-7    unusual          
+////  ...and 1157 test result(s) without anomalies
+
+//					const uint64_t s = (stateA += 0xCB9C59B3F9F87D4Du);
+//    				const uint64_t z = (s ^ s >> 31) * (stateB += 0x3463A64C060782B2u);
+//					return z ^ z >> 27;
+
+// uses an MCG instead of a Weyl sequence for stateB; seems to help quality, probably not speed.
+					uint64_t a = (stateA += 0xCB9C59B3F9F87D4DL);
+					a ^= a >> 31;
+					a *= (stateB *= 0xCC62FCEB9202FAADu);
+					return a ^ a >> 27;
 
 ////tmfn at 32, failures at 64
 //0x98C5F9D72405F55Au
