@@ -8,13 +8,26 @@ This set is of RNGs that use at least one of the following:
 2. complex math functions (sqrt, log/exp, sin/cos, etc)
 3. anything else not covered by simple.h, mult.h, indirection.h, or fibonacci.h
 */
+#include <immintrin.h>
 
 namespace PractRand {
 	namespace RNGs {
 		namespace Polymorphic {
 			namespace NotRecommended {
 				//class icg32_16;
-				//class eicg32_16;
+				//class eicg32_16;                  
+                
+
+				class aesdragontamer : public vRNG64 {
+					__m128i state;
+					__m128i increment;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
+
+
 			}
 		}
 	}

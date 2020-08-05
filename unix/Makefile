@@ -22,7 +22,7 @@ CXXFLAGS = -g $(addprefix -I,$(INCLUDES)) -Ofast
 LDFLAGS = $(CXXFLAGS)
 
 # ifeq ($(shell uname -s),Linux)
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++11 -msse4.1 -maes
 LDFLAGS += -lpthread
 # endif
 
@@ -55,6 +55,7 @@ SRC_OBJS = \
 	RNGs/other/indirection.o \
 	RNGs/other/mult.o \
 	RNGs/other/simple.o \
+	RNGs/other/special.o \
 	RNGs/other/transform.o
 
 LIB_OBJS = \

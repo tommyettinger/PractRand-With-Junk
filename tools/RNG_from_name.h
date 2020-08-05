@@ -128,6 +128,7 @@ namespace PractRand {
 				"xrsr_rev_mul",
 				"twirl32",
 				"zig32",
+				"aesdragontamer",
 				NULL
 			};
 			const int num_nonrecommended_nonlcg = sizeof(nonrecommended_nonlcg) / sizeof(nonrecommended_nonlcg[0]) - 1;
@@ -662,6 +663,9 @@ namespace RNG_Factories {
 		REGISTER_RNG_1(genindD)
 		REGISTER_RNG_1(genindE)
 		REGISTER_RNG_1(genindF)
+
+		// include/PractRand/RNGs/other/special.h
+			REGISTER_RNG_0(aesdragontamer)
 
 		// include/PractRand/RNGs/other/transform.h
 		RNG_Factories::RNG_factory_index["BDS"] = BDS_factory;
