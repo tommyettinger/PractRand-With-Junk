@@ -22,7 +22,7 @@ CXXFLAGS = -g $(addprefix -I,$(INCLUDES)) -Ofast
 LDFLAGS = $(CXXFLAGS)
 
 # ifeq ($(shell uname -s),Linux)
-CXXFLAGS += -std=c++11 -msse4.1 -maes
+CXXFLAGS += -std=c++11 -mavx2 -maes
 LDFLAGS += -lpthread
 # endif
 

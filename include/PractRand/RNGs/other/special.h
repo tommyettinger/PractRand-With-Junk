@@ -21,7 +21,10 @@ namespace PractRand {
 				class aesdragontamer : public vRNG64 {
 					__m128i state;
 					__m128i increment;
+					Uint64 buf[4];
+					int idx;
 				public:
+					aesdragontamer();
 					Uint64 raw64();
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
