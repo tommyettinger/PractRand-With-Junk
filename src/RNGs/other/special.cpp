@@ -16,6 +16,7 @@ namespace PractRand {
 			namespace NotRecommended {
                 /*
                 Passes 64TB with one unusual anomaly at 256GB, when tested without the change to increment (which is also the stream).
+                With the increment constantly changing, this has one anomaly at 512GB instead, and still passes 64TB.
                 The increment shouldn't change by adding an odd number; that would result in an even increment and that halves the period, or worse.
                 I use 0x9E3779B97F4A7C16 here instead of the pi-based number; its last bits are 0b10, which allows 2 to the 63 streams.
                 More streams are possible by adding a different number to the otherwise-unchanged first 64 bits of increment.
@@ -29,7 +30,7 @@ namespace PractRand {
                         __m128i penultimate2 = _mm_aesdec_si128(penultimate, increment); 
                         __m256i full = _mm256_insertf128_si256(_mm256_castsi128_si256(penultimate2), penultimate1, 1);
                         _mm256_storeu_si256((__m256i *) buf, full);
-                        ////Testing this now
+                        ////Tested this too, it works to at least 64TB, constantly changing seed.
                         increment = _mm_add_epi64(increment, _mm_set_epi64x(0u, 0x9E3779B97F4A7C16u));
                     }
                     return buf[idx &= 3];
