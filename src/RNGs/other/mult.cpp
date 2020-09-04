@@ -2340,11 +2340,67 @@ return z ^ z >> 28u;
 //    				const uint64_t z = (s ^ s >> 31) * (stateB += 0x3463A64C060782B2u);
 //					return z ^ z >> 27;
 
-// uses an MCG instead of a Weyl sequence for stateB; seems to help quality, probably not speed.
-					uint64_t a = (stateA += 0xCB9C59B3F9F87D4DL);
-					a ^= a >> 31;
-					a *= (stateB *= 0xCC62FCEB9202FAADu);
-					return a ^ a >> 27;
+
+//// Partly tried this, seemed fine to at least 256GB
+
+//	  				uint64_t a = (stateA += 0xCB9C59B3F9F87D4Du);
+//					if(a) a = (a ^ a >> 31) * (stateB += 0x3463A64C060782B2u);
+//					return a ^ a >> 27;
+
+                    // promising. no anomalies in the first 32GB, but that isn't much.
+					//const uint64_t a = ((stateA = stateA * 0xD1342543DE82EF95u + 0xCC62FCEB9202FAADu) >> 31) * (stateB += 0x3463A64C060782B2u);
+					//return a ^ a >> 27;
+
+					//const uint64_t a = ((stateA += 0xCC62FCEB9202FAADu)) * (stateB += 0x3463A64C060782B2u);
+					//return a ^ a >> 27;
+
+
+//					const uint64_t s = (stateA += 0xCB9C59B3F9F87D4Du);
+//					const uint64_t t = (stateB += 0x9E3779B97F4A7C16u) * (s ^ s >> 31);
+////					const uint64_t t = (s ? (stateB += 0x91E10DA5C79E7B1Eu) * (s ^ s >> 31) : 0);
+//					return t ^ t >> 27;
+
+//					uint64_t s = (stateA += 0xEA1FBB3AA44F0B9Du);
+//					const uint64_t t = ((s ^= s >> 31) ? (stateB += 0x841C6FFBC5B6AF25u) : 0u);
+//					s *= ((t ^ t << 9) | 1u);
+//					return s ^ s >> 27;
+
+//					const uint64_t s = (stateA += 0xCB9C59B3F9F87D4Du);
+//    				uint64_t z = (s ^ s >> 31) * (stateB += 0x3463A64C060782B2u);
+//					z ^= z >> 23;
+//					return z ^ z >> 27;
+
+
+//// Current TangleRNG; passes 64TB with no anomalies on seed=1
+//// Also quite fast on the JVM; period is 2 to the 64, with 2 to the 63 possible streams.
+//// This particular set of large constants and shift amounts does well; it probably isn't unique.
+//// The first large constant must be odd to guarantee full period; other than that, a lot of constants were tested.
+//// The first is a probable prime according to Java's BigInteger, which uses Lucas-Lehmer. I don't think primality is required.
+//// The second large constant is 2 to the 64 divided by the golden ratio, rounded to the nearest integer.
+//// The second constant needs to be 2 times any odd integer; equivalently, it must be equal to 2, mod 4.
+//// This requirement, along with stateB always starting as an odd number, keeps stateB odd, and ensures stateB will have
+////   been all possible odd numbers twice over the period. As a multiplier, stateB must be odd.
+//// The double-xorshift is a bijection, as is the earlier single-xorshift, but I don't know how easy it is to recover the state from 2 or more outputs.
+//// This generator is not equidistributed over its period, but if you sequentially changed streams each time period was exhausted (every several years),
+////   then you'd have a period of 2 to the 127, one-dimensionally equidistributed. You'd also be dead for a few quintillion years.
+					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x9E3779B97F4A7C16UL);
+					return z ^ z >> 26 ^ z >> 6;
+
+//0xde01abbf8f022f55u 34 //problems
+//0x61C8864680B583E9u 26
+//0x9E3779B97F4A7C16u 38
+//0xC13FA9A902A6328Fu 30
+//0x91E10DA5C79E7B1Du 34
+
+//0xCC62FCEB9202CAB9u 32
+//0x05CB93402A76F7DAu 32
+
+//0xD1342543DE82EF23u 31
+//0x74ED9428DE96EA4Au 33
+//0xCB9C59B3F9F87D4DL  0x3463A64C060782B2L
+
+//0xD1342543DE82EF95u
 
 ////tmfn at 32, failures at 64
 //0x98C5F9D72405F55Au
@@ -2352,7 +2408,6 @@ return z ^ z >> 28u;
 //0xFA346CBFD5890825u
 //0xCC62FCEB9202FAADu
 //0x9738B367F3F0FA9Au
-
 //0xCB9C59B3F9F87D4DL 0xF468D97FAB12104AL
 
 //0x9E3779B97F4A7C15u
