@@ -49,6 +49,13 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				class xorshift128plus : public vRNG64 {
+					Uint64 seed0, seed1;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 				class xorshift64of128 : public vRNG64 {
 					//the constants are still in need of tuning
 					Uint64 high, low;

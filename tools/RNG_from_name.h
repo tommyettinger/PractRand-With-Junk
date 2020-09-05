@@ -101,6 +101,7 @@ namespace PractRand {
 				"oriole64",
 				"xoshiro256starstar",
 				"xoshiro256scramjet",
+				"xorshift128plus",
 				NULL
 			};
 			const int num_nonrecommended_simple = sizeof(nonrecommended_simple) / sizeof(nonrecommended_simple[0]) - 1;
@@ -491,6 +492,7 @@ namespace RNG_Factories {
 		REGISTER_RNG_0(xsaltc16x3)
 		REGISTER_RNG_0(xorshift32)
 		REGISTER_RNG_0(xorshift64)
+		REGISTER_RNG_0(xorshift128plus)
 		REGISTER_RNG_0(xorshift32of128)
 		REGISTER_RNG_0(xorshift64of128)
 		REGISTER_RNG_0(xorshift16of32)

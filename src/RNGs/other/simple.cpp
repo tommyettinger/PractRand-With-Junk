@@ -76,6 +76,26 @@ namespace PractRand {
 					walker->handle(a);
 					if (!a) a = 1;
 				}
+
+				Uint64 xorshift128plus::raw64() {
+					Uint64 s1 = seed0;
+					Uint64 s0 = seed1;
+					seed0 = s0;
+					s1 ^= s1 << 23;
+					//// RandomXS128; fails quickly on mostly the low 8 bits.
+					return (seed1 = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26))) + s0;
+					//// does fine to 1TB, at least; no anomalies.
+					//return rotate64((seed1 = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26))) * 5, 29) * 257;
+					// xoshiro256** scrambler, seems to be fine.
+					//return rotate64((seed1 = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26))) * 5, 7) * 9;
+				}
+				std::string xorshift128plus::get_name() const { return "xorshift128plus"; }
+				void xorshift128plus::walk_state(StateWalkingObject *walker) {
+					walker->handle(seed0);
+					walker->handle(seed1);
+					if (!(seed0|seed1)) seed0 = 1;
+				}
+
 				void xorshift64of128::xrs(int bits) {
 					if (bits < 64) {
 						low ^= low >> bits;
