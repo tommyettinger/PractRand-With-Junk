@@ -2383,9 +2383,19 @@ return z ^ z >> 28u;
 //// The double-xorshift is a bijection, as is the earlier single-xorshift, but I don't know how easy it is to recover the state from 2 or more outputs.
 //// This generator is not equidistributed over its period, but if you sequentially changed streams each time period was exhausted (every several years),
 ////   then you'd have a period of 2 to the 127, one-dimensionally equidistributed. You'd also be dead for a few quintillion years.
+//					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+//        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x9E3779B97F4A7C16UL);
+//					return z ^ z >> 26 ^ z >> 6;
+
+//// passes 32TB, no anomalies, but fails with BCFN at 64TB
+//					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+//        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x74ED9428DE96EA4AUL);
+//					return z ^ z >> 27;
+
+//// mildly suspicious at 32TB, some other anomalies on the way.
 					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
-        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x9E3779B97F4A7C16UL);
-					return z ^ z >> 26 ^ z >> 6;
+        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x61C8864680B583EAUL);
+					return z ^ z >> 27;
 
 //0xde01abbf8f022f55u 34 //problems
 //0x61C8864680B583E9u 26
