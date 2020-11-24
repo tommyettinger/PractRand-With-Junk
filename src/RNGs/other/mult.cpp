@@ -2393,9 +2393,18 @@ return z ^ z >> 28u;
 //					return z ^ z >> 27;
 
 //// mildly suspicious at 32TB, some other anomalies on the way.
-					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
-        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x61C8864680B583EAUL);
-					return z ^ z >> 27;
+//					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+//        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x61C8864680B583EAUL);
+//					return z ^ z >> 27;
+
+//					const uint64_t s = (stateA += 0xC6BC279692B5C323UL);
+//        			const uint64_t z = (s ^ s >> 31) * (stateB += 0x9A1AD7561A3AC55AUL);
+//					return z ^ z >> 25;
+
+//0x9A1AD7561A3AC55AUL 32
+//0x9794A2A79714EA96UL 32
+
+//0x95B534A1ACCD52DAUL 32
 
 //0xde01abbf8f022f55u 34 //problems
 //0x61C8864680B583E9u 26
@@ -2426,6 +2435,14 @@ return z ^ z >> 28u;
         			//const uint64_t z = (s ^ s >> 31 ^ s >> 9) * 0xE7037ED1A0B428DBULL;
 					//return z ^ z >> 27;
 					// mul:C6BC279692B5C323,xorr:31,xorr:17,mul,xorr:26
+
+					// passes 32TB with no anomalies, but gets VERY SUSPICIOUS Gap test at 64 TB
+	  				//uint64_t a = (stateA += 0x9E3779B97F4A7C15UL); //0xC6BC279692B5C323UL //0xCB9C59B3F9F87D4DUL
+					//a = (a ^ rotate64(a, 38) ^ rotate64(a, 19)) * 0xCC62FCEB9202FAADUL;
+					//return a ^ a >> 43 ^ a >> 27;
+	  				uint64_t a = (stateA += 0x9E3779B97F4A7C15UL); //0xC6BC279692B5C323UL //0xCB9C59B3F9F87D4DUL
+					a = (a ^ rotate64(a, 26) ^ rotate64(a, 45)) * 0xCC62FCEB9202FAADUL;
+					return a ^ a >> 43 ^ a >> 27;
 
 				}
 				std::string mingler::get_name() const { return "mingler"; }
@@ -3296,11 +3313,14 @@ return z ^ z >> 28u;
 				}
 
 				Uint64 moremur64::raw64() { // named incorrectly, may name later... quarterback64 , due to use of 25 as a rotation?
-					Uint64 x = (state++);
-					x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
-					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
-					x ^= x >> 27;
-					return x;
+				    const uint64_t s = (state ^ 0x9E3779B97F4A7C15u) * 0xC6BC279692B5C323u;
+					//return state += s ^ s >> 41 ^ s >> 23; 0xD1342543DE82EF23
+					return state += (s ^ rotate64(s, 23) ^ rotate64(s, 41));
+					//Uint64 x = (state++);
+					//x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
+					//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					//x ^= x >> 27;
+					//return x;
 					// 0x9E3779B97F4A7C15UL
 
 				    // passes 32TB with two "unusual" anomalies, both BCFN, at 2TB and 4TB.
@@ -3344,8 +3364,8 @@ return z ^ z >> 28u;
 				}
 				std::string moremur64::get_name() const { return "moremur64"; }
 				void moremur64::walk_state(StateWalkingObject *walker) {
-					state = 0UL; // should only be used during the intensive many-short-tests period
-					//walker->handle(state);
+					//state = 0UL; // should only be used during the intensive many-short-tests period
+					walker->handle(state);
 				}
 				
 
