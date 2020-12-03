@@ -2440,9 +2440,14 @@ return z ^ z >> 28u;
 	  				//uint64_t a = (stateA += 0x9E3779B97F4A7C15UL); //0xC6BC279692B5C323UL //0xCB9C59B3F9F87D4DUL
 					//a = (a ^ rotate64(a, 38) ^ rotate64(a, 19)) * 0xCC62FCEB9202FAADUL;
 					//return a ^ a >> 43 ^ a >> 27;
-	  				uint64_t a = (stateA += 0x9E3779B97F4A7C15UL); //0xC6BC279692B5C323UL //0xCB9C59B3F9F87D4DUL
-					a = (a ^ rotate64(a, 26) ^ rotate64(a, 45)) * 0xCC62FCEB9202FAADUL;
-					return a ^ a >> 43 ^ a >> 27;
+
+					//0xC6BC279692B5C323UL //0xCB9C59B3F9F87D4DUL
+
+					// Passes 64TB with just one early (and minor) anomaly!
+					// [Low4/64]DC6-9x1Bytes-1           R=  -5.2  p =1-1.4e-3   unusual
+	  				uint64_t a = (stateA += 0x9E3779B97F4A7C15UL);
+					a = (a ^ rotate64(a, 47) ^ rotate64(a, 23)) * 0xCC62FCEB9202FAADUL;
+					return a ^ a >> 30 ^ a >> 26;
 
 				}
 				std::string mingler::get_name() const { return "mingler"; }
