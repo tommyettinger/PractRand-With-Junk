@@ -2446,7 +2446,14 @@ return z ^ z >> 28u;
 					// Passes 64TB with just one early (and minor) anomaly! On seed 0:
 					// [Low4/64]DC6-9x1Bytes-1           R=  -5.2  p =1-1.4e-3   unusual
 					// On seed 1, no anomalies at all in 64TB of testing.
-	  				uint64_t a = (stateA += 0x9E3779B97F4A7C15UL);
+	  				//uint64_t a = (stateA += 0x9E3779B97F4A7C15UL);
+					//a = (a ^ rotate64(a, 47) ^ rotate64(a, 23)) * 0xCC62FCEB9202FAADUL;
+					//return a ^ a >> 30 ^ a >> 26;
+
+	  				uint64_t a = (stateA+= 0x82B3C6EF372FE94FUL);
+					  // 0xF1DE83E19937733DUL is the modular multiplicative inverse of 0x9E3779B97F4A7C15UL.
+					  // 0x82B3C6EF372FE94FULis that rotated right by 11,
+					a = rotate64(a, 11) * 0x9E3779B97F4A7C15UL;
 					a = (a ^ rotate64(a, 47) ^ rotate64(a, 23)) * 0xCC62FCEB9202FAADUL;
 					return a ^ a >> 30 ^ a >> 26;
 
