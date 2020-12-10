@@ -2450,10 +2450,16 @@ return z ^ z >> 28u;
 					//a = (a ^ rotate64(a, 47) ^ rotate64(a, 23)) * 0xCC62FCEB9202FAADUL;
 					//return a ^ a >> 30 ^ a >> 26;
 
-	  				uint64_t a = (stateA+= 0x82B3C6EF372FE94FUL);
+					//fails at 4TB, even with extra multiply, when using 1 as the increment.
 					  // 0xF1DE83E19937733DUL is the modular multiplicative inverse of 0x9E3779B97F4A7C15UL.
-					  // 0x82B3C6EF372FE94FULis that rotated right by 11,
-					a = rotate64(a, 11) * 0x9E3779B97F4A7C15UL;
+					  // 0x82B3C6EF372FE94FUL is that rotated right by 11; when used as the increment, it passes 64TB with two anomalies, both DC6-9.
+					//uint64_t a = ++state;
+					//a = rotate64(a, 11) * 0x9E3779B97F4A7C15UL;
+					//a = (a ^ rotate64(a, 47) ^ rotate64(a, 23)) * 0xCC62FCEB9202FAADUL;
+					//return a ^ a >> 30 ^ a >> 26;
+
+
+	  				uint64_t a = (++stateA ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5C323UL;
 					a = (a ^ rotate64(a, 47) ^ rotate64(a, 23)) * 0xCC62FCEB9202FAADUL;
 					return a ^ a >> 30 ^ a >> 26;
 
