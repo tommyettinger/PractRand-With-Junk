@@ -547,6 +547,14 @@ namespace PractRand {
 				private:
 					uint8_t result();
 				};
+
+				class acorn64_10 : public vRNG64 {
+					Uint64 a, b, c, d, e, f, g, h, i, j, stream;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 			}
 		}
 	}

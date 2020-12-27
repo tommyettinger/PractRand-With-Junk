@@ -1554,6 +1554,29 @@ namespace PractRand {
 					walker->handle(board[6]);
 					walker->handle(board[7]);
 				}
+
+				Uint64 acorn64_10::raw64() {
+				    return (j += i += h += g += f += e += d += c += b += a += stream);
+//					t = (t ^ t >> 31) * (stream += 0x9E3779B97F4A7C16UL);
+//					return t ^ t >> 26 ^ t >> 6;
+				}
+				std::string acorn64_10::get_name() const { return "acorn64_10"; }
+				void acorn64_10::walk_state(StateWalkingObject *walker) {
+					walker->handle(stream);
+					stream |= 1U;
+					walker->handle(a);
+					walker->handle(b);
+					walker->handle(c);
+					walker->handle(d);
+					walker->handle(e);
+					walker->handle(f);
+					walker->handle(g);
+					walker->handle(h);
+					walker->handle(i);
+					walker->handle(j);
+				}
+
+
 			}
 		}
 	}
