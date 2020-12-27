@@ -2466,17 +2466,31 @@ return z ^ z >> 28u;
 	  				
 					//return stateA = (stateA ^ rotate64(stateA, 47) ^ rotate64(stateA, 23) ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5C323UL;
 					
-					// passes 64TB with no anomalies!
-					uint64_t a = (stateA = stateA * 0xCC62FCEB9202FAADUL + 0x9E3779B97F4A7C15UL);
-					a = (a ^ a >> 31) * 0xC6BC279692B5C323UL;
-					return a ^ a >> 25;
+					//// passes 64TB with no anomalies!
+					//// ShinyRNG
+					//uint64_t a = (stateA = stateA * 0xCC62FCEB9202FAADUL + 0x9E3779B97F4A7C15UL);
+					//a = (a ^ a >> 31) * 0xC6BC279692B5C323UL;
+					//return a ^ a >> 25;
+
+					//const Uint64 b = (stateB = (stateB >> 1ULL ^ (0ULL - (stateB & 1ULL) & 0xD800000000000000ULL)));
+					//const Uint64 b = (stateB += 0xCC62FCEB9202FAADUL);
+					
+					////GingerRNG; passes 64TB with no anomalies.
+					////Period is very good: (2 to the 64) * ((2 to the 64) - 1)
+					// 1-dimensionally equidistributed, and without the caveat that xoroshiro has (xoroshiro and xoshiro generate 0 less often).
+				    Uint64 s = (stateA += 0xC6BC279692B5C323UL ^ (stateB = (stateB >> 1ULL ^ (0ULL - (stateB & 1ULL) & 0xD800000000000000ULL))));
+					s = (s ^ s >> 31) * 0xCC62FCEB9202FAADUL;
+					return s ^ s >> 28;
 
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
-					stateB |= 1U;
+					if(stateB == 0) stateB = 1U;
+					stateA |= 1U;
+//					stateB |= 1U;
+
 //					walker->handle(incA);
 //					incA |= 1U;
 //					walker->handle(incB);
