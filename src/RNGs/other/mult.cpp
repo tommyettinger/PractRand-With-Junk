@@ -2474,13 +2474,39 @@ return z ^ z >> 28u;
 
 					//const Uint64 b = (stateB = (stateB >> 1ULL ^ (0ULL - (stateB & 1ULL) & 0xD800000000000000ULL)));
 					//const Uint64 b = (stateB += 0xCC62FCEB9202FAADUL);
-					
+
 					////GingerRNG; passes 64TB with no anomalies.
 					////Period is very good: (2 to the 64) * ((2 to the 64) - 1)
 					// 1-dimensionally equidistributed, and without the caveat that xoroshiro has (xoroshiro and xoshiro generate 0 less often).
-				    Uint64 s = (stateA += 0xC6BC279692B5C323UL ^ (stateB = (stateB >> 1ULL ^ (0ULL - (stateB & 1ULL) & 0xD800000000000000ULL))));
-					s = (s ^ s >> 31) * 0xCC62FCEB9202FAADUL;
+//				    Uint64 s = (stateA += 0xC6BC279692B5C323UL ^ (stateB = (stateB >> 1ULL ^ (0ULL - (stateB & 1ULL) & 0xD800000000000000ULL))));
+//					s = (s ^ s >> 31) * 0xCC62FCEB9202FAADUL;
+//					return s ^ s >> 28;
+
+					//// nothing special. slower than above, gets 3 unusual anomalies over 64TB
+					//stateB ^= stateB << 7;
+					//const Uint64 s = (stateA += 0xC6BC279692B5C323UL ^ (stateB ^= stateB >> 17));
+					//return (s ^ s >> 31) * ((stateB ^= stateB >> 13) | 1UL);
+
+					////Problems with this one.
+					////It has this anomaly twice; "unusual" at 32TB and "very suspicious" at 64 TB:
+					////[Low4/64]FPF-14+6/16:(2,14-0)
+					////It also has two other "mildly suspicious" anomalies at 64TB, one FPF, one DC6-9.
+					//// I am also not yet certain that it has a good period; it's at minimum 0xFFFFFFFFFFFFFFFF0000000000000000, but should ideally be the square of that.
+//				    const uint64_t s = (stateA += 0xCC62FCEB9202FAADUL ^ (stateB = (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL))));
+//				    const uint64_t i = s * 0xC6BC279692B5C323UL ^ ((s < 0xD1342543DE82EF95UL) ? incA : (incA += 0x9E3779B97F4A7C15UL ^ (incB = (incB >> 1UL ^ (0UL - (incB & 1UL) & 0x8000000000000212UL)))));
+//					return i ^ i >> 30;
+
+					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
+					s = (s ^ s >> 31 ^ (stateB = s < 0xD1342543DE82EF95UL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xC6BC279692B5C323UL;
 					return s ^ s >> 28;
+
+//					return s ^ s >> (s >> 59) + 6;
+					//s = (s ^ s >> 31) * 0xCC62FCEB9202FAADUL;
+//					return s ^ s >> 28;
+//				    Uint64 s = (stateA += 0xC6BC279692B5C323UL);
+//					s = (s ^ s >> 31) * ((stateB += 0xCC62FCEB9202FAADUL & 0UL - (s < 0x9E3779B97F4A7C15UL)) | 1UL);
+//					s = (s ^ s >> 31) * ((stateB = (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL))) | 1UL);
+//					return s ^ s >> 28;
 
 				}
 				std::string mingler::get_name() const { return "mingler"; }
@@ -2488,7 +2514,10 @@ return z ^ z >> 28u;
 					walker->handle(stateA);
 					walker->handle(stateB);
 					if(stateB == 0) stateB = 1U;
-					stateA |= 1U;
+					walker->handle(incA);
+					walker->handle(incB);
+					if(incB == 0) incB = 1U;
+//					stateA |= 1U;
 //					stateB |= 1U;
 
 //					walker->handle(incA);
