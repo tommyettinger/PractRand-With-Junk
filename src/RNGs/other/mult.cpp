@@ -2496,6 +2496,8 @@ return z ^ z >> 28u;
 //				    const uint64_t i = s * 0xC6BC279692B5C323UL ^ ((s < 0xD1342543DE82EF95UL) ? incA : (incA += 0x9E3779B97F4A7C15UL ^ (incB = (incB >> 1UL ^ (0UL - (incB & 1UL) & 0x8000000000000212UL)))));
 //					return i ^ i >> 30;
 
+					////passes 64TB with one "unusual" anomaly at 64TB:
+					//// BCFN(2+0,13-0,T)
 					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
 					s = (s ^ s >> 31 ^ (stateB = s < 0xD1342543DE82EF95UL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xC6BC279692B5C323UL;
 					return s ^ s >> 28;
