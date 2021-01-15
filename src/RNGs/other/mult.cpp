@@ -2417,7 +2417,7 @@ return z ^ z >> 28u;
 
 //0xD1342543DE82EF23u 31
 //0x74ED9428DE96EA4Au 33
-//0xCB9C59B3F9F87D4DL  0x3463A64C060782B2L
+//0xCB9C59B3F9F87D4DUL  0x3463A64C060782B2L
 
 //0xD1342543DE82EF95u
 
@@ -2498,8 +2498,14 @@ return z ^ z >> 28u;
 
 					////passes 64TB with one "unusual" anomaly at 64TB:
 					//// BCFN(2+0,13-0,T)
+//					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
+//					s = (s ^ s >> 31 ^ (stateB = s < 0xD1342543DE82EF95UL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xC6BC279692B5C323UL;
+//					return s ^ s >> 28;
+					
+					////again, passes 64TB with one anomaly at 64TB:
+					//// [Low8/32]DC6-9x1Bytes-1           R=  -6.2  p =1-1.2e-3   unusual
 					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
-					s = (s ^ s >> 31 ^ (stateB = s < 0xD1342543DE82EF95UL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xC6BC279692B5C323UL;
+					s = (s ^ s >> 31 ^ (stateB = s < 0xBA987654321FEDCBUL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xD1342543DE82EF95UL;
 					return s ^ s >> 28;
 
 //					return s ^ s >> (s >> 59) + 6;
