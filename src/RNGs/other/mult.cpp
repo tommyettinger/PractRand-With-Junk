@@ -2504,9 +2504,18 @@ return z ^ z >> 28u;
 					
 					////again, passes 64TB with one anomaly at 64TB:
 					//// [Low8/32]DC6-9x1Bytes-1           R=  -6.2  p =1-1.2e-3   unusual
+//					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
+//					s = (s ^ s >> 31 ^ (stateB = s < 0xBA987654321FEDCBUL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xC6BC279692B5C323UL;
+//					return s ^ s >> 28;
+					
+					////again, passes 64TB with one anomaly, but this time "unusual" at just 2TB, and nothing before or after:
+					//// [Low4/32]FPF-14+6/16:all          R=  -5.3  p =1-1.0e-4   unusual
+					////I think this is an improvement!
+					//// Speed is good, on-par with SplitMix64: https://quick-bench.com/q/8bBSdbMZh5THGlKzXSq3y350Iiw
+					////1D equidistributed, period is 0xFFFFFFFFFFFFFFFF0000000000000000 .
 					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
-					s = (s ^ s >> 31 ^ (stateB = s < 0xBA987654321FEDCBUL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xD1342543DE82EF95UL;
-					return s ^ s >> 28;
+					s = (s ^ s >> 31 ^ (stateB = s < 0xD1342543DE82EF95UL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xC6BC279692B5C323UL;
+					return s ^ s >> 28 ^ s >> 5;
 
 //					return s ^ s >> (s >> 59) + 6;
 					//s = (s ^ s >> 31) * 0xCC62FCEB9202FAADUL;
