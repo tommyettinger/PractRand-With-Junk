@@ -2513,9 +2513,33 @@ return z ^ z >> 28u;
 					////I think this is an improvement!
 					//// Speed is good, on-par with SplitMix64: https://quick-bench.com/q/8bBSdbMZh5THGlKzXSq3y350Iiw
 					////1D equidistributed, period is 0xFFFFFFFFFFFFFFFF0000000000000000 .
-					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
-					s = (s ^ s >> 31 ^ (stateB = s < 0xD1342543DE82EF95UL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xC6BC279692B5C323UL;
-					return s ^ s >> 28 ^ s >> 5;
+//					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
+//					s = (s ^ s >> 31 ^ (stateB = s < 0xD1342543DE82EF95UL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL)))) * 0xC6BC279692B5C323UL;
+//					return s ^ s >> 28 ^ s >> 5;
+
+					////
+//					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
+//					s = (s ^ s >> 31 ^ (stateB = s < 0xDB4F0B9175AE2165UL ? stateB : (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0x8000000000001797UL)))) * 0xC6BC279692B5C323UL;
+//					return s ^ s >> 28 ^ s >> 6;
+
+//					//0xDB4F0B9175AE2165
+//					uint64_t s = (stateA += 0xCC62FCEB9202FAADUL);
+//					s = (s ^ s >> 31) * (s < 0xD1342543DE82EF95UL ? incB : (incB *= 0xF1357AEA2E62A9C5UL));
+//					return s ^ s >> 28 ^ s >> 5;
+					
+					//// GrognardRNG
+					//// Passes 64TB with no anomalies!
+					//// Grognard is an old French military position for a kind of heavy-weight-carrier.
+					//// This is certainly able to handle heavy loads of generation.
+					//// Period is 2 to the 128, exactly.
+					//// This should be able to step backwards, but not skip. It can leap by updating stateB without stateA.
+					//// The zero check for stateB's update allows Java to run this a bit faster without a conditional, I think.
+					uint64_t s = (stateA += 0xD1342543DE82EF95u);
+					const uint64_t t = (s ? (stateB += 0xB1E131D6149D9795u) : stateB);
+					s = (s ^ s >> 31 ^ s >> 21) * ((t ^ t << 9) | 1u);
+					return s ^ s >> 28;
+
+//*= 0xF1357AEA2E62A9C5UL
 
 //					return s ^ s >> (s >> 59) + 6;
 					//s = (s ^ s >> 31) * 0xCC62FCEB9202FAADUL;
@@ -2533,9 +2557,10 @@ return z ^ z >> 28u;
 					if(stateB == 0) stateB = 1U;
 					walker->handle(incA);
 					walker->handle(incB);
-					if(incB == 0) incB = 1U;
+					// if(incB == 0) incB = 1U;
 //					stateA |= 1U;
 //					stateB |= 1U;
+					incB |= 1U;
 
 //					walker->handle(incA);
 //					incA |= 1U;
