@@ -2534,9 +2534,19 @@ return z ^ z >> 28u;
 					//// Period is 2 to the 128, exactly.
 					//// This should be able to step backwards, but not skip. It can leap by updating stateB without stateA.
 					//// The zero check for stateB's update allows Java to run this a bit faster without a conditional, I think.
+					//uint64_t s = (stateA += 0xD1342543DE82EF95u);
+					//const uint64_t t = (s ? (stateB += 0xB1E131D6149D9795u) : stateB);
+					//s = (s ^ s >> 31 ^ s >> 21) * ((t ^ t << 9) | 1u);
+					//return s ^ s >> 28;
+
+					//// GrogRNG
+					//// Passes 64TB with no anomalies!
+					//// Period is 2 to the 128, exactly.
+					//// Like GrognardRNG, but stripped down a little.
+					//// This can step backwards, but not skip, though it can leap in 2-to-the-64 distances by updating stateB without stateA.
+					//// The zero check for stateB's update allows Java to run this a bit faster without a conditional, I think.
 					uint64_t s = (stateA += 0xD1342543DE82EF95u);
-					const uint64_t t = (s ? (stateB += 0xB1E131D6149D9795u) : stateB);
-					s = (s ^ s >> 31 ^ s >> 21) * ((t ^ t << 9) | 1u);
+					s = (s ^ s >> 31 ^ s >> 21) * ((s ? (stateB += 0xC6BC279692B5C323u) : stateB) | 1u);
 					return s ^ s >> 28;
 
 //*= 0xF1357AEA2E62A9C5UL
