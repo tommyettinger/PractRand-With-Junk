@@ -3490,6 +3490,29 @@ return z ^ z >> 28u;
 					walker->handle(state);
 				}
 				
+				Uint64 nr3::raw64() {
+					u = u * SeedU1 + SeedU2;
+            		v ^= v >> 17;
+            		v ^= v << 31;
+            		v ^= v >> 8;
+            		w = SeedU3 * (w & 0xFFFFFFFFUL) + (w >> 32);
+            		Uint64 x = u ^ (u << 21);
+            		x ^= x >> 35;
+            		x ^= x << 4;
+            		return (x + v) ^ w;
+				}
+				std::string nr3::get_name() const { return "nr3"; }
+				void nr3::walk_state(StateWalkingObject *walker) {
+					v = SeedV;
+					w = SeedW;
+					walker->handle(u);
+					u ^= v;
+					raw64();
+					v = u;
+					raw64();
+					w = v;
+					raw64();
+				}
 
 			}
 		}

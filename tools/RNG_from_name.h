@@ -131,6 +131,7 @@ namespace PractRand {
 				"twirl32",
 				"zig32",
 				"aesdragontamer",
+				"nr3",
 				NULL
 			};
 			const int num_nonrecommended_nonlcg = sizeof(nonrecommended_nonlcg) / sizeof(nonrecommended_nonlcg[0]) - 1;
@@ -617,6 +618,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(thrustAlt64)
 			REGISTER_RNG_0(twinLinear)
 			REGISTER_RNG_0(moremur64)
+			REGISTER_RNG_0(nr3)
 
 		// include/PractRand/RNGs/other/fibonacci.h
 		RNG_Factories::RNG_factory_index["bigbadlcg"] = bigbadlcg_factory;

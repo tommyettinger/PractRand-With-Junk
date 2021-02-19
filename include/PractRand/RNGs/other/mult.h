@@ -596,6 +596,21 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				// From https://gitlab.com/pomma89/troschuetz-random/-/blob/main/src/Troschuetz.Random/Generators/NR3Generator.cs
+				// Has a long period, and just a few "unusual" anomalies early on.
+				class nr3 : public vRNG64 {
+					Uint64 u, v, w;
+				public:
+					const Uint64 SeedU1 = 2862933555777941757UL;
+					const Uint64 SeedU2 = 7046029254386353087UL;
+					const Uint64 SeedU3 = 4294957665UL;
+					const Uint64 SeedV = 4101842887655102017UL;
+					const Uint64 SeedW = 1UL;
+
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 
 			}
 		}
