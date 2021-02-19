@@ -611,6 +611,18 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				// From https://gitlab.com/pomma89/troschuetz-random/-/blob/main/src/Troschuetz.Random/Generators/NR3Q1Generator.cs
+				// This is just a Marsaglia 64-bit xorshift generator with a multiplication at the end. It fails BRank horribly all-around, but nothing else early on.
+				class nr3q1 : public vRNG64 {
+					Uint64 v;
+				public:
+					const Uint64 SeedU = 2862933555777941757UL;
+					const Uint64 SeedV = 4101842887655102017UL;
+
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 
 			}
 		}
