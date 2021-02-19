@@ -3528,6 +3528,23 @@ return z ^ z >> 28u;
 					v = raw64();
 				}
 
+				Uint64 nr3q2::raw64() {
+		            v ^= v >> 17;
+		            v ^= v << 31;
+		            v ^= v >> 8;
+		            w = SeedU * (w & 0xFFFFFFFFUL) + (w >> 32);
+					return v ^ w;
+				}
+				std::string nr3q2::get_name() const { return "nr3q2"; }
+				void nr3q2::walk_state(StateWalkingObject *walker) {
+					walker->handle(v);
+            		w = SeedW;
+					v &= 0xFFFFFFFFUL;
+            		v ^= SeedV;
+            		w = raw64();
+            		v = raw64();
+				}
+
 			}
 		}
 	}
