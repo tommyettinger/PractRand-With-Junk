@@ -624,6 +624,7 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 				};
 				// From https://gitlab.com/pomma89/troschuetz-random/-/blob/main/src/Troschuetz.Random/Generators/NR3Q2Generator.cs
+				// Not much improvement over nr3q1, if any. Fails from the start on BRank.
 				class nr3q2 : public vRNG64 {
 					Uint64 v, w;
 				public:
@@ -631,6 +632,14 @@ namespace PractRand {
 					const Uint64 SeedV = 4101842887655102017UL;
 					const Uint64 SeedW = 1UL;
 
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
+
+				class nova : public vRNG64 {
+					Uint64 v, w;
+				public:
 					Uint64 raw64();
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);

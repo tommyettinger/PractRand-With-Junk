@@ -3545,6 +3545,28 @@ return z ^ z >> 28u;
             		v = raw64();
 				}
 
+				// Excellent considering this uses no multiplication.
+				// Barely gets one "unusual" anomaly at 1TB, but otherwise passes 64TB:
+				//   [Low1/64]Gap-16:B                 R=  +4.9  p =  4.0e-4   unusual
+				// Period is (2 to the 128) - (2 to the 64). 1D equidistributed.
+				Uint64 nova::raw64() {
+		            v ^= v >> 17;
+		            v ^= v << 31;
+		            v ^= v >> 8;
+
+					Uint64 x = (w += 0xC6BC279692B5C323UL ^ v);
+					x ^= x >> 41;
+					x += ~(x << 31);
+					return x ^ x >> 23;
+
+				}
+				std::string nova::get_name() const { return "nova"; }
+				void nova::walk_state(StateWalkingObject *walker) {
+					walker->handle(v);
+            		walker->handle(w);
+					if(!v) v = 0x9E3779B97F4A7C15UL;
+				}
+
 			}
 		}
 	}
