@@ -3489,7 +3489,13 @@ return z ^ z >> 28u;
 					//state = 0UL; // should only be used during the intensive many-short-tests period
 					walker->handle(state);
 				}
-				
+
+				// Surprisingly strong, considering how bad nr3q1 and nr3q2 are.
+				// Passes 64TB with one anomaly, "mildly suspicious" at 128GB:
+				// [Low4/64]BCFN(2+3,13-0,T)         R= -10.6  p =1-9.4e-6   mildly suspicious
+				// Note that this has slightly less restrictive seeding than Troschuetz.Random, because
+				// only u is affected by seeding, and all Uint64 values are valid for u. I'm not 100%
+				// certain the way this seeds w is valid for that MWC generator, though.
 				Uint64 nr3::raw64() {
 					u = u * SeedU1 + SeedU2;
             		v ^= v >> 17;
@@ -3508,12 +3514,14 @@ return z ^ z >> 28u;
 					walker->handle(u);
 					u ^= v;
 					raw64();
-					v = u;
+					if(u == 0UL) v = SeedV;
+					else v = u;
 					raw64();
 					w = v;
 					raw64();
 				}
 
+				// Fails BRank immediately, on many tests.
 				Uint64 nr3q1::raw64() {
 					v ^= v >> 21;
             		v ^= v << 35;
@@ -3528,6 +3536,7 @@ return z ^ z >> 28u;
 					v = raw64();
 				}
 
+				// Fails BRank immediately, on many tests.
 				Uint64 nr3q2::raw64() {
 		            v ^= v >> 17;
 		            v ^= v << 31;
