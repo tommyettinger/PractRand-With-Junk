@@ -82,12 +82,13 @@ namespace PractRand {
 					Uint64 s0 = seed1;
 					seed0 = s0;
 					s1 ^= s1 << 23;
+					seed1 = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26));
 					//// RandomXS128; fails quickly on mostly the low 8 bits.
-					return (seed1 = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26))) + s0;
+					return seed1 + s0;
 					//// does fine to 1TB, at least; no anomalies.
-					//return rotate64((seed1 = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26))) * 5, 29) * 257;
+					//return rotate64(seed1 * 5, 29) * 257;
 					// xoshiro256** scrambler, seems to be fine.
-					//return rotate64((seed1 = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26))) * 5, 7) * 9;
+					//return rotate64(seed1 * 5, 7) * 9;
 				}
 				std::string xorshift128plus::get_name() const { return "xorshift128plus"; }
 				void xorshift128plus::walk_state(StateWalkingObject *walker) {
