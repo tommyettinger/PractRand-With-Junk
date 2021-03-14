@@ -2545,11 +2545,20 @@ return z ^ z >> 28u;
 					//// Like GrognardRNG, but stripped down a little.
 					//// This can step backwards, but not skip, though it can leap in 2-to-the-64 distances by updating stateB without stateA.
 					//// The zero check for stateB's update allows Java to run this a bit faster without a conditional, I think.
-					uint64_t s = (stateA += 0xD1342543DE82EF95u);
-					s = (s ^ s >> 31 ^ s >> 21) * ((s ? (stateB += 0xC6BC279692B5C323u) : stateB) | 1u);
-					return s ^ s >> 28;
+					//uint64_t s = (stateA += 0xD1342543DE82EF95u);
+					//s = (s ^ s >> 31 ^ s >> 21) * ((s ? (stateB += 0xC6BC279692B5C323u) : stateB) | 1u);
+					//return s ^ s >> 28;
 
 //*= 0xF1357AEA2E62A9C5UL
+					//// TremorRNG
+					//// Passes 32TB with no anomalies, but then has a significant anomaly at 64TB:
+					//// BCFN(2+1,13-0,T)                  R= +14.0  p =  5.1e-7   suspicious
+					//// Period is 2 to the 128, exactly.
+					//// GrogRNG should be about the same speed or faster, and higher quality.
+					const uint64_t s = (stateA += 0xC6BC279692B5C323u);
+					const uint64_t t = (stateB += (s >= 0xC6BC279692B5C323u) ? 0u : 0x9E3779B97F4A7C15u);
+					const uint64_t z = (s ^ s >> 31) * (t | 1U);
+					return z ^ z >> 27;
 
 //					return s ^ s >> (s >> 59) + 6;
 					//s = (s ^ s >> 31) * 0xCC62FCEB9202FAADUL;
@@ -3576,7 +3585,7 @@ return z ^ z >> 28u;
 		            v ^= v << 35;
 		            v ^= v >> 21;
 
-					Uint64 x = (w += 0xC6BC279692B5C323UL);
+					uint64_t x = (w += 0xC6BC279692B5C323UL);
 					x ^= x >> 28;
 					x += ~(x << 31);
 					x ^= x >> 26;
