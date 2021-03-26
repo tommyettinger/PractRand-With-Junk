@@ -2555,10 +2555,10 @@ return z ^ z >> 28u;
 					//// BCFN(2+1,13-0,T)                  R= +14.0  p =  5.1e-7   suspicious
 					//// Period is 2 to the 128, exactly.
 					//// GrogRNG should be about the same speed or faster, and higher quality.
-					const uint64_t s = (stateA += 0xC6BC279692B5C323u);
-					const uint64_t t = (stateB += (s >= 0xC6BC279692B5C323u) ? 0u : 0x9E3779B97F4A7C15u);
-					const uint64_t z = (s ^ s >> 31) * (t | 1U);
-					return z ^ z >> 27;
+					//const uint64_t s = (stateA += 0xC6BC279692B5C323u);
+					//const uint64_t t = (stateB += (s >= 0xC6BC279692B5C323u) ? 0u : 0x9E3779B97F4A7C15u);
+					//const uint64_t z = (s ^ s >> 31) * (t | 1U);
+					//return z ^ z >> 27;
 
 //					return s ^ s >> (s >> 59) + 6;
 					//s = (s ^ s >> 31) * 0xCC62FCEB9202FAADUL;
@@ -2568,18 +2568,30 @@ return z ^ z >> 28u;
 //					s = (s ^ s >> 31) * ((stateB = (stateB >> 1UL ^ (0UL - (stateB & 1UL) & 0xD800000000000000UL))) | 1UL);
 //					return s ^ s >> 28;
 
+					//// WaltzRNG
+					//// Passes 64TB with no anomalies!
+					//// Period is 2 to the 128 minus 2 to the 64.
+					//// stateA can be any uint64_t. stateB must not be 0.
+					//// Should be 1D equidistributed.
+					//// Thanks to Pelle Evensen for suggesting the two-xorshift form for stateB, first found by Richard P. Brent
+					//// in https://www.jstatsoft.org/article/view/v011i05 .
+					uint64_t s = (stateA += 0xC6BC279692B5C323u);
+					s = (s ^ s >> 31 ^ s >> 5) * ((stateB ^= stateB << 9) | 1u);
+					stateB ^= stateB >> 7;
+					return s ^ s >> 28;
+
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
 					if(stateB == 0) stateB = 1U;
-					walker->handle(incA);
-					walker->handle(incB);
+//					walker->handle(incA);
+//					walker->handle(incB);
 					// if(incB == 0) incB = 1U;
 //					stateA |= 1U;
 //					stateB |= 1U;
-					incB |= 1U;
+//					incB |= 1U;
 
 //					walker->handle(incA);
 //					incA |= 1U;
