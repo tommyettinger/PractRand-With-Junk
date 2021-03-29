@@ -2575,11 +2575,18 @@ return z ^ z >> 28u;
 					//// Should be 1D equidistributed.
 					//// Thanks to Pelle Evensen for suggesting the two-xorshift form for stateB, first found by Richard P. Brent
 					//// in https://www.jstatsoft.org/article/view/v011i05 .
-					uint64_t s = (stateA += 0xC6BC279692B5C323u);
-					s = (s ^ s >> 31 ^ s >> 5) * ((stateB ^= stateB << 9) | 1u);
-					stateB ^= stateB >> 7;
+					uint64_t s = (stateA += 0xC6BC279692B5C323u), b = stateB;
+					s = (s ^ s >> 31 ^ s >> 5) * (b | 1u);
+					b ^= b >> 7;
+					stateB = b ^ b << 9;
 					return s ^ s >> 28;
-
+					//// Looked promising (one unusual anomaly at 512GB) until 64TB, where it gets this big problem:
+					////BCFN(2+1,13-0,T)                  R= +16.1  p =  3.6e-8   very suspicious
+					//uint64_t s = (stateA += 0xC6BC279692B5C323u), b = stateB;
+					//s = (s ^ s >> 31) * (b | 1u);
+					//b ^= b << 9;
+					//stateB = b ^ b >> 7;
+					//return s ^ s >> 28;
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
