@@ -1115,24 +1115,38 @@ namespace PractRand {
 					//state0 = rotate64(state0, 55) ^ tmp ^ (tmp << 14);
 					//state1 = rotate64(tmp, 36);
 					//return result;
-					const Uint64 s0 = state0;
-					Uint64 s1 = state1;
-					const Uint64 result = s0 + s1;// +(state2 = state2 * Uint64(0x41C64E6D) + Uint64(0x9E3779B97F4A7C15));
-					s1 ^= s0;
-					state0 = rotate64(s0, 47) ^ s1 ^ (s1 << 16); // a, b
-					state1 = rotate64(s1, 37); // c
-											   //return (state2 += rotate64(result, 15));
-					return rotate64(result, 9) + (state2 += Uint64(1));//0x6C8E9CF570932BD9
-																	   //state0 = rotate64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
-																	   //state1 = rotate64(s1, 37); // c
+					// const Uint64 s0 = state0;
+					// Uint64 s1 = state1;
+					// const Uint64 result = s0 + s1;// +(state2 = state2 * Uint64(0x41C64E6D) + Uint64(0x9E3779B97F4A7C15));
+					// s1 ^= s0;
+					// state0 = rotate64(s0, 47) ^ s1 ^ (s1 << 16); // a, b
+					// state1 = rotate64(s1, 37); // c
+					// return rotate64(result, 9) + (state2 += Uint64(1));//0x6C8E9CF570932BD9
+					// 												   //state0 = rotate64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+					// 												   //state1 = rotate64(s1, 37); // c
+					//// BlubberRNG, passes 64TB no anomalies.
+					//// based on Konadare192Px++, roughly.
+					//// Period is at least 2 to the 64 because state0 is a Weyl sequence.
+					//// It could be as high as 2 to the 192, but is likely to be smaller and have sub-cycles.
+					const uint64_t a0 = (state0 += 0xC6BC279692B5C323UL);
+					const uint64_t b0 = state1;
+					const uint64_t c0 = state2;
+					state1 = rotate64(c0 + b0, 39) ^ a0;
+					state2 = rotate64(a0 ^ c0, 23) - b0;
+					return a0 - b0 ^ c0;
 
+					//state0 = 0x71AF0AB5118A6E6DUL + b0;
+					// state0 = 0xC6BC279692B5C323UL + a0 ^ b0;
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state0);
 					walker->handle(state1);
-					state0 |= ((state0 | state1) == 0);
 					walker->handle(state2);
+					// walker->handle(state0);
+					// walker->handle(state1);
+					// state0 |= ((state0 | state1) == 0);
+					// walker->handle(state2);
 				}
 
 				Uint64 xoshiro256starstar::raw64() {
