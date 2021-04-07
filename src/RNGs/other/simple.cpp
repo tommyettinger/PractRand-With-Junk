@@ -1128,12 +1128,37 @@ namespace PractRand {
 					//// based on Konadare192Px++, roughly.
 					//// Period is at least 2 to the 64 because state0 is a Weyl sequence.
 					//// It could be as high as 2 to the 192, but is likely to be smaller and have sub-cycles.
-					const uint64_t a0 = (state0 += 0xC6BC279692B5C323UL);
+					//const uint64_t a0 = (state0 += 0xC6BC279692B5C323UL);
+					//const uint64_t b0 = state1;
+					//const uint64_t c0 = state2;
+					//state1 = rotate64(c0 + b0, 39) ^ a0;
+					//state2 = rotate64(a0 ^ c0, 23) - b0;
+					//return a0 - b0 ^ c0;
+
+					//const uint64_t a0 = (state0 += 0xC6BC279692B5C323UL);
+					//const uint64_t b0 = state1;
+					//const uint64_t c0 = state2;
+					//state1 = rotate64(c0 + b0, 39) ^ a0;
+					//state2 = rotate64(a0 ^ c0, 23) - b0;
+					//return c0;
+
+					//// GrouchoRNG, passes 64TB no anomalies.
+					//// also based on the Konadare family.
+					//// Minimal data dependency; state0 does not depend on its previous value, nor does state1 or state2.
+					//// Effectively an ARX algorithm, since the ~ it uses is equivalent to "^ 0xFFFFFFFFFFFFFFFFUL"
+					//// and the "- n" is equivalent to "+ 1 + (n ^ 0xFFFFFFFFFFFFFFFFUL)"
+					//// (Get it, Groucho ARX?)
+					const uint64_t a0 = state0;
 					const uint64_t b0 = state1;
 					const uint64_t c0 = state2;
-					state1 = rotate64(c0 + b0, 39) ^ a0;
-					state2 = rotate64(a0 ^ c0, 23) - b0;
+					state0 = b0 + ~c0;
+					state1 = rotate64(a0, 39) ^ c0;
+					state2 = rotate64(b0, 23) - a0;
 					return a0 - b0 ^ c0;
+
+// + 0x9E3779B97F4A7C15UL;
+// + 0xC6BC279692B5C323UL;
+// + 0x71AF0AB5118A6E6DUL;
 
 					//state0 = 0x71AF0AB5118A6E6DUL + b0;
 					// state0 = 0xC6BC279692B5C323UL + a0 ^ b0;
