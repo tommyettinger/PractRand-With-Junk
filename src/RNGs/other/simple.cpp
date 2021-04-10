@@ -1148,13 +1148,24 @@ namespace PractRand {
 					//// Effectively an ARX algorithm, since the ~ it uses is equivalent to "^ 0xFFFFFFFFFFFFFFFFUL"
 					//// and the "- n" is equivalent to "+ 1 + (n ^ 0xFFFFFFFFFFFFFFFFUL)"
 					//// (Get it, Groucho ARX?)
+					//const uint64_t a0 = state0;
+					//const uint64_t b0 = state1;
+					//const uint64_t c0 = state2;
+					//state0 = b0 + ~c0;
+					//state1 = rotate64(a0, 39) ^ c0;
+					//state2 = rotate64(b0, 23) - a0;
+					//return a0 - b0 ^ c0;
+
+					//// heartbreaker. Gets a "very suspicious" right at 64TB:
+					////  BCFN(2+2,13-0,T)                  R= +17.2  p =  9.4e-9   very suspicious
+					//// this is significantly faster than GrouchoRNG, though, so some aspect of this may be useful.
 					const uint64_t a0 = state0;
 					const uint64_t b0 = state1;
 					const uint64_t c0 = state2;
 					state0 = b0 + ~c0;
-					state1 = rotate64(a0, 39) ^ c0;
+					state1 = rotate64(a0, 45) ^ c0;
 					state2 = rotate64(b0, 23) - a0;
-					return a0 - b0 ^ c0;
+					return a0;
 
 // + 0x9E3779B97F4A7C15UL;
 // + 0xC6BC279692B5C323UL;
