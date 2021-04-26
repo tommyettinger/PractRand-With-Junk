@@ -1172,14 +1172,26 @@ namespace PractRand {
 					//// than RomuTrio, at least when implemented in Java (where both are very quick, especially on Java 16).
 					//// Like GrouchoRNG, it has minimal data dependency, and is an ARX-type generator. It does use the
 					//// ~ and - operators, but those are constant-time and equivalent to add and xor operations.
+					//const uint64_t a0 = state0;
+					//const uint64_t b0 = state1;
+					//const uint64_t c0 = state2;
+					//state0 = b0 + ~c0;
+					//state1 = rotate64(a0, 46) ^ c0;
+					//state2 = rotate64(b0, 23) - a0;
+					//return a0 + b0;
+
+					//// ChicoRNG, passes 64TB with no anomalies.
+					//// This is faster than HarpoRNG, due to returning a0 as-is.
+					//// Each of the subsequent states can be computed in parallel instructions, without
+					//// affecting the current return. This is also an ARX-type generator, though it uses a subtraction.
 					const uint64_t a0 = state0;
 					const uint64_t b0 = state1;
 					const uint64_t c0 = state2;
-					state0 = b0 + ~c0;
-					state1 = rotate64(a0, 46) ^ c0;
+					state0 = b0 ^ c0 + 0xC6BC279692B5C323UL;
+					state1 = rotate64(a0, 46) + c0;
 					state2 = rotate64(b0, 23) - a0;
-					return a0 + b0;
-					
+					return a0;
+
 
 // + 0x9E3779B97F4A7C15UL;
 // + 0xC6BC279692B5C323UL;
