@@ -1184,13 +1184,36 @@ namespace PractRand {
 					//// This is faster than HarpoRNG, due to returning a0 as-is.
 					//// Each of the subsequent states can be computed in parallel instructions, without
 					//// affecting the current return. This is also an ARX-type generator, though it uses a subtraction.
-					const uint64_t a0 = state0;
-					const uint64_t b0 = state1;
-					const uint64_t c0 = state2;
-					state0 = b0 ^ c0 + 0xC6BC279692B5C323UL;
-					state1 = rotate64(a0, 46) + c0;
-					state2 = rotate64(b0, 23) - a0;
-					return a0;
+					//const uint64_t a0 = state0;
+					//const uint64_t b0 = state1;
+					//const uint64_t c0 = state2;
+					//state0 = b0 ^ c0 + 0xC6BC279692B5C323UL;
+					//state1 = rotate64(a0, 46) + c0;
+					//state2 = rotate64(b0, 23) - a0;
+					//return a0;
+
+					//// "Chico2", passes 64TB with no anomalies.
+					//// hwd results unknown so far; testing ongoing.
+					//// (I was testing a different generator with hwd at the same time as this with PractRand).
+					//// (I'm an old man, I'm confused!)
+					//// Exhaustive searches for the pairs of rotation amounts with the best avalanche properties
+					//// yielded these values, 27 and 42, as outliers with among the best quality.
+					//const uint64_t a0 = state0;
+					//const uint64_t b0 = state1;
+					//const uint64_t c0 = state2;
+					//state0 = b0 ^ c0 + 0xC6BC279692B5C323UL;
+					//state1 = rotate64(a0, 27) + c0;
+					//state2 = rotate64(b0, 42) ^ a0;
+					//return b0;
+
+					//// Attempting to pare down RomuTrio for speed.
+					const uint64_t fa = state0;
+					const uint64_t fb = state1;
+					const uint64_t fc = state2;
+					state0 = 0xD1342543DE82EF95UL * fc;
+					state1 = fa + fb + fc;
+					state2 = rotate64(fb, 42) + 0xC6BC279692B5C323UL;
+					return fa;
 
 
 // + 0x9E3779B97F4A7C15UL;
