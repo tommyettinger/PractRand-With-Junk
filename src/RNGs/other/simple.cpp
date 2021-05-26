@@ -1217,6 +1217,9 @@ namespace PractRand {
 					//// Test Name                         Raw       Processed     Evaluation
 					//// [Low4/32]BCFN(2+2,13-0,T)         R=  +9.1  p =  2.0e-4   unusual
 					//// Attempting to pare down RomuTrio for speed.
+					////
+					//// Also note that this passes 2.5 PB of hwd testing without any issues.
+
 					//const uint64_t fa = state0;
 					//const uint64_t fb = state1;
 					//const uint64_t fc = state2;
@@ -1227,14 +1230,31 @@ namespace PractRand {
 
 					//// Experimenting with better bijections.
 					//// This currently fails BCFN very early.
-					const uint64_t a0 = state2;
-					const uint64_t b0 = state2 ^ state0;
-					const uint64_t c0 = state0 - state1;
-					state0 = 0xC6BC279692B5C323UL + a0;
-					state1 = rotate64(b0, 23);
-					state2 = rotate64(c0, 56);
-					return c0;
+					//const uint64_t a0 = state2;
+					//const uint64_t b0 = state2 ^ state0;
+					//const uint64_t c0 = state0 - state1;
+					//state0 = 0xC6BC279692B5C323UL + a0;
+					//state1 = rotate64(b0, 23);
+					//state2 = rotate64(c0, 56);
+					//return c0;
 
+					//const uint64_t a0 = state0;
+					//const uint64_t b0 = state1;
+					//const uint64_t c0 = state2;
+					//state0 = rotate64(b0, 20) ^ c0; 
+					//state1 = rotate64(c0, 57) + a0;
+					//state2 = b0 + 0xC6BC279692B5C323L;
+					//return a0;
+
+					//// MargeRNG, a slight tweak on an earlier generator that lets it pass 64TB with no anomalies.
+					//// It's also quite fast, and doesn't enter a known 1-length cycle with an all-0 state.
+					const uint64_t fa = state0;
+					const uint64_t fb = state1;
+					const uint64_t fc = state2;
+					state0 = 0xD1342543DE82EF95UL * fc;
+					state1 = fa ^ fb ^ fc;
+					state2 = rotate64(fb, 21) + 0xC6BC279692B5C323UL;
+					return fa;
 
 // + 0x9E3779B97F4A7C15UL;
 // + 0xC6BC279692B5C323UL;
