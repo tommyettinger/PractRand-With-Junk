@@ -1248,12 +1248,15 @@ namespace PractRand {
 
 					//// MargeRNG, a slight tweak on an earlier generator that lets it pass 64TB with no anomalies.
 					//// It's also quite fast, and doesn't enter a known 1-length cycle with an all-0 state.
+					//// This was also tested with left-rotations of 42 and 21; 42 had an unusually high amount of anomalies,
+					//// while 21 had serious issues in hwd testing at about 200 TB. Using 41 still passes 64TB with no anomalies,
+					//// and is still undergoing hwd testing (but has passed 400TB without issue there).
 					const uint64_t fa = state0;
 					const uint64_t fb = state1;
 					const uint64_t fc = state2;
 					state0 = 0xD1342543DE82EF95UL * fc;
 					state1 = fa ^ fb ^ fc;
-					state2 = rotate64(fb, 21) + 0xC6BC279692B5C323UL;
+					state2 = rotate64(fb, 41) + 0xC6BC279692B5C323UL;
 					return fa;
 
 // + 0x9E3779B97F4A7C15UL;
