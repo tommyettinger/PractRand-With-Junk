@@ -1,0 +1,4 @@
+echo "This is just so I can remember the specific invocations."
+cd unix
+make clean && make
+../bin/RNG_test YOUR_RNG_NAME_HERE -seed 0 -multithreaded -tf 2 -tlmax 64TB

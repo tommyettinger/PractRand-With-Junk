@@ -3617,6 +3617,30 @@ return z ^ z >> 28u;
 					if(!v) v = 0x9E3779B97F4A7C15UL;
 				}
 
+				Uint64 mars256::raw64() {
+					// Passes 64TB with no anomalies.
+					// Has notably non-random behavior if it starts with an all-zero state,
+					// returning each result twice successively after some initial returns of 0.
+					// If on that cycle (which has unknown length), it immediately fails hwd.
+					// Otherwise, it does pretty well with hwd; I don't know when it fails.
+					const uint64_t fa = stateA;
+					const uint64_t fb = stateB;
+					const uint64_t fc = stateC;
+					const uint64_t fd = stateD;
+					stateA = 0xD1342543DE82EF95UL * fd;
+					stateB = fa + 0xC6BC279692B5C323UL;
+					stateC = rotate64(fb, 47);
+					stateD = fa - fc;
+					return fd;
+				}
+				std::string mars256::get_name() const { return "mars256"; }
+				void mars256::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
+				}
+
 			}
 		}
 	}

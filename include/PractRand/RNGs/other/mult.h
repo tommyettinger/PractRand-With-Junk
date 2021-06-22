@@ -644,6 +644,13 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				class mars256 : public vRNG64 {
+					Uint64 stateA, stateB, stateC, stateD;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 
 			}
 		}
