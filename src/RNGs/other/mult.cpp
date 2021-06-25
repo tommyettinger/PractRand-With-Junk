@@ -3623,6 +3623,7 @@ return z ^ z >> 28u;
 					// returning each result twice successively after some initial returns of 0.
 					// If on that cycle (which has unknown length), it immediately fails hwd.
 					// Otherwise, it does pretty well with hwd; I don't know when it fails.
+/*
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
 					const uint64_t fc = stateC;
@@ -3631,6 +3632,19 @@ return z ^ z >> 28u;
 					stateB = fa + 0xC6BC279692B5C323UL;
 					stateC = rotate64(fb, 47);
 					stateD = fa - fc;
+					return fd;
+*/
+					// Passes 64TB with no anomalies, is a little faster, and does not have the
+					// non-random behavior with the all-zero initial state. It's passed 400TB
+					// so far in hwd without issues.
+					const uint64_t fa = stateA;
+					const uint64_t fb = stateB;
+					const uint64_t fc = stateC;
+					const uint64_t fd = stateD;
+					stateA = 0xD1342543DE82EF95UL * fd;
+					stateB = fa + 0xC6BC279692B5C323UL;
+					stateC = rotate64(fb, 47) - fd;
+					stateD = fb ^ fc;
 					return fd;
 				}
 				std::string mars256::get_name() const { return "mars256"; }
