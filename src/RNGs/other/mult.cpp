@@ -3635,8 +3635,8 @@ return z ^ z >> 28u;
 					return fd;
 */
 					// Passes 64TB with no anomalies, is a little faster, and does not have the
-					// non-random behavior with the all-zero initial state. It's passed 400TB
-					// so far in hwd without issues.
+					// non-random behavior with the all-zero initial state. It's passed 5PB
+					// in hwd without issues.
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
 					const uint64_t fc = stateC;
@@ -3649,6 +3649,61 @@ return z ^ z >> 28u;
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
+				}
+
+				Uint32 marsgwt::raw32() {
+					const uint32_t fa = stateA;
+					const uint32_t fb = stateB;
+					const uint32_t fc = stateC;
+					const uint32_t fd = stateD;
+//					stateA = 0xDEF95U * fd;
+//					stateB = fa + 0x92B5C323U;
+//					stateC = rotate32(fb, 23) - fd;
+//					stateD = fb ^ fc;
+					stateA = rotate32(fd, 23) * 0xDEF95U;
+					stateB = fa + 0x92B5C323U;
+					stateC = rotate32(fb, 11) + fd;
+					stateD = fa ^ fb - fc;
+					return fd;
+				}
+				std::string marsgwt::get_name() const { return "marsgwt"; }
+				void marsgwt::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
+				}
+				Uint64 lizard256::raw64() {
+//					const uint64_t fa = stateA;
+//					const uint64_t fb = stateB;
+//					const uint64_t fc = stateC;
+//					const uint64_t fd = stateD;
+//					stateA = rotate64(fd, 37) + 0xD1342543DE82EF95UL;
+//					stateB = rotate64(fc, 47) + fd ^ fa;
+//					stateC = rotate64(fa, 12) + 0xC6BC279692B5C323UL;
+//					stateD = fa ^ fb + fc;
+//					return fd;
+					
+					////Passes 64TB without anomalies, as well as 400TB of hwd so far.
+					////This is almost the same as mars256 above, but is
+					////a little faster by removing `- fd` after the rotation.
+					////it also changes `fb ^ fc` to `fb + fc`.
+					const uint64_t fa = stateA;
+					const uint64_t fb = stateB;
+					const uint64_t fc = stateC;
+					const uint64_t fd = stateD;
+					stateA = 0xD1342543DE82EF95UL * fd;
+					stateB = fa + 0xC6BC279692B5C323UL;
+					stateC = rotate64(fb, 47);
+					stateD = fb + fc;
+					return fd;
+				}
+				std::string lizard256::get_name() const { return "lizard256"; }
+				void lizard256::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
 					walker->handle(stateC);
