@@ -3688,19 +3688,88 @@ return z ^ z >> 28u;
 //					stateD = fa ^ fb + fc;
 //					return fd;
 					
-					////Passes 64TB without anomalies, as well as 400TB of hwd so far.
-					////This is almost the same as mars256 above, but is
+					////Passes 64TB without anomalies, as well as 500TB of hwd so far.
+					////This is almost the same as mars256 above, but attempts to be
 					////a little faster by removing `- fd` after the rotation.
-					////it also changes `fb ^ fc` to `fb + fc`.
-					const uint64_t fa = stateA;
-					const uint64_t fb = stateB;
-					const uint64_t fc = stateC;
-					const uint64_t fd = stateD;
-					stateA = 0xD1342543DE82EF95UL * fd;
-					stateB = fa + 0xC6BC279692B5C323UL;
-					stateC = rotate64(fb, 47);
-					stateD = fb + fc;
-					return fd;
+					////it also changes `fb ^ fc` to `fb + fc`. It isn't actually any
+					////faster, because the pipeline stalls finishing the multiply earlier.
+					//const uint64_t fa = stateA;
+					//const uint64_t fb = stateB;
+					//const uint64_t fc = stateC;
+					//const uint64_t fd = stateD;
+					//stateA = 0xD1342543DE82EF95UL * fd;
+					//stateB = fa + 0xC6BC279692B5C323UL;
+					//stateC = rotate64(fb, 47);
+					//stateD = fb + fc;
+					//return fd;
+
+////hwd issues at 100TB
+//					const uint64_t fa = stateA;
+//					const uint64_t fb = stateB;
+//					const uint64_t fc = stateC;
+//					const uint64_t fd = stateD;
+//	stateA = fa + 0xC6BC279692B5C323UL;
+//	stateB = rotate64(fa, 23) + fd;
+//	stateC = rotate64(fd, 35) ^ fb;
+//	stateD = rotate64(fb, 44) + fc;
+//	return fd;
+//	stateA = fa + 0xD1342543DE82EF95UL;
+//	stateB = rotate64(fa, 44) + fd;
+//	stateC = fb ^ fb << 7;
+//	stateD = fc ^ fc >> 9;
+//	return fd;
+
+//const uint64_t fa = stateA;
+//const uint64_t fb = stateB;
+//const uint64_t fc = stateC;
+//stateA = fc + 0xC6BC279692B5C323UL;
+//stateB = rotate64(fc, 25) ^ fa;
+//return stateC ^= rotate64(fa, 44) + fb;
+
+	// const uint64_t fa = stateA;
+	// const uint64_t fb = stateB;
+	// const uint64_t fc = stateC;
+	// const uint64_t fd = stateD;
+	// stateA = fc * fd;
+	// stateB = fc + rotate64(fa, 39);
+	// stateC = fb ^ fd;
+	// stateD = fd + 0x9E3779B97F4A7C16UL;
+	// return fc;
+	
+	//// Stranger256 passes a ridiculous amount of extsat (over 2 exabytes) and hwd (at least 7 PB) testing, as well as 64TB of PractRand.
+	//// This generator is very solid and uses no multiplication. It isn't astonishingly fast, but is decent.
+	//// stateA and stateB form an interleaved 64-bit xorshift RNG. The worst one. That gets fed into the rest, which is chaotic.
+	//const uint64_t fa = stateA;
+	//const uint64_t fb = stateB;
+	//const uint64_t fc = stateC;
+	//const uint64_t fd = stateD;
+	//stateA = fb ^ fb << 7;
+	//stateB = fa ^ fa >> 9;
+	//stateC = rotate64(fd, 39) - fb;
+	//stateD = fa - fc + 0xC6BC279692B5C323UL;
+	//return fc;
+
+////passes at least 8TB with no anomalies, but not especially fast.
+//	const uint64_t fa = stateA;
+//	const uint64_t fb = stateB;
+//	const uint64_t fc = stateC;
+//	const uint64_t fd = stateD;
+//	stateA = rotate64(fd, 17) ^ fc;
+//	stateB = rotate64(fa, 59) + fd;
+//	stateC = rotate64(fb, 41) ^ fa;
+//	stateD = rotate64(fc, 11) + 0xC6BC279692B5C323UL;
+//	return fc;
+
+	const uint64_t fa = stateA;
+	const uint64_t fb = stateB;
+	const uint64_t fc = stateC;
+	const uint64_t fd = stateD;
+	stateA = fd ^ fc;
+	stateB = rotate64(fa, 41);
+	stateC = fa + fb;
+	stateD = fc + 0x9E3779B97F4A7C15UL;
+	return fc;
+
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
 				void lizard256::walk_state(StateWalkingObject *walker) {
@@ -3708,6 +3777,7 @@ return z ^ z >> 28u;
 					walker->handle(stateB);
 					walker->handle(stateC);
 					walker->handle(stateD);
+					// stateD |= 1UL;
 				}
 
 			}
