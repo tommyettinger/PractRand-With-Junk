@@ -1109,6 +1109,18 @@ namespace PractRand {
 					if (state0 == 0 && state1 == 0)
 						state0 = 1;
 				}
+
+				uint64_t jump(uint64_t state){
+				    const uint64_t poly = 0x5556837749D9A17FUL;
+				    long val = 0UL, b = 1UL;
+				    for (int i = 0; i < 63; i++, b <<= 1) {
+				        if(poly & b) val ^= state;
+				        state ^= state << 7;
+				        state ^= state >> 9;
+				    }
+				    return val;
+				}
+
 				Uint64 oriole64::raw64() {
 					//Uint64 result = state0 + state1;
 					//Uint64 tmp = state0 ^ state1;
@@ -1251,13 +1263,13 @@ namespace PractRand {
 					//// This was also tested with left-rotations of 42 and 21; 42 had an unusually high amount of anomalies,
 					//// while 21 had serious issues in hwd testing at about 200 TB. Using 41 still passes 64TB with no anomalies,
 					//// and is still undergoing hwd testing (but has passed 400TB without issue there).
-					const uint64_t fa = state0;
-					const uint64_t fb = state1;
-					const uint64_t fc = state2;
-					state0 = 0xD1342543DE82EF95UL * fc;
-					state1 = fa ^ fb ^ fc;
-					state2 = rotate64(fb, 41) + 0xC6BC279692B5C323UL;
-					return fa;
+					//const uint64_t fa = state0;
+					//const uint64_t fb = state1;
+					//const uint64_t fc = state2;
+					//state0 = 0xD1342543DE82EF95UL * fc;
+					//state1 = fa ^ fb ^ fc;
+					//state2 = rotate64(fb, 41) + 0xC6BC279692B5C323UL;
+					//return fa;
 
 // + 0x9E3779B97F4A7C15UL;
 // + 0xC6BC279692B5C323UL;
@@ -1265,11 +1277,22 @@ namespace PractRand {
 
 					//state0 = 0x71AF0AB5118A6E6DUL + b0;
 					// state0 = 0xC6BC279692B5C323UL + a0 ^ b0;
+
+	const uint64_t fa = state0;
+	const uint64_t fb = state1;
+	const uint64_t fc = state2;
+	state0 = fb ^ fb << 7;
+	state1 = fa ^ fa >> 9;
+	state2 = fa + rotate64(fc, 41);
+	return fc + fb;
+
+
 				}
-				std::string oriole64::get_name() const { return "oriole64"; }
+				std::string oriole64::get_name() const { return "skipper192"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state0);
-					walker->handle(state1);
+					state0 |= (state0 == 0U);
+					state1 = jump(state0);
 					walker->handle(state2);
 					// walker->handle(state0);
 					// walker->handle(state1);
@@ -1308,28 +1331,38 @@ namespace PractRand {
 					state0 |= ((state0 | state1 | state2 | state3) == 0);
 				}
 				Uint64 xoshiro256scramjet::raw64() {
-					if (++current & 3)
-					{
-						const uint64_t result = state[current] + first[current];
-						return rotate64(current, 33) + second[current];
-					}
-					else
-					{
-						current = 0;
-						const uint64_t result = state[0] + 0x9E3779B97F4A7C15ULL;
-
+						const uint64_t result = (rotate64(state[1] * 0x818102004182A025ULL, 29) * 0xAC564B05ULL);
 						const uint64_t t = state[1] << 17;
-
 						state[2] ^= state[0];
 						state[3] ^= state[1];
 						state[1] ^= state[2];
 						state[0] ^= state[3];
-
 						state[2] ^= t;
-
 						state[3] = rotate64(state[3], 45);
-						return rotate64(result, 33) + 0xDB4F0B9175AE2165ULL;
-					}
+						return result;
+
+					// if (++current & 3)
+					// {
+					// 	const uint64_t result = state[current] + first[current];
+					// 	return rotate64(current, 33) + second[current];
+					// }
+					// else
+					// {
+					// 	current = 0;
+					// 	const uint64_t result = state[0] + 0x9E3779B97F4A7C15ULL;
+
+					// 	const uint64_t t = state[1] << 17;
+
+					// 	state[2] ^= state[0];
+					// 	state[3] ^= state[1];
+					// 	state[1] ^= state[2];
+					// 	state[0] ^= state[3];
+
+					// 	state[2] ^= t;
+
+					// 	state[3] = rotate64(state[3], 45);
+					// 	return rotate64(result, 33) + 0xDB4F0B9175AE2165ULL;
+					// }
 				}
 				std::string xoshiro256scramjet::get_name() const { return "xoshiro256scramjet"; }
 				void xoshiro256scramjet::walk_state(StateWalkingObject *walker) {
