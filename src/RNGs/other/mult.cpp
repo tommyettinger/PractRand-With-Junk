@@ -1295,9 +1295,9 @@ namespace PractRand {
 					//z = (z ^ z >> 29 ^ z >> 43 ^ z << 7 ^ z << 53) * 0xDB4F0B9175AE2165ULL;
 					//return z ^ z >> 23 ^ z >> 41;
 
-					uint64_t z = state++ ^ 0xEB44ACCAB455D165ULL;
-					z = (z ^ z >> 29 ^ z >> 43 ^ z << 7 ^ z << 53) * 0xDB4F0B9175AE2165ULL;
-					return z ^ z >> 26;
+					//uint64_t z = state++ ^ 0xEB44ACCAB455D165ULL;
+					//z = (z ^ z >> 29 ^ z >> 43 ^ z << 7 ^ z << 53) * 0xDB4F0B9175AE2165ULL;
+					//return z ^ z >> 26;
 
 
 					//return z ^ z >> 19 ^ z >> 53 ^ z << 24;
@@ -1308,10 +1308,21 @@ namespace PractRand {
 //					z = (z ^ z >> 43 ^ z >> 31 ^ z >> 23) * 0xDB4F0B9175AE2165UL;
 //					return s ^ s >> 28;
 
+                    //// VibrantRNG, passes 64TB with no anomalies.
+					//// This is the same as MizuchiRNG with different multipliers.
+					uint64_t z = (state = state * 0xD1342543DE82EF95UL + stream);
+					z = (z ^ z >> 23 ^ z >> 47) * UINT64_C(0xDB4F0B9175AE2165);
+					return z ^ z >> 25;
+
+//					// DiverRNG, verbatim
+//					uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xC6BC279692B5CC83));
+//					z = rotate64(z, 27) * UINT64_C(0xDB4F0B9175AE2165);
+//					return z ^ (z >> 25u);
+
 
 					//0x369DEA0F31A53F85ULL
 				}
-				std::string tiptoe64::get_name() const { return "tiptoe64"; }
+				std::string tiptoe64::get_name() const { return "vibrant"; }
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
@@ -1447,10 +1458,10 @@ namespace PractRand {
 //return z ^ z >> 26u ^ z >> 31u;
 
 //fails at 4TB
-uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
-z = (z ^ z >> 30 ^ z >> 5 ^ 0xDB4F0B9175AE2165ULL) * 0xC6BC279692B5CC83ULL;
-return z ^ z >> 28u;
-//return z ^ z >> 31u ^ z >> 23u;
+//uint64_t z = (state += 0x9E3779B97F4A7C15ULL);
+//z = (z ^ z >> 30 ^ z >> 5 ^ 0xDB4F0B9175AE2165ULL) * 0xC6BC279692B5CC83ULL;
+//return z ^ z >> 28u;
+////return z ^ z >> 31u ^ z >> 23u;
 
 //VelvetRNG, should also work as a simple determine()
 //passes 32TB, no anomalies, could be fast in Java, seems fast in MSVC...
@@ -1519,11 +1530,15 @@ return z ^ z >> 28u;
 
 					//return (z ^ z >> 30u);
 
+					////Fails TMFn after 4 to 16 TB; this is very close to  DiverRNG but uses an LCG, not an XLCG.
+					uint64_t z = (state = state * 0xD1342543DE82EF95UL + 1UL);
+					z = rotate64(z, 41) * 0xDB4F0B9175AE2165UL;
+					return z ^ (z >> 28u);
+
 				}
-				std::string linnormA::get_name() const { return "LinnormA"; }
+				std::string linnormA::get_name() const { return "linnormA"; }
 				void linnormA::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
-					state |= 1ULL;
 					printf("Seed is 0x%016X\r\n", state);// stream);
 				}
 
