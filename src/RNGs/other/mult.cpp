@@ -3679,13 +3679,22 @@ namespace PractRand {
 //					stateB = fa + 0x92B5C323U;
 //					stateC = rotate32(fb, 23) - fd;
 //					stateD = fb ^ fc;
-					stateA = rotate32(fd, 23) * 0xDEF95U;
-					stateB = fa + 0x92B5C323U;
-					stateC = rotate32(fb, 11) + fd;
-					stateD = fa ^ fb - fc;
-					return fd;
+
+//					stateA = rotate32(fd, 23) * 0xDEF95U;
+//					stateB = fa + 0x92B5C323U;
+//					stateC = rotate32(fb, 11) + fd;
+//					stateD = fa ^ fb - fc;
+//					return fd;
+
+    //// Passess 64TB with no anomalies.
+	stateA = fb ^ fc ^ fd;
+	stateB = rotate32(fa, 21);
+	stateC = fa + fb;
+	stateD = fc + 0x9E3779B9U;
+	return fc;
+
 				}
-				std::string marsgwt::get_name() const { return "marsgwt"; }
+				std::string marsgwt::get_name() const { return "lizard128"; }
 				void marsgwt::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
