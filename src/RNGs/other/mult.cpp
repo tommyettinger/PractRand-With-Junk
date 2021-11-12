@@ -3784,15 +3784,27 @@ namespace PractRand {
 //	stateD = rotate64(fc, 11) + 0xC6BC279692B5C323UL;
 //	return fc;
 
+//	const uint64_t fa = stateA;
+//	const uint64_t fb = stateB;
+//	const uint64_t fc = stateC;
+//	const uint64_t fd = stateD;
+//	stateA = fd ^ fc;
+//	stateB = rotate64(fa, 41);
+//	stateC = fa + fb;
+//	stateD = fc + 0x9E3779B97F4A7C15UL;
+//	return fc;
+
+	////Passes 64TB with no anomalies.
 	const uint64_t fa = stateA;
 	const uint64_t fb = stateB;
 	const uint64_t fc = stateC;
 	const uint64_t fd = stateD;
-	stateA = fd ^ fc;
-	stateB = rotate64(fa, 41);
+	stateA = fb ^ fc ^ fd;
+	stateB = rotate64(fa, 42);
 	stateC = fa + fb;
 	stateD = fc + 0x9E3779B97F4A7C15UL;
 	return fc;
+
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
