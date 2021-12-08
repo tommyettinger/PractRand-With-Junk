@@ -665,8 +665,15 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
-
-
+				class plum256 : public vRNG64 {
+					Uint64 stateA, stateB, stateC, stateD;
+					int rotation;
+				public:
+					plum256(int rot) : rotation(rot) {};
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 			}
 		}
 	}

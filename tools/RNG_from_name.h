@@ -625,6 +625,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(mars256)
 			REGISTER_RNG_0(marsgwt)
 			REGISTER_RNG_0(lizard256)
+			REGISTER_RNG_1(plum256)
 
 		// include/PractRand/RNGs/other/fibonacci.h
 		RNG_Factories::RNG_factory_index["bigbadlcg"] = bigbadlcg_factory;

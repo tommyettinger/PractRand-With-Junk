@@ -3671,10 +3671,10 @@ namespace PractRand {
 				}
 
 				Uint32 marsgwt::raw32() {
-					const uint32_t fa = stateA;
-					const uint32_t fb = stateB;
-					const uint32_t fc = stateC;
-					const uint32_t fd = stateD;
+//					const uint32_t fa = stateA;
+//					const uint32_t fb = stateB;
+//					const uint32_t fc = stateC;
+//					const uint32_t fd = stateD;
 //					stateA = 0xDEF95U * fd;
 //					stateB = fa + 0x92B5C323U;
 //					stateC = rotate32(fb, 23) - fd;
@@ -3686,14 +3686,24 @@ namespace PractRand {
 //					stateD = fa ^ fb - fc;
 //					return fd;
 
-    //// Passess 64TB with no anomalies.
-	stateA = fb ^ fc ^ fd;
-	stateB = rotate32(fa, 21);
-	stateC = fa + fb;
-	stateD = fc + 0x9E3779B9U;
-	return fc;
+//    //// Passess 64TB with no anomalies.
+//	stateA = fb ^ fc ^ fd;
+//	stateB = rotate32(fa, 21);
+//	stateC = fa + fb;
+//	stateD = fc + 0x9E3779B9U;
+//	return fc;
+					const uint32_t fa = stateA;
+					const uint32_t fb = stateB;
+					const uint32_t fc = stateC;
+					const uint32_t fd = stateD;
+					stateA = fb ^ fc ^ fd;
+					stateB = rotate32(fa, 21);
+					stateC = fa + fb;
+					stateD = fd + 0x3943D869U;
+					return fc;
 
 				}
+				//0x3943D8696D4A3CDDUL;
 				std::string marsgwt::get_name() const { return "lizard128"; }
 				void marsgwt::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
@@ -3795,17 +3805,53 @@ namespace PractRand {
 //	return fc;
 
 	////Passes 64TB with no anomalies.
+//	const uint64_t fa = stateA;
+//	const uint64_t fb = stateB;
+//	const uint64_t fc = stateC;
+//	const uint64_t fd = stateD;
+//	stateA = fb ^ fc ^ fd;
+//	stateB = rotate64(fa, 42);
+//	stateC = fa + fb;
+//	stateD = fc + 0x9E3779B97F4A7C15UL;
+//	return fc;
+
+	// this whole structure seems good and then has problems later.
+//	const uint64_t fa = stateA;
+//	const uint64_t fb = stateB;
+//	const uint64_t fc = stateC;
+//	const uint64_t fd = stateD;
+//	stateA = fc + fd ^ fb;
+//	stateB = rotate64(fa, 36);
+//	stateC = fa + fb;
+//	stateD = fd + 0xC259492BFC623C6BULL;
+//	return fc;
+//0x3943D8696D4A3CDDUL is ~0xC6BC279692B5C323ULL + 1ULL;
+//0xFC0072FA0B15F4FDULL
 	const uint64_t fa = stateA;
 	const uint64_t fb = stateB;
 	const uint64_t fc = stateC;
 	const uint64_t fd = stateD;
-	stateA = fb ^ fc ^ fd;
-	stateB = rotate64(fa, 42);
+	stateA = fc ^ fd;
+	stateB = rotate64(fa, 41) + fc;
 	stateC = fa + fb;
-	stateD = fc + 0x9E3779B97F4A7C15UL;
+	stateD = fd + 0x9E3779B97F4A7C15UL;
 	return fc;
 
-
+//					const uint64_t fa = stateA;
+//					const uint64_t fb = stateB;
+//					const uint64_t fc = stateC;
+//					const uint64_t fd = stateD;
+//					stateA = fd * 0xD1342543DE82EF95UL;
+//					stateB = rotate64(fa + fd, 29);
+//					stateC = fc + 0xC6BC279692B5C323UL;
+//					stateD = fb ^ fc;
+//					return fd;
+					//// with seed 0, passes 4TB without anomalies, but not especially fast. Not slow either...
+//					stateA = 0xD1342543DE82EF95UL * fc;
+//					stateB = fa ^ fb ^ fc;
+//					stateC = rotate64(fb, 41) + fd;
+//					stateD = fd + 0x9E3779B97F4A7C15UL;
+//					return fa;
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
 				void lizard256::walk_state(StateWalkingObject *walker) {
@@ -3813,7 +3859,59 @@ namespace PractRand {
 					walker->handle(stateB);
 					walker->handle(stateC);
 					walker->handle(stateD);
-					// stateD |= 1UL;
+				}
+				Uint64 plum256::raw64() {
+					//const uint64_t fa = stateA;
+					//const uint64_t fb = stateB;
+					//const uint64_t fc = stateC;
+					//const uint64_t fd = stateD;
+					//// Good rotations: 23, 25, 29, 46
+					//stateA = fd * 0xD1342543DE82EF95UL;
+					//stateB = rotate64(fa + fd, rotation);
+					//stateC = fc + 0xC6BC279692B5C323UL;
+					//stateD = fb ^ fc;
+					//return fd;
+					//// Good rotations: most; 6, 8-13, 15-18, 20, 26,, 30-31, 33-37, 40, 42-44, 46-48, 51-56
+//					stateA = 0xD1342543DE82EF95UL * fc;
+//					stateB = fa ^ fc;
+//					stateC = rotate64(fb, rotation) + fd;
+//					stateD = fd + 0xC6BC279692B5C323UL;
+//					return fa;
+
+	const uint64_t fa = stateA;
+	const uint64_t fb = stateB;
+	const uint64_t fc = stateC;
+	const uint64_t fd = stateD;
+    //// Good rotations: 23, 41, 53-55
+//	stateA = fb ^ fc;
+//	stateB = rotate64(fa + fd, rotation);
+//	stateC = fa + fb;
+//	stateD = fd + 0x9E3779B97F4A7C15UL;
+//	return fc;
+	//// No good rotations.
+//	stateA = fc ^ fd;
+//	stateB = rotate64(fa, rotation) + fc;
+//	stateC = fa + fb;
+//	stateD = fd + 0x9E3779B97F4A7C15UL;
+//	return fc;
+	stateA = rotate64(fc + fb, rotation);
+	stateB = fc ^ fd;
+	stateC = fa + fb;
+	stateD = fd + 0x9E3779B97F4A7C15UL;
+	return fc;
+
+				}
+
+				std::string plum256::get_name() const {
+					std::ostringstream tmp;
+					tmp << "plum256x" << rotation;
+					return tmp.str();
+				}
+				void plum256::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
 				}
 
 			}
