@@ -3850,8 +3850,14 @@ namespace PractRand {
 //	stateC = fa + fb;
 //	stateD = fd + 0x9E3779B97F4A7C15UL;
 //	return fa ^ fb;
+    //// 37 gets an unusual at 4TB, suspicious at 8TB, both [Low8/32]DC6-9x1Bytes-1
+//	stateA = rotate64(fc - fb, 37);
+//	stateB = fc ^ fa;
+//	stateC = fd + fb;
+//	stateD = fd + 0x9E3779B97F4A7C15UL;
+//	return fa ^ fc;
 
-	stateA = rotate64(fc - fb, 37);
+	stateA = rotate64(fc + fb, 41);
 	stateB = fc ^ fa;
 	stateC = fd + fb;
 	stateD = fd + 0x9E3779B97F4A7C15UL;
