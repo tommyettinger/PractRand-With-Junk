@@ -3843,11 +3843,19 @@ namespace PractRand {
 //	return fc;
 
     //// 45 gets a mildly suspicious at 8TB, [Low4/16]DC6-9x1Bytes-1
-	stateA = rotate64(fc - fb, 39);
-	stateB = fc ^ fd;
-	stateC = fa + fb;
+	//// 39 gets an unusual at 256GB, [Low4/32]Gap-16:B
+	//// 37 gets an unusual at 2TB, [Low8/64]BCFN(2+1,13-0,T)
+//	stateA = rotate64(fc - fb, 37);
+//	stateB = fc ^ fd;
+//	stateC = fa + fb;
+//	stateD = fd + 0x9E3779B97F4A7C15UL;
+//	return fa ^ fb;
+
+	stateA = rotate64(fc - fb, 37);
+	stateB = fc ^ fa;
+	stateC = fd + fb;
 	stateD = fd + 0x9E3779B97F4A7C15UL;
-	return fa ^ fb;
+	return fa ^ fc;
 
 //					const uint64_t fa = stateA;
 //					const uint64_t fb = stateB;
