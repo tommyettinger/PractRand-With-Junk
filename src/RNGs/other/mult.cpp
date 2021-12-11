@@ -3831,15 +3831,23 @@ namespace PractRand {
 	const uint64_t fb = stateB;
 	const uint64_t fc = stateC;
 	const uint64_t fd = stateD;
-    //// Good rotations: 11-13, 19, 22, 26, 37-38, 41-42, 46, 50, 53-55
+    //// Good rotations: 11-13, 19, 22, 26, 38, 41-42, 46, 50, 53-55
 	//// 23 gets two mildly suspicious at 4TB
 	//// 39 gets a mildly suspicious at 8TB
 	//// 45 gets a mildly suspicious at 512GB, very suspicious at 1TB; both [Low4/16]DC6-9x1Bytes-1
-	stateA = rotate64(fc + fb, 37);
+	//// 37 gets a mildly suspicious at 2TB, VERY SUSPICIOUS at 4TB; both [Low8/32]DC6-9x1Bytes-1
+//	stateA = rotate64(fc + fb, 37);
+//	stateB = fc ^ fd;
+//	stateC = fa + fb;
+//	stateD = fd + 0x9E3779B97F4A7C15UL;
+//	return fc;
+
+    //// 45 gets a mildly suspicious at 8TB, [Low4/16]DC6-9x1Bytes-1
+	stateA = rotate64(fc - fb, 39);
 	stateB = fc ^ fd;
 	stateC = fa + fb;
 	stateD = fd + 0x9E3779B97F4A7C15UL;
-	return fc;
+	return fa ^ fb;
 
 //					const uint64_t fa = stateA;
 //					const uint64_t fb = stateB;
