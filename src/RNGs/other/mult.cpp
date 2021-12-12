@@ -3856,12 +3856,17 @@ namespace PractRand {
 //	stateC = fd + fb;
 //	stateD = fd + 0x9E3779B97F4A7C15UL;
 //	return fa ^ fc;
-
-	stateA = rotate64(fc + fb, 41);
-	stateB = fc ^ fa;
-	stateC = fd + fb;
-	stateD = fd + 0x9E3779B97F4A7C15UL;
-	return fa ^ fc;
+    //// 41 gets an unusual at 4TB, BCFN(2+0,13-0,T)
+//	stateA = rotate64(fc + fb, 41);
+//	stateB = fc ^ fa;
+//	stateC = fd + fb;
+//	stateD = fd + 0x9E3779B97F4A7C15UL;
+//	return fa ^ fc;
+			stateA = rotate64(fb, 41) * 0xD1342543DE82EF95UL;
+			stateB = fc ^ fd;
+			stateC = fa + fb;
+			stateD = fd + 0x9E3779B97F4A7C15UL;
+			return fc;
 
 //					const uint64_t fa = stateA;
 //					const uint64_t fb = stateB;
