@@ -3862,7 +3862,8 @@ namespace PractRand {
 //	stateC = fd + fb;
 //	stateD = fd + 0x9E3779B97F4A7C15UL;
 //	return fa ^ fc;
-			stateA = rotate64(fb, 41) * 0xD1342543DE82EF95UL;
+			//// Good rotations: 9-13, 15, 18-21, 23, 25-27, 30, 36-37, 42, 44, 47, 49, 51, 53, 55, 57, 59
+			stateA = rotate64(fb * 0xF1357AEA2E62A9C5UL, 20);
 			stateB = fc ^ fd;
 			stateC = fa + fb;
 			stateD = fd + 0x9E3779B97F4A7C15UL;
@@ -3926,11 +3927,17 @@ namespace PractRand {
 //	stateD = fd + 0x9E3779B97F4A7C15UL;
 //	return fc;
     //// Good rotations: 11-13, 19, 22-23, 26, 37-39, 41-42, 45-46, 50, 53-55
-	stateA = rotate64(fc + fb, rotation);
-	stateB = fc ^ fd;
-	stateC = fa + fb;
-	stateD = fd + 0x9E3779B97F4A7C15UL;
-	return fc;
+//	stateA = rotate64(fc + fb, rotation);
+//	stateB = fc ^ fd;
+//	stateC = fa + fb;
+//	stateD = fd + 0x9E3779B97F4A7C15UL;
+//	return fc;
+			//// Good rotations: 9-13, 15, 18-21, 23, 25-27, 30, 36-37, 42, 44, 47, 49, 51, 53, 55, 57, 59
+			stateA = rotate64(fb * 0xF1357AEA2E62A9C5UL, rotation);
+			stateB = fc ^ fd;
+			stateC = fa + fb;
+			stateD = fd + 0x9E3779B97F4A7C15UL;
+			return fc;
 
 				}
 
