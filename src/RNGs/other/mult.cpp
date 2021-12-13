@@ -3863,11 +3863,19 @@ namespace PractRand {
 //	stateD = fd + 0x9E3779B97F4A7C15UL;
 //	return fa ^ fc;
 			//// Good rotations: 9-13, 15, 18-21, 23, 25-27, 30, 36-37, 42, 44, 47, 49, 51, 53, 55, 57, 59
-			stateA = rotate64(fb * 0xF1357AEA2E62A9C5UL, 20);
-			stateB = fc ^ fd;
+			//// but this isn't super-fast.
+//			stateA = rotate64(fb * 0xF1357AEA2E62A9C5UL, 20);
+//			stateB = fc ^ fd;
+//			stateC = fa + fb;
+//			stateD = fd + 0x9E3779B97F4A7C15UL;
+//			return fc;
+
+			stateA = rotate64(fb + fc, 37);
+			stateB = rotate64(fc ^ fd, 26);
 			stateC = fa + fb;
 			stateD = fd + 0x9E3779B97F4A7C15UL;
 			return fc;
+
 
 //					const uint64_t fa = stateA;
 //					const uint64_t fb = stateB;
@@ -3933,8 +3941,15 @@ namespace PractRand {
 //	stateD = fd + 0x9E3779B97F4A7C15UL;
 //	return fc;
 			//// Good rotations: 9-13, 15, 18-21, 23, 25-27, 30, 36-37, 42, 44, 47, 49, 51, 53, 55, 57, 59
-			stateA = rotate64(fb * 0xF1357AEA2E62A9C5UL, rotation);
-			stateB = fc ^ fd;
+//			stateA = rotate64(fb * 0xF1357AEA2E62A9C5UL, rotation);
+//			stateB = fc ^ fd;
+//			stateC = fa + fb;
+//			stateD = fd + 0x9E3779B97F4A7C15UL;
+//			return fc;
+
+			//// Good rotations: 2, 4-6, 9-10, 13, 16, 18-21, 23, 27, 30, 33, 36-37, 40, 43-44, 47, 49-50, 53-56, 58, 61
+			stateA = rotate64(fb + fc, rotation);
+			stateB = rotate64(fc ^ fd, 63 ^ rotation);
 			stateC = fa + fb;
 			stateD = fd + 0x9E3779B97F4A7C15UL;
 			return fc;
