@@ -3871,7 +3871,8 @@ namespace PractRand {
 //			return fc;
 
 			//// Good rotations: 2, 4-6, 9-10, 13, 16, 18-21, 23, 27, 30, 33, 36-37, 40, 43-44, 47, 49-50, 53-56, 58, 61
-			//// rotation 37 (then 26) passes at least 16TB, but just after that I had a power outage.
+			//// rotation 37 (then 26) passes 64TB with no anomalies.
+			//// Calling this one TrimRandom.
 			stateA = rotate64(fb + fc, 37);
 			stateB = rotate64(fc ^ fd, 26);
 			stateC = fa + fb;
