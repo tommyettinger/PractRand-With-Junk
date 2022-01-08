@@ -3873,12 +3873,26 @@ namespace PractRand {
 			//// Good rotations: 2, 4-6, 9-10, 13, 16, 18-21, 23, 27, 30, 33, 36-37, 40, 43-44, 47, 49-50, 53-56, 58, 61
 			//// rotation 37 (then 26) passes 64TB with no anomalies.
 			//// Calling this one TrimRandom.
-			stateA = rotate64(fb + fc, 37);
-			stateB = rotate64(fc ^ fd, 26);
-			stateC = fa + fb;
-			stateD = fd + 0x9E3779B97F4A7C15UL;
-			return fc;
+			//// Passes 2PB of hwd.
+			//// Fails after 2^58.24 bytes of ExtSat.
+			//stateA = rotate64(fb + fc, 37);
+			//stateB = rotate64(fc ^ fd, 26);
+			//stateC = fa + fb;
+			//stateD = fd + 0x9E3779B97F4A7C15UL;
+			//return fc;
 
+			//// Works pretty well; seed 0 gets a "mildly suspicious" at 4TB, seed 1 is fine at 32TB
+			//stateA = rotate64(fb + fc, 7);
+			//stateB = rotate64(fc ^ fd, 55);
+			//stateC = fa + fb;
+			//stateD = fd + 0xC6BC279692B5C323UL;
+			//return fc;
+
+			stateA = rotate64(fb + fc, 35);
+			stateB = rotate64(fc ^ fd, 46);
+			stateC = fa + fb;
+			stateD = fd + 0x06A0F81D3D2E35EFL;
+			return fc;
 
 //					const uint64_t fa = stateA;
 //					const uint64_t fb = stateB;
@@ -3951,11 +3965,18 @@ namespace PractRand {
 //			return fc;
 
 			//// Good rotations: 2, 4-6, 9-10, 13, 16, 18-21, 23, 27, 30, 33, 36-37, 40, 43-44, 47, 49-50, 53-56, 58, 61
+			//stateA = rotate64(fb + fc, rotation);
+			//stateB = rotate64(fc ^ fd, 63 ^ rotation);
+			//stateC = fa + fb;
+			//stateD = fd + 0x9E3779B97F4A7C15UL;
+			//return fc;
+
 			stateA = rotate64(fb + fc, rotation);
-			stateB = rotate64(fc ^ fd, 63 ^ rotation);
+			stateB = rotate64(fc ^ fd, 62 - rotation);
 			stateC = fa + fb;
-			stateD = fd + 0x9E3779B97F4A7C15UL;
+			stateD = fd + 0xC6BC279692B5C323UL;
 			return fc;
+			
 
 				}
 
