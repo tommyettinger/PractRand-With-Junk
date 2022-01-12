@@ -3888,6 +3888,7 @@ namespace PractRand {
 			//stateD = fd + 0xC6BC279692B5C323UL;
 			//return fc;
 
+			//// Passes 64TB without anomalies.
 			stateA = rotate64(fb + fc, 35);
 			stateB = rotate64(fc ^ fd, 46);
 			stateC = fa + fb;
