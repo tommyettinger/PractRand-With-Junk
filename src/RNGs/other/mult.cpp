@@ -3889,6 +3889,8 @@ namespace PractRand {
 			//return fc;
 
 			//// Passes 64TB without anomalies.
+			//// Remortality test has a phase of suspect results, but recovers after a few hours.
+			//// --- Finished -- trials: 2251799813685248	2^51.0 (out of 2^51) trials -- Trim256 -- 64 bits: 	chi2p: 1-2.796e-03 1-5.488e-03 1-1.648e-04 1-4.027e-01 => p < 8.522e-03   2^57.32 calls, 2^60.32 bytes	2^41.15 bytes/second	used:   6::19:15:33.93
 			stateA = rotate64(fb + fc, 35);
 			stateB = rotate64(fc ^ fd, 46);
 			stateC = fa + fb;
