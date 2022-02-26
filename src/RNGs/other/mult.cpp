@@ -2590,11 +2590,11 @@ namespace PractRand {
 					//// Should be 1D equidistributed.
 					//// Thanks to Pelle Evensen for suggesting the two-xorshift form for stateB, first found by Richard P. Brent
 					//// in https://www.jstatsoft.org/article/view/v011i05 .
-					uint64_t s = (stateA += 0xC6BC279692B5C323u), b = stateB;
-					s = (s ^ s >> 31 ^ s >> 5) * (b | 1u);
-					b ^= b >> 7;
-					stateB = b ^ b << 9;
-					return s ^ s >> 28;
+//					uint64_t s = (stateA += 0xC6BC279692B5C323u), b = stateB;
+//					s = (s ^ s >> 31 ^ s >> 5) * (b | 1u);
+//					b ^= b >> 7;
+//					stateB = b ^ b << 9;
+//					return s ^ s >> 28;
 					//// Looked promising (one unusual anomaly at 512GB) until 64TB, where it gets this big problem:
 					////BCFN(2+1,13-0,T)                  R= +16.1  p =  3.6e-8   very suspicious
 					//uint64_t s = (stateA += 0xC6BC279692B5C323u), b = stateB;
@@ -2602,17 +2602,23 @@ namespace PractRand {
 					//b ^= b << 9;
 					//stateB = b ^ b >> 7;
 					//return s ^ s >> 28;
+
+					//// TingleRNG
+					//// Passes 64TB with no anomalies. Period is 2 to the 64, allows skipping.
+					uint64_t z = (stateA += 0xC6BC279692B5C323UL) * (stateB += 0x9E3779B97F4A7C16UL);
+					z = (z ^ z >> 31) * 0xD1342543DE82EF95UL; //0xACBD2BDCA2BFF56DUL;
+					return z ^ z >> 26;
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
-					if(stateB == 0) stateB = 1U;
+//					if(stateB == 0) stateB = 1U;
 //					walker->handle(incA);
 //					walker->handle(incB);
 					// if(incB == 0) incB = 1U;
 //					stateA |= 1U;
-//					stateB |= 1U;
+					stateB |= 1U;
 //					incB |= 1U;
 
 //					walker->handle(incA);
