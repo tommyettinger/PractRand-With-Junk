@@ -3894,16 +3894,28 @@ namespace PractRand {
 			//stateD = fd + 0xC6BC279692B5C323UL;
 			//return fc;
 
+			//// Trim256 (original)
 			//// Passes 64TB without anomalies.
 			//// Remortality test (seed 0) has a phase of suspect results, but recovers after a few hours.
 			//// --- Finished -- trials: 2251799813685248	2^51.0 (out of 2^51) trials -- Trim256 -- 64 bits: 	chi2p: 1-2.796e-03 1-5.488e-03 1-1.648e-04 1-4.027e-01 => p < 8.522e-03   2^57.32 calls, 2^60.32 bytes	2^41.15 bytes/second	used:   6::19:15:33.93
 			//// A much longer remortality test (with seed 1) passes at least 2 exabytes and is still running.
 			//// It is currently at a p-value of 4.019e-01 10 days and 22 hours into testing.
-			stateA = rotate64(fb + fc, 35);
-			stateB = rotate64(fc ^ fd, 46);
-			stateC = fa + fb;
-			stateD = fd + 0x06A0F81D3D2E35EFL;
-			return fc;
+//			stateA = rotate64(fb + fc, 35);
+//			stateB = rotate64(fc ^ fd, 46);
+//			stateC = fa + fb;
+//			stateD = fd + 0x06A0F81D3D2E35EFL;
+//			return fc;
+
+		  //// Trim256 (original)
+          //// Passes 64TB without anomalies (seed 1)
+		  //// On the new boolbin test, seems strong at about 4 days into testing.
+		  //// This is slightly faster than the previous Trim256 when run in Java.
+		  //// It also has stronger avalanche properties.
+		  stateA = rotate64(fb ^ fc, 57);
+		  stateB = rotate64(fc ^ fd, 11);
+		  stateC = fa + fb;
+		  stateD = fd + 0xADB5B12149E93C39UL;
+		  return fc;
 
 //					const uint64_t fa = stateA;
 //					const uint64_t fb = stateB;
