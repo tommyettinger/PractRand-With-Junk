@@ -3698,15 +3698,28 @@ namespace PractRand {
 //	stateC = fa + fb;
 //	stateD = fc + 0x9E3779B9U;
 //	return fc;
+//					const uint32_t fa = stateA;
+//					const uint32_t fb = stateB;
+//					const uint32_t fc = stateC;
+//					const uint32_t fd = stateD;
+//					stateA = fb ^ fc ^ fd;
+//					stateB = rotate32(fa, 21);
+//					stateC = fa + fb;
+//					stateD = fd + 0x3943D869U;
+//					return fc;
+
+					//// ChopRandom
+					//// Passes 64TB of PractRand without any anomalies.
+					//// Generally quite fast on GWT.
 					const uint32_t fa = stateA;
 					const uint32_t fb = stateB;
 					const uint32_t fc = stateC;
 					const uint32_t fd = stateD;
-					stateA = fb ^ fc ^ fd;
-					stateB = rotate32(fa, 21);
-					stateC = fa + fb;
-					stateD = fd + 0x3943D869U;
-					return fc;
+            	    stateA = rotate32(fb ^ fc, 26);
+            	    stateB = rotate32(fc ^ fd, 11);
+            	    stateC = fa ^ fb + fc;
+            	    stateD = fd + 0xADB5B165U;
+            	    return fc;
 
 				}
 				//0x3943D8696D4A3CDDUL;
