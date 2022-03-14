@@ -651,10 +651,10 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
-				class marsgwt : public vRNG32 {
+				class marsgwt : public vRNG64 {
 					Uint32 stateA, stateB, stateC, stateD;
 				public:
-					Uint32 raw32();
+					Uint64 raw64();
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
