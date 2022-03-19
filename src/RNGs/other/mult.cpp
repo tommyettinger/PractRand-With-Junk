@@ -4046,6 +4046,44 @@ namespace PractRand {
 					walker->handle(stateC);
 					walker->handle(stateD);
 				}
+				
+				Uint64 overload320::raw64() {
+					//// Overload320; XORs an unscrambled xoshiro with a Weyl sequence, then runs that through MX3.
+					//// Passes 64TB without anomalies.
+					uint64_t x = stateB ^ (stateE += stream);
+					const uint64_t t = stateB << 17;
+
+					stateC ^= stateA;
+					stateD ^= stateB;
+					stateB ^= stateC;
+					stateA ^= stateD;
+
+					stateC ^= t;
+
+					stateD = rotate64(stateD, 45);
+					x ^= x >> 32;
+					x *= 0xbea225f9eb34556dUL;
+					x ^= x >> 29 ^ stream;
+					x *= 0xbea225f9eb34556dUL;
+					x ^= x >> 32;
+					x *= 0xbea225f9eb34556dUL;
+					x ^= x >> 29;
+
+					return x;
+
+					
+				}
+				std::string overload320::get_name() const { return "overload320"; }
+				void overload320::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
+					walker->handle(stateE);
+					walker->handle(stream);
+					stream |= 1UL;
+				}
+
 
 			}
 		}
