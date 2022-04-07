@@ -1331,7 +1331,13 @@ namespace PractRand {
 					state0 |= ((state0 | state1 | state2 | state3) == 0);
 				}
 				Uint64 xoshiro256scramjet::raw64() {
-						const uint64_t result = (rotate64(state[1] * 0x818102004182A025ULL, 29) * 0xAC564B05ULL);
+					//// This is an alternate scrambler for xoshiro256.
+					//// It keeps the 4D equidistribution of xoshiro256**, but is closer to
+					//// the mixers in LXM than the simple ** mixer.
+					//// It passes 64TB without anomalies.
+						uint64_t result = (state[1] * 0xF1357AEA2E62A9C5UL); // inverse is 0x781494A55DAAED0DUL
+						result ^= result >> 44 ^ result >> 23;
+						result *= 0xF1357AEA2E62A9C5UL;
 						const uint64_t t = state[1] << 17;
 						state[2] ^= state[0];
 						state[3] ^= state[1];
@@ -1339,8 +1345,8 @@ namespace PractRand {
 						state[0] ^= state[3];
 						state[2] ^= t;
 						state[3] = rotate64(state[3], 45);
-						return result;
-
+						return (result ^ result >> 29);
+						
 					// if (++current & 3)
 					// {
 					// 	const uint64_t result = state[current] + first[current];
