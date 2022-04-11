@@ -1336,7 +1336,9 @@ namespace PractRand {
 					//// the mixers in LXM than the simple ** mixer.
 					//// It passes 64TB without anomalies.
 						uint64_t result = (state[1] * 0xF1357AEA2E62A9C5UL); // inverse is 0x781494A55DAAED0DUL
-						result ^= result >> 44 ^ result >> 23;
+						//// Either of the below two lines passes 64TB, no anomalies.
+						result ^= result >> 31;
+						//result ^= result >> 44 ^ result >> 23;
 						result *= 0xF1357AEA2E62A9C5UL;
 						const uint64_t t = state[1] << 17;
 						state[2] ^= state[0];
