@@ -1335,11 +1335,27 @@ namespace PractRand {
 					//// It keeps the 4D equidistribution of xoshiro256**, but is closer to
 					//// the mixers in LXM than the simple ** mixer.
 					//// It passes 64TB without anomalies.
-						uint64_t result = (state[1] * 0xF1357AEA2E62A9C5UL); // inverse is 0x781494A55DAAED0DUL
-						//// Either of the below two lines passes 64TB, no anomalies.
+						//uint64_t result = (state[1] * 0xF1357AEA2E62A9C5UL); // inverse is 0x781494A55DAAED0DUL
+						////// Either of the below two lines passes 64TB, no anomalies.
+						//result ^= result >> 31;
+						////result ^= result >> 44 ^ result >> 23;
+						//result *= 0xF1357AEA2E62A9C5UL;
+						//const uint64_t t = state[1] << 17;
+						//state[2] ^= state[0];
+						//state[3] ^= state[1];
+						//state[1] ^= state[2];
+						//state[0] ^= state[3];
+						//state[2] ^= t;
+						//state[3] = rotate64(state[3], 45);
+						//return (result ^ result >> 29);
+						
+						//// Passes 64TB with one anomaly, "unusual" at 512GB:
+						//// [Low4/64]DC6-9x1Bytes-1           R=  +5.3  p =  1.6e-3   unusual
+						uint64_t result = state[1] + 0xF1357AEA2E62A9C5UL; // inverse is 0x781494A55DAAED0DUL
 						result ^= result >> 31;
-						//result ^= result >> 44 ^ result >> 23;
-						result *= 0xF1357AEA2E62A9C5UL;
+						result += 0x9E3779B97F4A7C15UL;
+						//result -= result << 31;
+						//result += result << 16;
 						const uint64_t t = state[1] << 17;
 						state[2] ^= state[0];
 						state[3] ^= state[1];
