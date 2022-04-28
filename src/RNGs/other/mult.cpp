@@ -4048,9 +4048,33 @@ namespace PractRand {
 				}
 				
 				Uint64 overload320::raw64() {
-					//// Overload320; XORs an unscrambled xoshiro with a Weyl sequence, then runs that through MX3.
-					//// Passes 64TB without anomalies.
-					uint64_t x = stateB ^ (stateE += stream);
+//					//// Overload320; XORs an unscrambled xoshiro with a Weyl sequence, then runs that through MX3.
+//					//// Passes 64TB without anomalies.
+//					uint64_t x = stateB ^ (stateE += stream);
+//					const uint64_t t = stateB << 17;
+//
+//					stateC ^= stateA;
+//					stateD ^= stateB;
+//					stateB ^= stateC;
+//					stateA ^= stateD;
+//
+//					stateC ^= t;
+//
+//					stateD = rotate64(stateD, 45);
+//					x ^= x >> 32;
+//					x *= 0xbea225f9eb34556dUL;
+//					x ^= x >> 29 ^ stream;
+//					x *= 0xbea225f9eb34556dUL;
+//					x ^= x >> 32;
+//					x *= 0xbea225f9eb34556dUL;
+//					x ^= x >> 29;
+//
+//					return x;
+
+					//const uint64_t x = rotate64(stateB + (stateE += stream), 29);
+
+					//// Passes 64TB with no anomalies.
+					const uint64_t x = stateB * 5UL;
 					const uint64_t t = stateB << 17;
 
 					stateC ^= stateA;
@@ -4061,17 +4085,7 @@ namespace PractRand {
 					stateC ^= t;
 
 					stateD = rotate64(stateD, 45);
-					x ^= x >> 32;
-					x *= 0xbea225f9eb34556dUL;
-					x ^= x >> 29 ^ stream;
-					x *= 0xbea225f9eb34556dUL;
-					x ^= x >> 32;
-					x *= 0xbea225f9eb34556dUL;
-					x ^= x >> 29;
-
-					return x;
-
-					
+					return rotate64(x, 17) * ((stateE += stream) | 1UL);
 				}
 				std::string overload320::get_name() const { return "overload320"; }
 				void overload320::walk_state(StateWalkingObject *walker) {

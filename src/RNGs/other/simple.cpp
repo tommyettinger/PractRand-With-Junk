@@ -1351,11 +1351,21 @@ namespace PractRand {
 						
 						//// Passes 64TB with one anomaly, "unusual" at 512GB:
 						//// [Low4/64]DC6-9x1Bytes-1           R=  +5.3  p =  1.6e-3   unusual
-						uint64_t result = state[1] + 0xF1357AEA2E62A9C5UL; // inverse is 0x781494A55DAAED0DUL
-						result ^= result >> 31;
-						result += 0x9E3779B97F4A7C15UL;
-						//result -= result << 31;
-						//result += result << 16;
+//						uint64_t result = state[1] + 0xF1357AEA2E62A9C5UL; // inverse is 0x781494A55DAAED0DUL
+//						result ^= result >> 31;
+//						result += 0x9E3779B97F4A7C15UL;
+//						result ^= result >> 29;
+//						const uint64_t t = state[1] << 17;
+//						state[2] ^= state[0];
+//						state[3] ^= state[1];
+//						state[1] ^= state[2];
+//						state[0] ^= state[3];
+//						state[2] ^= t;
+//						state[3] = rotate64(state[3], 45);
+//						return result;
+						
+						const uint64_t result = (state[1] + 0x9E3779B97F4A7C15UL) * 0xD1342543DE82EF95UL; // inverse is 0x781494A55DAAED0DUL
+						
 						const uint64_t t = state[1] << 17;
 						state[2] ^= state[0];
 						state[3] ^= state[1];
@@ -1363,7 +1373,7 @@ namespace PractRand {
 						state[0] ^= state[3];
 						state[2] ^= t;
 						state[3] = rotate64(state[3], 45);
-						return (result ^ result >> 29);
+						return result ^ result >> 25 ^ result >> 47;
 						
 					// if (++current & 3)
 					// {
