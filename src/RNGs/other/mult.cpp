@@ -4074,8 +4074,22 @@ namespace PractRand {
 					//const uint64_t x = rotate64(stateB + (stateE += stream), 29);
 
 					//// Passes 64TB with no anomalies.
-					const uint64_t x = stateB * 5UL;
+//					const uint64_t x = stateB * 5UL;
+//					const uint64_t t = stateB << 17;
+//
+//					stateC ^= stateA;
+//					stateD ^= stateB;
+//					stateB ^= stateC;
+//					stateA ^= stateD;
+//
+//					stateC ^= t;
+//
+//					stateD = rotate64(stateD, 45);
+//					return rotate64(x, 17) * ((stateE += stream) | 1UL);
+
+					//// Passes 64TB with no anomalies.
 					const uint64_t t = stateB << 17;
+					const uint64_t x = t - stateB;
 
 					stateC ^= stateA;
 					stateD ^= stateB;
@@ -4085,7 +4099,8 @@ namespace PractRand {
 					stateC ^= t;
 
 					stateD = rotate64(stateD, 45);
-					return rotate64(x, 17) * ((stateE += stream) | 1UL);
+					return rotate64(x, 7) * ((stateE += stream) | 1UL);
+
 				}
 				std::string overload320::get_name() const { return "overload320"; }
 				void overload320::walk_state(StateWalkingObject *walker) {
