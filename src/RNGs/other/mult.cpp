@@ -4088,6 +4088,7 @@ namespace PractRand {
 //					return rotate64(x, 17) * ((stateE += stream) | 1UL);
 
 					//// Passes 64TB with no anomalies.
+					//// Also passes 64TB with no anomalies when stream is forced to 1 (using seed=1).
 					const uint64_t t = stateB << 17;
 					const uint64_t x = t - stateB;
 
@@ -4109,8 +4110,9 @@ namespace PractRand {
 					walker->handle(stateC);
 					walker->handle(stateD);
 					walker->handle(stateE);
-					walker->handle(stream);
-					stream |= 1UL;
+					//walker->handle(stream);
+					//stream |= 1UL;
+					stream = 1UL;
 				}
 
 
