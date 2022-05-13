@@ -2605,9 +2605,13 @@ namespace PractRand {
 
 					//// TingleRNG
 					//// Passes 64TB with no anomalies. Period is 2 to the 64, allows skipping.
-					uint64_t z = (stateA += 0xC6BC279692B5C323UL) * (stateB += 0x9E3779B97F4A7C16UL);
-					z = (z ^ z >> 31) * 0xD1342543DE82EF95UL; //0xACBD2BDCA2BFF56DUL;
-					return z ^ z >> 26;
+//					uint64_t z = (stateA += 0xC6BC279692B5C323UL) * (stateB += 0x9E3779B97F4A7C16UL);
+//					z = (z ^ z >> 31) * 0xD1342543DE82EF95UL; //0xACBD2BDCA2BFF56DUL;
+//					return z ^ z >> 26;
+					//// TroubleRNG
+					////
+        			stateA = stateA * (stateB += 0x9E3779B97F4A7C16UL) + 0xC6BC279692B5C323UL;
+					return (stateA -= rotate64(stateA, 23));
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
@@ -3943,11 +3947,11 @@ namespace PractRand {
 		  //// On the new boolbin test, seems strong at about 4 days into testing.
 		  //// This is slightly faster than the previous Trim256 when run in Java.
 		  //// It also has stronger avalanche properties.
-		  stateA = rotate64(fb ^ fc, 57);
-		  stateB = rotate64(fc ^ fd, 11);
-		  stateC = fa + fb;
-		  stateD = fd + 0xADB5B12149E93C39UL;
-		  return fc;
+//		  stateA = rotate64(fb ^ fc, 57);
+//		  stateB = rotate64(fc ^ fd, 11);
+//		  stateC = fa + fb;
+//		  stateD = fd + 0xADB5B12149E93C39UL;
+//		  return fc;
 
 //					const uint64_t fa = stateA;
 //					const uint64_t fb = stateB;
@@ -3964,6 +3968,15 @@ namespace PractRand {
 //					stateC = rotate64(fb, 41) + fd;
 //					stateD = fd + 0x9E3779B97F4A7C15UL;
 //					return fa;
+
+//// SlashRandom, passes at least 1TB without anomalies (seed 1).
+//// Should be extremely fast; similar code sure was.
+//// No period guarantees.
+stateA = rotate64(fc, 44);
+stateB = fa + fc;
+stateC = fb ^ fd;
+stateD = fb + 0xDE916ABCC965815BUL;
+return stateB;
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
 				void lizard256::walk_state(StateWalkingObject *walker) {
