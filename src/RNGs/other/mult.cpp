@@ -3969,8 +3969,9 @@ namespace PractRand {
 //					stateD = fd + 0x9E3779B97F4A7C15UL;
 //					return fa;
 
-//// SlashRandom, passes at least 1TB without anomalies (seed 1).
-//// Should be extremely fast; similar code sure was.
+//// SlashRandom, passes 4TB without anomalies (seed 1), fails at 16TB:
+//// BCFN(2+0,13-0,T)                  R= +23.9  p =  2.7e-12    FAIL
+//// Extremely fast.
 //// No period guarantees.
 stateA = rotate64(fc, 44);
 stateB = fa + fc;
@@ -4100,20 +4101,36 @@ return stateB;
 //					stateD = rotate64(stateD, 45);
 //					return rotate64(x, 17) * ((stateE += stream) | 1UL);
 
-					//// Passes 64TB with no anomalies.
-					//// Also passes 64TB with no anomalies when stream is forced to 1 (using seed=1).
-					const uint64_t t = stateB << 17;
-					const uint64_t x = t - stateB;
+//					//// Passes 64TB with no anomalies.
+//					//// Also passes 64TB with no anomalies when stream is forced to 1 (using seed=1).
+//					const uint64_t t = stateB << 17;
+//					const uint64_t x = t - stateB;
+//
+//					stateC ^= stateA;
+//					stateD ^= stateB;
+//					stateB ^= stateC;
+//					stateA ^= stateD;
+//
+//					stateC ^= t;
+//
+//					stateD = rotate64(stateD, 45);
+//					return rotate64(x, 7) * ((stateE += stream) | 1UL);
 
-					stateC ^= stateA;
-					stateD ^= stateB;
-					stateB ^= stateC;
-					stateA ^= stateD;
-
-					stateC ^= t;
-
-					stateD = rotate64(stateD, 45);
-					return rotate64(x, 7) * ((stateE += stream) | 1UL);
+    //// Pasar320
+	//// Passes 64TB of PractRand with no anomalies.
+	//// Fails ReMort rather quickly, but it also runs very quickly (over twice as fast as the generator immediately above).
+	//// Various simple changes to this so far have all failed ReMort after different spans of time.
+	const uint64_t fa = stateA;
+	const uint64_t fb = stateB;
+	const uint64_t fc = stateC;
+	const uint64_t fd = stateD;
+	const uint64_t fe = stateE;
+	stateA = rotate64(fc, 41);
+	stateB = fd ^ fc;
+	stateC = fe ^ fb;
+	stateD = fa + fc;
+	stateE = fe + 0xDE916ABCC965815BUL;
+	return stateD;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }
