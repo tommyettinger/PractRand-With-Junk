@@ -3973,11 +3973,31 @@ namespace PractRand {
 //// BCFN(2+0,13-0,T)                  R= +23.9  p =  2.7e-12    FAIL
 //// Extremely fast.
 //// No period guarantees.
-stateA = rotate64(fc, 44);
-stateB = fa + fc;
-stateC = fb ^ fd;
-stateD = fb + 0xDE916ABCC965815BUL;
-return stateB;
+//stateA = rotate64(fc, 44);
+//stateB = fa + fc;
+//stateC = fb ^ fd;
+//stateD = fb + 0xDE916ABCC965815BUL;
+//return stateB;
+
+//stateA = rotate64(fc, 12); // try 12, 11, 9
+//stateB = fa + fc;
+//stateC = fb ^ fd;
+//stateD = fb + 0xC6BC279692B5C323UL;//0x9E3779B97F4A7C15UL;//0xDE916ABCC965815BUL;
+//return stateB;
+
+//stateA = fb ^ rotate64(fc, 19); // 21, 19
+//stateB = fa ^ fd;
+//stateC = fb + fd;
+//stateD = fd + 0xC6BC279692B5C323UL;//0x9E3779B97F4A7C15UL;//0xDE916ABCC965815BUL;
+//return stateA;
+
+// bad rotations: 42 (BRank at 8TB)
+stateA = fb + rotate64(fc, 11); // 39, 36, 28, 25, 23, 22, 20, 19, 13
+stateB = fa ^ fc;
+stateC = fa ^ fd;
+stateD = fd + 0xDE916ABCC965815BUL;
+return stateA;
+
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
 				void lizard256::walk_state(StateWalkingObject *walker) {
@@ -4040,13 +4060,35 @@ return stateB;
 			//stateD = fd + 0x9E3779B97F4A7C15UL;
 			//return fc;
 
-			stateA = rotate64(fb + fc, rotation);
-			stateB = rotate64(fc ^ fd, 62 - rotation);
-			stateC = fa + fb;
-			stateD = fd + 0xC6BC279692B5C323UL;
-			return fc;
+			//stateA = rotate64(fb + fc, rotation);
+			//stateB = rotate64(fc ^ fd, 62 - rotation);
+			//stateC = fa + fb;
+			//stateD = fd + 0xC6BC279692B5C323UL;
+			//return fc;
 			
+//stateA = rotate64(fc, rotation); // try 53, 44, 42, 23, 22, 21, 20 12, 11, 9
+//stateB = fa + fc;
+//stateC = fb ^ fd;
+//stateD = fb + 0xC6BC279692B5C323UL;//0x9E3779B97F4A7C15UL;//0xDE916ABCC965815BUL;
+//return stateB;
 
+//	stateA = fd * 0xF1357AEA2E62A9C5UL;
+//	stateB = fb + 0xDE916ABCC965815BUL;
+//	stateC = fa ^ fb;
+//	stateD = rotate64(fc, rotation);
+//	return fc;
+
+//stateA = fb + rotate64(fc, rotation); // 21, 19
+//stateB = fa ^ fd;
+//stateC = fb ^ fd;
+//stateD = fd + 0xC6BC279692B5C323UL;//0x9E3779B97F4A7C15UL;//0xDE916ABCC965815BUL;
+//return stateA;
+
+stateA = fb + rotate64(fc, rotation); // 42, 39, 36, 28, 25, 23, 22, 20, 19, 13, 11
+stateB = fa ^ fc;
+stateC = fa ^ fd;
+stateD = fd + 0xDE916ABCC965815BUL;
+return stateA;
 				}
 
 				std::string plum256::get_name() const {
@@ -4120,17 +4162,29 @@ return stateB;
 	//// Passes 64TB of PractRand with no anomalies.
 	//// Fails ReMort rather quickly, but it also runs very quickly (over twice as fast as the generator immediately above).
 	//// Various simple changes to this so far have all failed ReMort after different spans of time.
+//	const uint64_t fa = stateA;
+//	const uint64_t fb = stateB;
+//	const uint64_t fc = stateC;
+//	const uint64_t fd = stateD;
+//	const uint64_t fe = stateE;
+//	stateA = rotate64(fc, 41);
+//	stateB = fd ^ fc;
+//	stateC = fe ^ fb;
+//	stateD = fa + fc;
+//	stateE = fe + 0xDE916ABCC965815BUL;
+//	return stateD;
+
 	const uint64_t fa = stateA;
 	const uint64_t fb = stateB;
 	const uint64_t fc = stateC;
 	const uint64_t fd = stateD;
 	const uint64_t fe = stateE;
-	stateA = rotate64(fc, 41);
-	stateB = fd ^ fc;
-	stateC = fe ^ fb;
-	stateD = fa + fc;
-	stateE = fe + 0xDE916ABCC965815BUL;
-	return stateD;
+	stateA = fd + fc ^ fe;//0xF1357AEA2E62A9C5UL;//0xD1342543DE82EF95UL
+	stateB = fb + 0xDE916ABCC965815BUL;
+	stateC = fa + fe;
+	stateD = rotate64(fe, 42);
+	stateE = fb ^ fd - fa;
+	return fa;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }

@@ -450,7 +450,7 @@ namespace PractRand {
 
 				class xoshiro256starstar : public vRNG64 {
 					// from David Blackman and Sebastiano Vigna (vigna@acm.org), see http://vigna.di.unimi.it/xorshift/
-					Uint64 state0, state1, state2, state3;
+					Uint32 state0, state1, state2, state3;
 				public:
 					Uint64 raw64();
 					std::string get_name() const;

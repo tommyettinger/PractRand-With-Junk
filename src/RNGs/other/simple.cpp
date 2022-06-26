@@ -1278,37 +1278,64 @@ namespace PractRand {
 					//state0 = 0x71AF0AB5118A6E6DUL + b0;
 					// state0 = 0xC6BC279692B5C323UL + a0 ^ b0;
 
+//	const uint64_t fa = state0;
+//	const uint64_t fb = state1;
+//	const uint64_t fc = state2;
+//	state0 = fb ^ fb << 7;
+//	state1 = fa ^ fa >> 9;
+//	state2 = fa + rotate64(fc, 41);
+//	return fc + fb;
+    // surprisingly, not bad... passes at least 32GB without anomalies, could do more?
+	// has a fixpoint at all-zero.
 	const uint64_t fa = state0;
 	const uint64_t fb = state1;
 	const uint64_t fc = state2;
-	state0 = fb ^ fb << 7;
-	state1 = fa ^ fa >> 9;
-	state2 = fa + rotate64(fc, 41);
-	return fc + fb;
-
+	state0 = fc * 0xF1357AEA2E62A9C5UL;
+	state1 = rotate64(fa, 44);
+	state2 = fa + fb;
+	return fc;
 
 				}
-				std::string oriole64::get_name() const { return "skipper192"; }
+				std::string oriole64::get_name() const { return "dash192"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
-					walker->handle(state0);
-					state0 |= (state0 == 0U);
-					state1 = jump(state0);
-					walker->handle(state2);
 					// walker->handle(state0);
-					// walker->handle(state1);
-					// state0 |= ((state0 | state1) == 0);
+					// state0 |= (state0 == 0U);
+					// state1 = jump(state0);
 					// walker->handle(state2);
+					walker->handle(state0);
+					walker->handle(state1);
+					// state0 |= ((state0 | state1) == 0);
+					walker->handle(state2);
 				}
 
 				Uint64 xoshiro256starstar::raw64() {
-					//xoshiro256+
-					//const uint64_t result = state0 + state3;
-					//xoshiro256**
-					const uint64_t result = rotate64(state1 * 5, 7) * 9;
-					// used with the random rotate option below
-					//const uint64_t result = state0 + state1;
+//					//xoshiro256+
+//					// const uint64_t result = state0 + state3;
+//					// xoshiro256++
+//					const uint64_t result = rotate64(state0 + state3, 23) + state0;
+//					//xoshiro256**
+//					// const uint64_t result = rotate64(state1 * 5, 7) * 9;
+//					// used with the random rotate option below
+//					//const uint64_t result = state0 + state1;
+//
+//					const uint64_t t = state1 << 17;
+//
+//					state2 ^= state0;
+//					state3 ^= state1;
+//					state1 ^= state2;
+//					state0 ^= state3;
+//
+//					state2 ^= t;
+//
+//					state3 = rotate64(state3, 45);
+//					return result;
 
-					const uint64_t t = state1 << 17;
+// This has 64-bit output, but uses the 32-bit xoshiro128 state transition and the 32-bit ++ scrambler for its upper 32 bits.
+// That scrambler uses states 0 and 3, while the lower 32 bits scramble states 2 and 1 similarly (using subtraction and a different rotation).
+// It passes 64TB of PractRand without any anomalies. It passes ReMort testing through 2 to the 57.32 bytes. The ReMort results aren't especially
+// strong, but were never considered suspect over the course of testing.
+					const uint64_t result = (uint64_t)(rotate32(state0 + state3, 7) + state0) << 32 ^ (rotate32(state2 - state1, 13) + state2);
+					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
 					state3 ^= state1;
@@ -1317,12 +1344,15 @@ namespace PractRand {
 
 					state2 ^= t;
 
-					state3 = rotate64(state3, 45);
+					state3 = rotate32(state3, 11);
 					return result;
+
+
 					//return rotate64(result, state3 & 63);
 					//					return result ^ result >> 28;
 				}
-				std::string xoshiro256starstar::get_name() const { return "xoshiro256starstar"; }
+				// std::string xoshiro256starstar::get_name() const { return "xoshiro256starstar"; }
+				std::string xoshiro256starstar::get_name() const { return "xoshiro128weird"; }
 				void xoshiro256starstar::walk_state(StateWalkingObject *walker) {
 					walker->handle(state0);
 					walker->handle(state1);
@@ -1437,6 +1467,8 @@ namespace PractRand {
 
 
 					const uint32_t result = state1 + 0x41C64E6Du;// + 0x9E3779B9u;
+				    //const uint64_t result = (uint64_t)(rol32(s->s[0] + s->s[3], 7) + s->s[0]) << 32 ^ (rol32(s->s[2] - s->s[1], 13) + s->s[2]);
+					// const uint64_t result = (uint64_t)(rotate32(state0 + state3, 7) + state0) << 32 ^ (rotate32(state2 - state1, 13) + state2);
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1447,10 +1479,10 @@ namespace PractRand {
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-					//return result;
+					return result;
 					//return rotate32(state3, 23) + (state0 ^ 0x41C64E6Du) * 0x9E3779BBu;
 					//return (result << 7) - rotate32(result, 3);
-					return rotate32(result, 17) + 0x9E3779B9u;
+					// return rotate32(result, 17) + 0x9E3779B9u;
 
 					//return result ^ result >> 11;
 					//return ((result << 11) - rotate32(result, 9));
