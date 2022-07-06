@@ -1287,16 +1287,29 @@ namespace PractRand {
 //	return fc + fb;
     // surprisingly, not bad... passes at least 32GB without anomalies, could do more?
 	// has a fixpoint at all-zero.
+//	const uint64_t fa = state0;
+//	const uint64_t fb = state1;
+//	const uint64_t fc = state2;
+//	state0 = fc * 0xF1357AEA2E62A9C5UL;
+//	state1 = rotate64(fa, 44);
+//	state2 = fa + fb;
+//	return fc;
 	const uint64_t fa = state0;
 	const uint64_t fb = state1;
 	const uint64_t fc = state2;
+	//// works well, passes 64TB with one anomaly at 32TB ("unusual")
+//	state0 = fc * 0xF1357AEA2E62A9C5UL;
+//	state1 = rotate64(fa, 44);
+//	state2 = fb ^ fa + 0x9E3779B97F4A7C15UL;
+//	return fc;
+    // Duck192 (faster version)
+	// Passes 64TB with no anomalies. Passes at least 2^55.2 bytes of ReMort without suspect results.
 	state0 = fc * 0xF1357AEA2E62A9C5UL;
-	state1 = rotate64(fa, 44);
-	state2 = fa + fb;
-	return fc;
-
+	state1 = rotate64(fa, 44) + 0x9E3779B97F4A7C15UL;
+	state2 = fb ^ fa;
+	return state2;
 				}
-				std::string oriole64::get_name() const { return "dash192"; }
+				std::string oriole64::get_name() const { return "duck192"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
 					// walker->handle(state0);
 					// state0 |= (state0 == 0U);
