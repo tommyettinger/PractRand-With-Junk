@@ -1303,7 +1303,10 @@ namespace PractRand {
 //	state2 = fb ^ fa + 0x9E3779B97F4A7C15UL;
 //	return fc;
     // Duck192 (faster version)
-	// Passes 64TB with no anomalies. Passes at least 2^55.2 bytes of ReMort without suspect results.
+	// Passes 64TB with no anomalies (seed 0).
+	// With seed 1, has an "unusual" anomaly at 512MB, then passes the remaining 64TB without more anomalies.
+	//  [Low4/32]DC6-9x1Bytes-1           R=  +7.6  p =  3.1e-4   unusual
+	// Passes a huge amount, at least 2^57.32 bytes, of ReMort without suspect results.
 	state0 = fc * 0xF1357AEA2E62A9C5UL;
 	state1 = rotate64(fa, 44) + 0x9E3779B97F4A7C15UL;
 	state2 = fb ^ fa;
