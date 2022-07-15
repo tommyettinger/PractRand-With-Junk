@@ -3992,11 +3992,19 @@ namespace PractRand {
 //return stateA;
 
 // bad rotations: 42 (BRank at 8TB)
-stateA = fb + rotate64(fc, 11); // 39, 36, 28, 25, 23, 22, 20, 19, 13
-stateB = fa ^ fc;
-stateC = fa ^ fd;
-stateD = fd + 0xDE916ABCC965815BUL;
-return stateA;
+//stateA = fb + rotate64(fc, 11); // 39, 36, 28, 25, 23, 22, 20, 19, 13
+//stateB = fa ^ fc;
+//stateC = fa ^ fd;
+//stateD = fd + 0xDE916ABCC965815BUL;
+//return stateA;
+
+// Whisker256
+// Passes 64TB of PractRand with no anomalies.
+// Very fast on the JVM.
+	stateA = fd * 0xF1357AEA2E62A9C5UL;
+	stateB = rotate64(fa, 44);
+	stateC = fb + 0x9E3779B97F4A7C15UL;
+	return (stateD = fa ^ fc);
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
