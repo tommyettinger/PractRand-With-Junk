@@ -4278,12 +4278,21 @@ return stateA;
 	const uint64_t fc = stateC;
 	const uint64_t fd = stateD;
 	const uint64_t fe = stateE;
-	stateA = fd + fc ^ fe;//0xF1357AEA2E62A9C5UL;//0xD1342543DE82EF95UL
-	stateB = fb + 0xDE916ABCC965815BUL;
-	stateC = fa + fe;
-	stateD = rotate64(fe, 42);
-	stateE = fb ^ fd - fa;
-	return fa;
+//	stateA = fd + fc ^ fe;//0xF1357AEA2E62A9C5UL;//0xD1342543DE82EF95UL
+//	stateB = fb + 0xDE916ABCC965815BUL;
+//	stateC = fa + fe;
+//	stateD = rotate64(fe, 42);
+//	stateE = fb ^ fd - fa;
+//	return fa;
+
+// Pasar320.
+// Passes 64TB with no anomalies (using seed 3).
+// Passes 179PB of ReMort, 107 PB of BBin.
+  stateA = fe * 0xF1357AEA2E62A9C5UL;
+  stateB = rotate64(fa, 44);
+  stateC = fb + fd;
+  stateD = fd + 0x9E3779B97F4A7C15UL;
+  return stateE = fa ^ fc;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }
