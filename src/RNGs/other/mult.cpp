@@ -4285,14 +4285,23 @@ return stateA;
 //	stateE = fb ^ fd - fa;
 //	return fa;
 
-// Pasar320.
-// Passes 64TB with no anomalies (using seed 3).
-// Passes 179PB of ReMort, 107 PB of BBin.
-  stateA = fe * 0xF1357AEA2E62A9C5UL;
-  stateB = rotate64(fa, 44);
-  stateC = fb + fd;
-  stateD = fd + 0x9E3779B97F4A7C15UL;
-  return stateE = fa ^ fc;
+//// Pasar320.
+//// Passes 64TB with no anomalies (using seed 3).
+//// Passes 179PB of ReMort, 107 PB of BBin.
+//  stateA = fe * 0xF1357AEA2E62A9C5UL;
+//  stateB = rotate64(fa, 44);
+//  stateC = fb + fd;
+//  stateD = fd + 0x9E3779B97F4A7C15UL;
+//  return stateE = fa ^ fc;
+
+  // Finch320.
+  // Passes 64TB with one anomaly at 128GB,
+  // [Low4/16]BCFN(2+0,13-0,T)         R=  +8.6  p =  4.1e-4   unusual
+  stateA = rotate64(fe, 50);
+  stateB = fb ^ fa + fd;
+  stateC = rotate64(fb, 25);
+  stateD = fd + 0xF1357AEA2E62A9C5UL;
+  return stateE = fa + fc;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }
