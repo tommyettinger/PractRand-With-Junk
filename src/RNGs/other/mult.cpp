@@ -4092,10 +4092,24 @@ namespace PractRand {
 //--- Finished -- BBin trials: 281474976710656	2^48.0 (out of 2^48) trials -- Slash256 -- 	ps:   3.740e-01    2.533e-01    3.441e-01    6.306e-01    8.154e-01*   6.656e-01   => p <   7.62337e-01   2^52.58 calls, 2^55.58 bytes	2^36.59 bytes/second	used:   6::00:59:24.89
 //
 //// I am very confident in this generator now.
+	// stateA = fd * 0xF1357AEA2E62A9C5UL;
+	// stateB = rotate64(fa, 44);
+	// stateC = fb + 0x9E3779B97F4A7C15UL;
+	// return (stateD = fa ^ fc);
+
+
+	// stateA = fd ^ fb + fc;
+	// stateB = rotate64(fa, 37);
+	// stateC = fc + 0x9E3779B97F4A7C15UL;
+	// return (stateD = fa + fb);
+
+	// SquawkRandom
+	// Passes 64TB with no anomalies (seed 0).
+	// Guaranteed minimum period of 2 to the 64.
 	stateA = fd * 0xF1357AEA2E62A9C5UL;
 	stateB = rotate64(fa, 44);
-	stateC = fb + 0x9E3779B97F4A7C15UL;
-	return (stateD = fa ^ fc);
+	stateC = fc + 0x9E3779B97F4A7C15UL;
+	return (stateD = fa + fb ^ fc);
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
