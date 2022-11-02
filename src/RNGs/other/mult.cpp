@@ -4106,10 +4106,15 @@ namespace PractRand {
 	// SquawkRandom
 	// Passes 64TB with no anomalies (seed 0).
 	// Guaranteed minimum period of 2 to the 64.
+	// stateA = fd * 0xF1357AEA2E62A9C5UL;
+	// stateB = rotate64(fa, 44);
+	// stateC = fc + 0x9E3779B97F4A7C15UL;
+	// return (stateD = fa + fb ^ fc);
+
 	stateA = fd * 0xF1357AEA2E62A9C5UL;
-	stateB = rotate64(fa, 44);
-	stateC = fc + 0x9E3779B97F4A7C15UL;
-	return (stateD = fa + fb ^ fc);
+	stateB = rotate64(fa, 10);
+	stateC = fc + 0x9E3779B97F4A7C15UL;//0xDE916ABCC965815BUL;
+	return (stateD = fc + fb);
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
@@ -4311,11 +4316,19 @@ return stateA;
   // Finch320.
   // Passes 64TB with one anomaly at 128GB,
   // [Low4/16]BCFN(2+0,13-0,T)         R=  +8.6  p =  4.1e-4   unusual
-  stateA = rotate64(fe, 50);
-  stateB = fb ^ fa + fd;
-  stateC = rotate64(fb, 25);
-  stateD = fd + 0xF1357AEA2E62A9C5UL;
-  return stateE = fa + fc;
+//   stateA = rotate64(fe, 50);
+//   stateB = fb ^ fa + fd;
+//   stateC = rotate64(fb, 25);
+//   stateD = fd + 0xF1357AEA2E62A9C5UL;
+//   return stateE = fa + fc;
+
+  // Lantern320.
+  // Passes 64TB with no anomalies.
+  stateA = fa + 0x9E3779B97F4A7C15UL;
+  stateB = rotate64(fe, 41);
+  stateC = fa ^ fb;
+  stateD = rotate64(fc, 17);
+  return stateE = fc + fd;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }
