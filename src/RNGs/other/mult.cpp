@@ -4322,13 +4322,28 @@ return stateA;
 //   stateD = fd + 0xF1357AEA2E62A9C5UL;
 //   return stateE = fa + fc;
 
-  // Lantern320.
-  // Passes 64TB with no anomalies.
-  stateA = fa + 0x9E3779B97F4A7C15UL;
-  stateB = rotate64(fe, 41);
-  stateC = fa ^ fb;
-  stateD = rotate64(fc, 17);
-  return stateE = fc + fd;
+//  // Lantern320.
+//  // Passes 64TB with no anomalies.
+//  stateA = fa + 0x9E3779B97F4A7C15UL;
+//  stateB = rotate64(fe, 41);
+//  stateC = fa ^ fb;
+//  stateD = rotate64(fc, 17);
+//  return stateE = fc + fd;
+
+//  stateA = fa + 0x9E3779B97F4A7C15UL;
+//  stateB = rotate64(fe, 49);
+//  stateC = fa ^ fb;
+//  stateD = rotate64(fc, 25);
+//  return stateE = fc + fd;
+
+//  // Ace320.
+//  // Passes 64TB with no anomalies.
+//  // Passes over 80PB of ReMort testing without suspicion.
+    stateA = fa + 0x9E3779B97F4A7C15UL;
+    stateB = fa ^ fe;
+    stateC = fb + fd;
+    stateD = rotate64(fc, 52);
+    return stateE = fb - fc;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }
