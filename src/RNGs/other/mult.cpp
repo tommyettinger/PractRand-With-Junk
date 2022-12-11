@@ -2610,8 +2610,28 @@ namespace PractRand {
 //					return z ^ z >> 26;
 					//// TroubleRNG
 					////
-        			stateA = stateA * (stateB += 0x9E3779B97F4A7C16UL) + 0xC6BC279692B5C323UL;
-					return (stateA -= rotate64(stateA, 23));
+//        			stateA = stateA * (stateB += 0x9E3779B97F4A7C16UL) + 0xC6BC279692B5C323UL;
+//					return (stateA -= rotate64(stateA, 23));
+
+					// I dunno. Passes 16TB without anomalies. State A must not be 0, state B must be odd.
+					// uint64_t r = stateA;
+					// r ^= r << 9;
+					// stateA = (r ^= r >> 7);
+					// r *= (stateB += 0x9E3779B97F4A7C16UL);
+					// r ^= r >> 31;
+					// r *= (stateB);
+					// return (r ^ r >> 31);
+
+					//// WaveRandom
+					//// Passes 64TB with no anomalies.
+					//// Not as clearly correlated between similar starting states as Tangle.
+					uint64_t r = (stateA += 0xC6BC279692B5C323UL);
+					r ^= r >> 31;
+					r *= (stateB += 0x9E3779B97F4A7C16UL);
+					r ^= r >> 29;
+					r *= stateB;
+					return (r ^ r >> 30);
+
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
