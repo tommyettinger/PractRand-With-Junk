@@ -2622,16 +2622,33 @@ namespace PractRand {
 					// r *= (stateB);
 					// return (r ^ r >> 31);
 
-					//// WaveRandom
-					//// Passes 64TB with no anomalies.
-					//// Not as clearly correlated between similar starting states as Tangle.
-					uint64_t r = (stateA += 0xC6BC279692B5C323UL);
-					r ^= r >> 31;
-					r *= (stateB += 0x9E3779B97F4A7C16UL);
-					r ^= r >> 29;
-					r *= stateB;
-					return (r ^ r >> 30);
+//					//// WaveRandom
+//					//// Passes 64TB with no anomalies.
+//					//// Not as clearly correlated between similar starting states as Tangle.
+//					uint64_t r = (stateA += 0xC6BC279692B5C323UL);
+//					r ^= r >> 31;
+//					r *= (stateB += 0x9E3779B97F4A7C16UL);
+//					r ^= r >> 29;
+//					r *= stateB;
+//					return (r ^ r >> 30);
 
+//					//// [Low1/64]Gap-16:A and [Low1/64]Gap-16:B fail at 32TB
+//					uint64_t a = (stateA = (stateA ^ 0xF1357AEA2E62A9C5UL) * 0xBB67AE8584CAA73BUL);
+//					uint64_t b = (stateB = (stateB ^ 0xD1342543DE82EF95UL) * 0xC6BC279692B5C323UL);
+//					return (a ^ a >> 41) + (b ^ b >> 19);
+
+					//// PulseRNG
+					//// Passes 64TB with one anomaly,
+					////   [Low1/8]BCFN(2+2,13-0,T)          R=  +8.9  p =  2.6e-4   unusual 
+					//// Period should be (2 to the 128) - (2 to the 64).
+					//// Should be 1D equidistributed, producing each result (2 to the 64) - 1 times.
+					uint64_t a = (stateA += 0xD1342543DE82EF95UL);
+					stateB ^= stateB << 7;
+					uint64_t b = stateB ^= stateB >> 9;
+					b ^= b * b | 1UL;
+					b += a ^ a >> 31;
+					//b ^= b * b | 1UL;
+					return (b ^ b >> 30);
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
@@ -2643,7 +2660,7 @@ namespace PractRand {
 					// if(incB == 0) incB = 1U;
 //					stateA |= 1U;
 					stateB |= 1U;
-//					incB |= 1U;
+					// incB |= 1U;
 
 //					walker->handle(incA);
 //					incA |= 1U;
