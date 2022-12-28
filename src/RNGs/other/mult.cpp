@@ -1308,21 +1308,28 @@ namespace PractRand {
 //					z = (z ^ z >> 43 ^ z >> 31 ^ z >> 23) * 0xDB4F0B9175AE2165UL;
 //					return s ^ s >> 28;
 
-                    //// VibrantRNG, passes 64TB with no anomalies.
-					//// This is the same as MizuchiRNG with different multipliers.
-					uint64_t z = (state = state * 0xD1342543DE82EF95UL + stream);
-					z = (z ^ z >> 23 ^ z >> 47) * UINT64_C(0xDB4F0B9175AE2165);
-					return z ^ z >> 25;
+//                    //// VibrantRNG, passes 64TB with no anomalies.
+//					//// This is the same as MizuchiRNG with different multipliers.
+//					uint64_t z = (state = state * 0xD1342543DE82EF95UL + stream);
+//					z = (z ^ z >> 23 ^ z >> 47) * UINT64_C(0xDB4F0B9175AE2165);
+//					return z ^ z >> 25;
 
 //					// DiverRNG, verbatim
 //					uint64_t z = (state = (state ^ UINT64_C(0x6C8E9CF570932BD5)) * UINT64_C(0xC6BC279692B5CC83));
 //					z = rotate64(z, 27) * UINT64_C(0xDB4F0B9175AE2165);
 //					return z ^ (z >> 25u);
 
+					// One anomaly at 64TB,
+					//   [Low4/32]Gap-16:B                 R=  -5.0  p =1-3.9e-4   unusual
+					uint64_t z = (state = -(state ^ (state * state | 5U)));
+					z ^= z >> 31;
+					z *= 0xDB4F0B9175AE2165;
+					z ^= z >> 30;
+					return z;
 
 					//0x369DEA0F31A53F85ULL
 				}
-				std::string tiptoe64::get_name() const { return "vibrant"; }
+				std::string tiptoe64::get_name() const { return "tiptoe"; }
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
