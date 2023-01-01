@@ -1319,15 +1319,35 @@ namespace PractRand {
 //					z = rotate64(z, 27) * UINT64_C(0xDB4F0B9175AE2165);
 //					return z ^ (z >> 25u);
 
-					// One anomaly at 64TB,
-					//   [Low4/32]Gap-16:B                 R=  -5.0  p =1-3.9e-4   unusual
-					uint64_t z = (state = -(state ^ (state * state | 5U)));
-					z ^= z >> 31;
-					z *= 0xDB4F0B9175AE2165;
-					z ^= z >> 30;
-					return z;
+//					// One anomaly at 64TB,
+//					//   [Low4/32]Gap-16:B                 R=  -5.0  p =1-3.9e-4   unusual
+//					uint64_t z = (state = -(state ^ (state * state | 5U)));
+//					z ^= z >> 31;
+//					z *= 0xDB4F0B9175AE2165;
+//					z ^= z >> 30;
+//					return z;
 
-					//0x369DEA0F31A53F85ULL
+//					uint64_t z = (state = -(state ^ (state * state | 5U)));
+//					uint64_t z = (state = state * 0xD1342543DE82EF95 + 0xDB4F0B9175AE2165);
+//					z ^= z >> 30;
+//					z *= 0xF1357AEA2E62A9C5;
+//					z ^= z >> 31;
+//					return z;
+
+					// Some kind of XQO-based random?
+					// Passes 64TB with no anomalies.
+					uint64_t z = (state += 0x9E3779B97F4A7C15UL);
+					z ^= z * z | 1UL;
+					z ^= z >> 21 ^ z >> 3;
+					z ^= z * z | 1UL;
+					return z ^ z >> 31 ^ z >> 5;
+
+					// uint64_t z = (++state);
+					//& 0xFFFFFFFFFFFFFFFEUL;
+					// z *= 0xF1357AEA2E62A9C5UL;
+					// return z ^ z >> 26;
+
+					//0xD1342543DE82EF95 is an LCG constant, 0xF1357AEA2E62A9C5 is an MCG constant.
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
@@ -2670,13 +2690,20 @@ namespace PractRand {
 					////   [Low1/8]BCFN(2+2,13-0,T)          R=  +8.9  p =  2.6e-4   unusual 
 					//// Period should be (2 to the 128) - (2 to the 64).
 					//// Should be 1D equidistributed, producing each result (2 to the 64) - 1 times.
-					uint64_t a = (stateA += 0xD1342543DE82EF95UL);
-					stateB ^= stateB << 7;
-					uint64_t b = stateB ^= stateB >> 9;
-					b ^= b * b | 1UL;
-					b += a ^ a >> 31;
-					//b ^= b * b | 1UL;
-					return (b ^ b >> 30);
+//					uint64_t a = (stateA += 0xD1342543DE82EF95UL);
+//					stateB ^= stateB << 7;
+//					uint64_t b = stateB ^= stateB >> 9;
+//					b ^= b * b | 1UL;
+//					b += a ^ a >> 31;
+//					//b ^= b * b | 1UL;
+//					return (b ^ b >> 30);
+
+					//uint64_t a = (stateA = -(stateA ^ (stateA * stateA | 5U)));
+					uint64_t a = (stateA = stateA * 0xD1342543DE82EF95UL + 0xDB4F0B9175AE2165UL);
+					a ^= a >> 32;
+					a *= (stateB += 0x9E3779B97F4A7C15UL) | 1UL;
+					a ^= a >> 31;
+					return a;
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
