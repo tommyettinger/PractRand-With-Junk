@@ -1334,18 +1334,41 @@ namespace PractRand {
 //					z ^= z >> 31;
 //					return z;
 
-					// Some kind of XQO-based random?
-					// Passes 64TB with no anomalies.
-					uint64_t z = (state += 0x9E3779B97F4A7C15UL);
-					z ^= z * z | 1UL;
-					z ^= z >> 21 ^ z >> 3;
-					z ^= z * z | 1UL;
-					return z ^ z >> 31 ^ z >> 5;
+//					// Some kind of XQO-based random?
+//					// Passes 64TB with no anomalies.
+//					uint64_t z = (state += 0x9E3779B97F4A7C15UL);
+//					z ^= z * z | 1UL;
+//					z ^= z >> 21 ^ z >> 3;
+//					z ^= z * z | 1UL;
+//					return z ^ z >> 31 ^ z >> 5;
 
 					// uint64_t z = (++state);
 					//& 0xFFFFFFFFFFFFFFFEUL;
 					// z *= 0xF1357AEA2E62A9C5UL;
 					// return z ^ z >> 26;
+
+					// uint64_t z = (state += 0x9E3779B97F4A7C15UL);
+					//					z = 0xDE916ABCC965815BUL * (z ^ (z * z | 5UL));
+					// z = -(z ^ (z * z | 5UL));
+					// z = 0xC6BC279692B5CC83UL * (z ^ (z * z | 5UL));
+
+					// uint64_t z = (state = -(state ^ (state * state | 5U))) + (stream += 0x9E3779B97F4A7C16UL);
+
+					// state ^= state << 7;
+					// uint64_t z = state ^= state >> 9;
+
+					//// QuestRandom
+					//// LFSR for state, odd Weyl sequence for stream.
+					//// Passes 64TB with no anomalies. Long enough period?
+					uint64_t z = (state = state >> 1 ^ (-(state & 1UL) & 0x9C82435DE0D49E35UL));
+					// z ^= z >> 31;
+					z *= (stream += 0x9E3779B97F4A7C16UL);
+					z ^= z >> 31;
+					z *= stream;
+					return z ^ z >> 29;
+					// z ^= z >> 29;
+					// z *= 0xF1357AEA2E62A9C5UL;
+					// return z ^ z >> 31;
 
 					//0xD1342543DE82EF95 is an LCG constant, 0xF1357AEA2E62A9C5 is an MCG constant.
 				}
