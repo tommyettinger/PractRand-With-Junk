@@ -1354,23 +1354,36 @@ namespace PractRand {
 
 					// uint64_t z = (state = -(state ^ (state * state | 5U))) + (stream += 0x9E3779B97F4A7C16UL);
 
-					// state ^= state << 7;
-					// uint64_t z = state ^= state >> 9;
-
-					//// QuestRandom
-					//// LFSR for state, odd Weyl sequence for stream.
-					//// Passes 64TB with no anomalies. Long enough period?
-					uint64_t z = (state = state >> 1 ^ (-(state & 1UL) & 0x9C82435DE0D49E35UL));
-					// z ^= z >> 31;
+					//// Prototype of QuestRandom
+					//// The simplest 64-bit Xorshift for state, Weyl sequence for stream.
+					//// Passes 64TB with one anomaly at 2TB:
+					////   [Low1/8]FPF-14+6/16:cross         R=  +4.9  p =  1.8e-4   unusual
+					state ^= state << 7;
+					uint64_t z = state ^= state >> 9;
 					z *= (stream += 0x9E3779B97F4A7C16UL);
 					z ^= z >> 31;
 					z *= stream;
 					return z ^ z >> 29;
+
+					//// QuestRandom
+					//// LFSR for state, odd Weyl sequence for stream.
+					//// Passes 64TB with no anomalies. Long enough period?
+//					uint64_t z = (state = state >> 1 ^ (-(state & 1UL) & 0x9C82435DE0D49E35UL));
+//					// z ^= z >> 31;
+//					z *= (stream += 0x9E3779B97F4A7C16UL);
+//					z ^= z >> 31;
+//					z *= stream;
+//					return z ^ z >> 29;
 					// z ^= z >> 29;
 					// z *= 0xF1357AEA2E62A9C5UL;
 					// return z ^ z >> 31;
 
 					//0xD1342543DE82EF95 is an LCG constant, 0xF1357AEA2E62A9C5 is an MCG constant.
+
+					//uint64_t z = (state = -(state ^ (state * state | 5U)));
+					// uint64_t z = (state = state * 0xD1342543DE82EF95 + 0xDB4F0B9175AE2165);
+					// z ^= rotate64(z, 25) ^ rotate64(z, 40);
+					// return z ^ rotate64(z, 13) ^ rotate64(z, 53);
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
