@@ -1378,7 +1378,8 @@ namespace PractRand {
 					// z *= 0xF1357AEA2E62A9C5UL;
 					// return z ^ z >> 31;
 
-					//0xD1342543DE82EF95 is an LCG constant, 0xF1357AEA2E62A9C5 is an MCG constant.
+					//0xD1342543DE82EF95UL is an LCG constant, 0xF1357AEA2E62A9C5UL is an MCG constant.
+					//0x2ECBDABC217D106BUL is - 0xD1342543DE82EF95UL
 
 					//uint64_t z = (state = -(state ^ (state * state | 5U)));
 					// uint64_t z = (state = state * 0xD1342543DE82EF95 + 0xDB4F0B9175AE2165);
@@ -1389,10 +1390,17 @@ namespace PractRand {
 					//// Passes 64TB with no anomalies.
 					//// State has two parts, with state (a counter with a variable step) dependent on stream (an LFSR with many taps).
 					//// Period is (2 to the 128) - (2 to the 64). While state can be anything, stream can't be 0.
-					uint64_t z = (state += 0x9E3779B97F4A7C15UL + (stream = stream >> 1 ^ (-(stream & 1UL) & 0x9C82435DE0D49E35UL)));
-					z ^= z >> 30;
-					z *= 0xF1357AEA2E62A9C5UL;
-					return z ^ z >> 29;
+					// uint64_t z = (state += 0x9E3779B97F4A7C15UL + (stream = stream >> 1 ^ (-(stream & 1UL) & 0x9C82435DE0D49E35UL)));
+					// z ^= z >> 30;
+					// z *= 0xF1357AEA2E62A9C5UL;
+					// return z ^ z >> 29;
+
+					//// Passes 64TB with no anomalies, but near-instantly fails Remortality.
+					uint64_t z = (state += 0xDB4F0B9175AE2165UL);
+					z *= (stream += 0x9E3779B97F4A7C16UL);
+					z ^= z >> 33;
+					z *= stream;
+					return z ^ z >> 30;
 
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
