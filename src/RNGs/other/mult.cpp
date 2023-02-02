@@ -1396,12 +1396,24 @@ namespace PractRand {
 					// return z ^ z >> 29;
 
 					//// Passes 64TB with no anomalies, but near-instantly fails Remortality.
-					uint64_t z = (state += 0xDB4F0B9175AE2165UL);
-					z *= (stream += 0x9E3779B97F4A7C16UL);
-					z ^= z >> 33;
-					z *= stream;
-					return z ^ z >> 30;
+					// uint64_t z = (state += 0xDB4F0B9175AE2165UL);
+					// z *= (stream += 0x9E3779B97F4A7C16UL);
+					// z ^= z >> 33;
+					// z *= stream;
+					// return z ^ z >> 30;
 
+					// IceRandom
+					// Passes 64TB with no anomalies.
+					// Two states, updated with the same period (2 to the 64), which enables constant-time skipping/jumping.
+					// ARX; mostly an effort to see if this type of generator could work with so few operation types.
+					uint64_t z = (state += 0xDB4F0B9175AE2165UL);
+					uint64_t y = (stream += 0x9E3779B97F4A7C15UL);
+					y += z ^ rotate64(z, 11) ^ rotate64(z, 50);
+					z += rotate64(y, 17);
+					y += z ^ rotate64(z, 46) ^ rotate64(z, 21);
+					z += rotate64(y, 47);
+					y += z ^ rotate64(z, 41) ^ rotate64(z, 25);
+					return y;
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
