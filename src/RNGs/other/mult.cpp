@@ -1429,14 +1429,75 @@ namespace PractRand {
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- Ice -- 64 bits: 	ps:   7.319e-01    7.815e-01    7.169e-01    8.875e-01*   5.468e-01   => p <   1.98124e-01   2^54.32 calls, 2^57.32 bytes	2^37.23 bytes/second	used:  12::21:04:21.12
 
-					uint64_t z = (state += 0xDB4F0B9175AE2165UL);
-					uint64_t y = (stream += 0x9E3779B97F4A7C15UL);
-					y += z ^ rotate64(z, 11) ^ rotate64(z, 50);
-					z += rotate64(y, 17);
+//					uint64_t z = (state += 0xDB4F0B9175AE2165UL);
+//					uint64_t y = (stream += 0x9E3779B97F4A7C15UL);
+//					y += z ^ rotate64(z, 11) ^ rotate64(z, 50);
+//					z += rotate64(y, 17);
+//					y += z ^ rotate64(z, 46) ^ rotate64(z, 21);
+//					z += rotate64(y, 47);
+//					y += z ^ rotate64(z, 41) ^ rotate64(z, 25);
+//					return y;
+
+
+//// Gets very suspicious at 8TB, but ReMort doesn't detect anything in the same timeframe (12 hours).
+//					uint64_t z = (state += 0xDB4F0B9175AE2165UL);
+//					uint64_t y = (stream += 0x9E3779B97F4A7C15UL);
+//					y += z ^ rotate64(z, 11) ^ rotate64(z, 50);
+//					z += y ^ rotate64(y, 46) ^ rotate64(y, 21);
+//					y += z ^  rotate64(z, 41) ^ rotate64(z, 25);
+//					return y;
+
+//					uint64_t z = (state += 0xDB4F0B9175AE2165UL);
+//					uint64_t y = (stream += 0x9E3779B97F4A7C15UL);
+//					uint64_t a = y + (z ^ rotate64(z, 11) ^ rotate64(z, 50));
+//					uint64_t b = z + (y ^ rotate64(y, 37) ^ rotate64(y, 21));
+//					return (a ^ rotate64(a, 44) ^ rotate64(a, 26)) + (b ^ rotate64(b, 53) ^ rotate64(b, 17));
+
+					// uint64_t y = (stream ^ stream >> 7);
+					// stream = y ^ y << 9;
+					// uint64_t z = (state += 0x9E3779B97F4A7C15UL);
+//					uint64_t y = (state += 0xDB4F0B9175AE2165UL);
+//					uint64_t z = (stream = stream >> 1 ^ (-(stream & 1UL) & 0x9C82435DE0D49E35UL));
+//					uint64_t a = (y + (z ^ rotate64(z, 10) ^ rotate64(z, 50)));
+//					uint64_t b = (z + (y ^ rotate64(y, 46) ^ rotate64(y, 21)));
+//					return (a ^ rotate64(a, 17) ^ rotate64(a, 41)) + (b ^ rotate64(b, 23) ^ rotate64(b, 47));
+
+					// uint64_t z = (state = state >> 1 ^ (-(state & 1UL) & 0x9C82435DE0D49E35UL));
+					// uint64_t y = (stream += 0x9E3779B97F4A7C15UL);
+					// uint64_t y = (stream ^ stream >> 7);
+					// stream = y ^ y << 9;
+					// uint64_t z = (state += 0x9E3779B97F4A7C15UL);
+
+					//uint64_t y = (state += 0xDB4F0B9175AE2165UL);
+					//uint64_t z = (stream += 0x9E3779B97F4A7C15UL);
+					// z += y ^ rotate64(y, 6)  ^ rotate64(y, 25);
+					// y += z ^ rotate64(z, 41) ^ rotate64(z, 59);
+					// z += rotate64(y, 47) ^ rotate64(y, 11) ^ rotate64(y, 25);
+					// y += rotate64(z, 21) ^ rotate64(z, 50) ^ rotate64(z, 59);
+					// z += z ^ rotate64(z, 11) ^ rotate64(z, 50);
+					// // y += rotate64(y, 17);
+					// z += z ^ rotate64(z, 46) ^ rotate64(z, 21);
+					// // y += rotate64(y, 47);
+					// z += z ^ rotate64(z, 41) ^ rotate64(z, 25);
+					// return y ^ z;
+
+					// WrangleRNG
+					// Passes 64TB with no anomalies.
+					// Period is exactly 2 to the 64, and there are 2 to the 63 streams of unknown correlation.
+					// The increments this uses are meant to be a serious stress-test for the generator; 1 and 3.
+					// Even with that pair, this seems strong. It uses only add, rotate, and XOR operations.
+					// Instruction pipelining has a lot of possibility here; half of the rotations can be pipelined
+					// to compute at the same time as another rotation (I think).
+					uint64_t z = (state += 1UL);
+					uint64_t y = (stream += 3UL);
+					z += y ^ rotate64(y, 11) ^ rotate64(y, 50);
 					y += z ^ rotate64(z, 46) ^ rotate64(z, 21);
-					z += rotate64(y, 47);
-					y += z ^ rotate64(z, 41) ^ rotate64(z, 25);
-					return y;
+					z += y ^ rotate64(y,  5) ^ rotate64(y, 14);
+					y += z ^ rotate64(z, 25) ^ rotate64(z, 41);
+					z += y ^ rotate64(y, 53) ^ rotate64(y,  3);
+					y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
+					return y ^ z;
+
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
