@@ -1536,6 +1536,27 @@ namespace PractRand {
 
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
+
+				uint64_t mmi(const uint64_t a) {
+					uint64_t x = 2 ^ a * 3;
+					x *= 2 - a * x;
+					x *= 2 - a * x;
+					x *= 2 - a * x;
+					x *= 2 - a * x;
+					return x;
+				}
+
+				uint64_t fixGamma(uint64_t gamma) {
+					uint64_t inverse = mmi(gamma |= 1UL), add = 0UL;
+					while (abs((long long)__popcnt64(gamma) - 32) > 8
+						|| abs((long long)__popcnt64(gamma ^ gamma >> 1) - 32) > 8
+						|| abs((long long)__popcnt64(inverse) - 32) > 8
+						|| abs((long long)__popcnt64(inverse ^ inverse >> 1) - 32) > 8) {
+						inverse = mmi(gamma = gamma * 0xD1342543DE82EF95L + (add += 2L));
+					}
+					return gamma;
+				}
+
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
@@ -3038,7 +3059,7 @@ namespace PractRand {
 					//const Uint64 inc = 0x9E3779B97F4A7C15;
 					//const Uint64 stage1 = 0xBF58476D1CE4E5B9;
 					//const Uint64 stage2 = 0x94D049BB133111EB;
-					Uint64 z = (state += 0x9E3779B97F4A7C15);
+					Uint64 z = (state += 0x222233B8B7C7F28B);
 					z = (z ^ z >> 30) * 0xBF58476D1CE4E5B9;
 					z = (z ^ z >> 27) * 0x94D049BB133111EB;
 					return z ^ z >> 31;
