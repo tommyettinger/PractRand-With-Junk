@@ -1510,22 +1510,36 @@ namespace PractRand {
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- Ice -- 64 bits: 	ps:   4.505e-02*   4.809e-01    4.145e-01    5.532e-02    1.580e-01   => p <   9.14651e-02   2^54.32 calls, 2^57.32 bytes	2^36.61 bytes/second	used:  19::20:20:42.83
 
-					uint64_t z = (state += 1UL);
-					uint64_t y = (stream += 3UL);
-					z += y ^ rotate64(y, 11) ^ rotate64(y, 50);
-					y += z ^ rotate64(z, 46) ^ rotate64(z, 21);
-					z += y ^ rotate64(y,  5) ^ rotate64(y, 14);
+
+					//// Testing with some of the worst possible increments (gammas). Still passes!
+					//uint64_t z = (state += 1UL);
+					//uint64_t y = (stream += 3UL);
+					//z += y ^ rotate64(y, 11) ^ rotate64(y, 50);
+					//y += z ^ rotate64(z, 46) ^ rotate64(z, 21);
+					//z += y ^ rotate64(y,  5) ^ rotate64(y, 14);
+					//y += z ^ rotate64(z, 25) ^ rotate64(z, 41);
+					//z += y ^ rotate64(y, 53) ^ rotate64(y,  3);
+					//y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
+					//return y ^ z;
+
+					//// Using harmonious number-based increments (R2 sequence), we can elide two lines.
+					//// We also only need to return y, not y ^ z.
+					//// This passes PractRand to 64TB with no anomalies.
+					uint64_t z = (state += 0xC13FA9A902A6328FUL);
+					uint64_t y = (stream += 0x91E10DA5C79E7B1DUL);
+					z += y ^ rotate64(y, 5) ^ rotate64(y, 14);
 					y += z ^ rotate64(z, 25) ^ rotate64(z, 41);
-					z += y ^ rotate64(y, 53) ^ rotate64(y,  3);
+					z += y ^ rotate64(y, 53) ^ rotate64(y, 3);
 					y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
-					return y ^ z;
+					return y;
+
 
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
-					stream |= 1ULL;
+					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
 					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, stream);

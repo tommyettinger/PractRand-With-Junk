@@ -105,6 +105,9 @@
     <ClCompile Include="..\..\src\tests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\RNGs\other\special.cpp">
+      <Filter>Source Files\RNGs\other</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\PractRand\config.h">
