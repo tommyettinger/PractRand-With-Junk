@@ -1520,6 +1520,17 @@ namespace PractRand {
 //					y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
 //					return y ^ z;
 
+					//// Testing with some of the worst possible increments (gammas). Still passes!
+					//uint64_t z = (state += 1UL);
+					//uint64_t y = (stream += 3UL);
+					//z += y ^ rotate64(y, 11) ^ rotate64(y, 50);
+					//y += z ^ rotate64(z, 46) ^ rotate64(z, 21);
+					//z += y ^ rotate64(y,  5) ^ rotate64(y, 14);
+					//y += z ^ rotate64(z, 25) ^ rotate64(z, 41);
+					//z += y ^ rotate64(y, 53) ^ rotate64(y,  3);
+					//y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
+					//return y ^ z;
+
 ////JacinthRandom, passes 64TB of PractRand with no anomalies.
 // 6	                   2  + 1.36750e+01	                   0  - 2.29283e-01	                   0  - 2.29283e-01	                   0  - 2.29283e-01	                   0  - 2.29283e-01	
 // 7	                4441  + 1.51585e-01	                4403  - 3.33245e-02	                4392  - 1.21172e-01	                4443  + 1.75929e-01	                4362  - 6.39342e-01	
@@ -1542,23 +1553,45 @@ namespace PractRand {
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- Ice -- 64 bits: 	ps:   7.414e-01    1.474e-01*   5.070e-01    3.656e-01    3.480e-01   => p <   6.89827e-01   2^54.32 calls, 2^57.32 bytes	2^37.18 bytes/second	used:  13::09:26:19.48
 
+					//// Using harmonious number-based increments (R2 sequence), we can elide two lines.
+					//// We also probably only need to return y, not y ^ z, but the above test used y ^ z .
+					//// This passes PractRand to 64TB with no anomalies, returning either y or y ^ z .
 					uint64_t z = (state += 0xC13FA9A902A6328FUL);
 					uint64_t y = (stream += 0x91E10DA5C79E7B1DUL);
-					//// These two lines can be commented out when using sufficiently-large, well-distributed increments.
-					// z += y ^ rotate64(y, 11) ^ rotate64(y, 50);
-					// y += z ^ rotate64(z, 46) ^ rotate64(z, 21);
 					z += y ^ rotate64(y,  5) ^ rotate64(y, 14);
 					y += z ^ rotate64(z, 25) ^ rotate64(z, 41);
-					z += y ^ rotate64(y, 53) ^ rotate64(y,  3);
+					z += y ^ rotate64(y, 53) ^ rotate64(y, 3);
 					y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
 					return y ^ z;
 
+
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
+
+				uint64_t mmi(const uint64_t a) {
+					uint64_t x = 2 ^ a * 3;
+					x *= 2 - a * x;
+					x *= 2 - a * x;
+					x *= 2 - a * x;
+					x *= 2 - a * x;
+					return x;
+				}
+
+				uint64_t fixGamma(uint64_t gamma) {
+					uint64_t inverse = mmi(gamma |= 1UL), add = 0UL;
+					while (abs((long long)__popcnt64(gamma) - 32) > 8
+						|| abs((long long)__popcnt64(gamma ^ gamma >> 1) - 32) > 8
+						|| abs((long long)__popcnt64(inverse) - 32) > 8
+						|| abs((long long)__popcnt64(inverse ^ inverse >> 1) - 32) > 8) {
+						inverse = mmi(gamma = gamma * 0xD1342543DE82EF95L + (add += 2L));
+					}
+					return gamma;
+				}
+
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
-					stream |= 1ULL;
+					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
 					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, stream);
@@ -3057,7 +3090,7 @@ namespace PractRand {
 					//const Uint64 inc = 0x9E3779B97F4A7C15;
 					//const Uint64 stage1 = 0xBF58476D1CE4E5B9;
 					//const Uint64 stage2 = 0x94D049BB133111EB;
-					Uint64 z = (state += 0x9E3779B97F4A7C15);
+					Uint64 z = (state += 0x222233B8B7C7F28B);
 					z = (z ^ z >> 30) * 0xBF58476D1CE4E5B9;
 					z = (z ^ z >> 27) * 0x94D049BB133111EB;
 					return z ^ z >> 31;

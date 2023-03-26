@@ -47,7 +47,7 @@ namespace PractRand {
                 }
                 void aesdragontamer::walk_state(StateWalkingObject *walker) {
                     idx = 0;
-                    increment = _mm_set_epi32(0, 0xF9F87D4D, 0, 0x9E3779B9);
+                    increment = _mm_set_epi32(0xCB9C59B3, 0xF9F87D4D, 0x060782B1, 0x9E3779B9);
                     //increment = _mm_set_epi64x(0xCB9C59B3F9F87D4Du, 0x3463A64C060782B1u);
 //                  increment = _mm_set_epi8(0x2f, 0x2b, 0x29, 0x25, 0x1f, 0x1d, 0x17, 0x13, 
 //                        0x11, 0x0D, 0x0B, 0x07, 0x05, 0x03, 0x02, 0x01);
