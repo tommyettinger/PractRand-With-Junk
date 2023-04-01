@@ -2954,6 +2954,15 @@ namespace PractRand {
 					a *= (stateB += 0x9E3779B97F4A7C15UL) | 1UL;
 					a ^= a >> 31;
 					return a;
+
+//uint64_t z = (state += 0xC13FA9A902A6328FUL);
+//uint64_t y = (stream += 0x91E10DA5C79E7B1DUL);
+//z += y ^ rotate64(y, 5) ^ rotate64(y, 14);
+//y += z ^ rotate64(z, 25) ^ rotate64(z, 41);
+//z += y ^ rotate64(y, 53) ^ rotate64(y, 3);
+//y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
+//return y;
+
 				}
 				std::string mingler::get_name() const { return "mingler"; }
 				void mingler::walk_state(StateWalkingObject *walker) {
@@ -3020,11 +3029,11 @@ namespace PractRand {
 					//return x ^ x >> 15;
 
 
-					const uint32_t s = (stateA = stateA + 0xC1C64E6DU | 0);
-				    uint32_t x = (s ^ s >> 17) * ((stateB = stateB - (-((s | -s) >> 31) & 0x279BU) | 0U) >> 12 | 1U);
-					x ^= x >> 16;
-					x *= 0xAC451U;
-					return x ^ x >> 15;
+					//const uint32_t s = (stateA = stateA + 0xC1C64E6DU | 0);
+				    //uint32_t x = (s ^ s >> 17) * ((stateB = stateB - (-((s | -s) >> 31) & 0x279BU) | 0U) >> 12 | 1U);
+					//x ^= x >> 16;
+					//x *= 0xAC451U;
+					//return x ^ x >> 15;
 
 
 					//uint32_t x = (s ^ s >> 17) * (stateB | 0xFFF00001U);
@@ -3041,6 +3050,16 @@ namespace PractRand {
 //					x ^= x >> 11;
 //					x *= UINT32_C(0x31848bab);
 //					x ^= x >> 14;
+
+					// SpinelRandom, passes 64TB with no anomalies.
+					// Period is 2 to the 64. All states are valid.
+					uint32_t z = (stateA += 0xC13FA9A9U);
+					uint32_t y = (stateB += -((z | -z) >> 31) & 0x91E10DA5U);
+					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
+					y += z ^ rotate32(z, 28) ^ rotate32(z, 21);
+					z += y ^ rotate32(y, 12) ^ rotate32(y, 23);
+					y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
+					return y;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
