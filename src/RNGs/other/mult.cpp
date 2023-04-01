@@ -1556,13 +1556,25 @@ namespace PractRand {
 					//// Using harmonious number-based increments (R2 sequence), we can elide two lines.
 					//// We also probably only need to return y, not y ^ z, but the above test used y ^ z .
 					//// This passes PractRand to 64TB with no anomalies, returning either y or y ^ z .
+//					uint64_t z = (state += 0xC13FA9A902A6328FUL);
+//					uint64_t y = (stream += 0x91E10DA5C79E7B1DUL);
+//					z += y ^ rotate64(y,  5) ^ rotate64(y, 14);
+//					y += z ^ rotate64(z, 25) ^ rotate64(z, 41);
+//					z += y ^ rotate64(y, 53) ^ rotate64(y, 3);
+//					y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
+//					return y;
+
+					//// Passes 64TB with one anomaly,
+					//// [Low4/32]FPF-14+6/16:cross        R=  -2.5  p =1-1.6e-4   unusual
+					//// Has a period of 2 to the 128.
+					//// 0xAEF17502108EF2DAU is a constant that must be even; 0U works as one extreme.
 					uint64_t z = (state += 0xC13FA9A902A6328FUL);
-					uint64_t y = (stream += 0x91E10DA5C79E7B1DUL);
-					z += y ^ rotate64(y,  5) ^ rotate64(y, 14);
+					uint64_t y = (stream += 0x91E10DA5C79E7B1DUL + ((z | 0xAEF17502108EF2DAU - z) >> 63));
+					// z += y ^ rotate64(y,  5) ^ rotate64(y, 14);
 					y += z ^ rotate64(z, 25) ^ rotate64(z, 41);
 					z += y ^ rotate64(y, 53) ^ rotate64(y, 3);
 					y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
-					return y ^ z;
+					return y;
 
 
 				}
@@ -1577,16 +1589,16 @@ namespace PractRand {
 					return x;
 				}
 
-				uint64_t fixGamma(uint64_t gamma) {
-					uint64_t inverse = mmi(gamma |= 1UL), add = 0UL;
-					while (abs((long long)__popcnt64(gamma) - 32) > 8
-						|| abs((long long)__popcnt64(gamma ^ gamma >> 1) - 32) > 8
-						|| abs((long long)__popcnt64(inverse) - 32) > 8
-						|| abs((long long)__popcnt64(inverse ^ inverse >> 1) - 32) > 8) {
-						inverse = mmi(gamma = gamma * 0xD1342543DE82EF95L + (add += 2L));
-					}
-					return gamma;
-				}
+				// uint64_t fixGamma(uint64_t gamma) {
+				// 	uint64_t inverse = mmi(gamma |= 1UL), add = 0UL;
+				// 	while (abs((long long)__popcnt64(gamma) - 32) > 8
+				// 		|| abs((long long)__popcnt64(gamma ^ gamma >> 1) - 32) > 8
+				// 		|| abs((long long)__popcnt64(inverse) - 32) > 8
+				// 		|| abs((long long)__popcnt64(inverse ^ inverse >> 1) - 32) > 8) {
+				// 		inverse = mmi(gamma = gamma * 0xD1342543DE82EF95L + (add += 2L));
+				// 	}
+				// 	return gamma;
+				// }
 
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
