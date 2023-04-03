@@ -3039,10 +3039,19 @@ namespace PractRand {
 //					x *= UINT32_C(0x31848bab);
 //					x ^= x >> 14;
 
-					// SpinelRandom, passes 64TB with no anomalies.
-					// Period is 2 to the 64. All states are valid.
+//					// SpinelRandom, passes 64TB with no anomalies.
+//					// Period is 2 to the 64. All states are valid.
+//					uint32_t z = (stateA += 0xC13FA9A9U);
+//					uint32_t y = (stateB += -((z | -z) >> 31) & 0x91E10DA5U);
+//					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
+//					y += z ^ rotate32(z, 28) ^ rotate32(z, 21);
+//					z += y ^ rotate32(y, 12) ^ rotate32(y, 23);
+//					y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
+//					return y;
+
 					uint32_t z = (stateA += 0xC13FA9A9U);
-					uint32_t y = (stateB += -((z | -z) >> 31) & 0x91E10DA5U);
+					//uint32_t y = (stateB += ((z | 0xAEF17502 - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
+					uint32_t y = (stateB += ((z | 0xF1357AEA - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
 					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
 					y += z ^ rotate32(z, 28) ^ rotate32(z, 21);
 					z += y ^ rotate32(y, 12) ^ rotate32(y, 23);
@@ -4008,18 +4017,29 @@ namespace PractRand {
 					stateD = fa - fc;
 					return fd;
 */
-					// Passes 64TB with no anomalies, is a little faster, and does not have the
-					// non-random behavior with the all-zero initial state. It's passed 5PB
-					// in hwd without issues.
-					const uint64_t fa = stateA;
-					const uint64_t fb = stateB;
-					const uint64_t fc = stateC;
-					const uint64_t fd = stateD;
-					stateA = 0xD1342543DE82EF95UL * fd;
-					stateB = fa + 0xC6BC279692B5C323UL;
-					stateC = rotate64(fb, 47) - fd;
-					stateD = fb ^ fc;
-					return fd;
+//					// Passes 64TB with no anomalies, is a little faster, and does not have the
+//					// non-random behavior with the all-zero initial state. It's passed 5PB
+//					// in hwd without issues.
+//					const uint64_t fa = stateA;
+//					const uint64_t fb = stateB;
+//					const uint64_t fc = stateC;
+//					const uint64_t fd = stateD;
+//					stateA = 0xD1342543DE82EF95UL * fd;
+//					stateB = fa + 0xC6BC279692B5C323UL;
+//					stateC = rotate64(fb, 47) - fd;
+//					stateD = fb ^ fc;
+//					return fd;
+
+					// QuartzRandom
+					// Passes 64TB with no anomalies.
+					// Period is at least 2 to the 64, with 2 the 64 guaranteed streams.
+					uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+					uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+					uint64_t z = stateC + x;
+					uint64_t w = stateD + y;
+					stateC = z + (w ^ rotate64(w, 25) ^ rotate64(w, 43));
+					stateD = w + (z ^ rotate64(z, 47) ^ rotate64(z, 13));
+					return stateC ^ stateD;
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
