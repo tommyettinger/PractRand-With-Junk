@@ -4057,13 +4057,24 @@ namespace PractRand {
 					// Passes 64TB with no anomalies.
 					// Period is at least 2 to the 64, with 2 the 64 guaranteed streams.
 					// Unlike the above QuartzRandom, this can step backward, and doesn't have shrinking cycles.
+					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+					//uint64_t z = stateC + x;
+					//uint64_t w = stateD + y;
+					//stateC = x + (w ^ rotate64(w, 25) ^ rotate64(w, 38));
+					//stateD = y + (z ^ rotate64(z, 47) ^ rotate64(z, 19));
+					//return stateC + stateD;
+
+
+					// Fails at 8TB. Also fails ReMort after a very short run, about 15 seconds or less.
 					uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
 					uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
 					uint64_t z = stateC + x;
 					uint64_t w = stateD + y;
-					stateC = x + (w ^ rotate64(w, 25) ^ rotate64(w, 38));
-					stateD = y + (z ^ rotate64(z, 47) ^ rotate64(z, 19));
+					stateC = x ^ rotate64(w, 21);
+					stateD = y ^ rotate64(z, 53);
 					return stateC + stateD;
+
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
