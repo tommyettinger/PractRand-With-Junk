@@ -4085,7 +4085,7 @@ namespace PractRand {
 
 					// JasperRandom
 					// Passes 64TB with no anomalies.
-					// Period is at least 2 to the 64, with 2 the 64 guaranteed streams.
+					// Period is at least 2 to the 64, with 2 to the 64 guaranteed streams.
 					// Unlike the above QuartzRandom, this can step backward, and doesn't have shrinking cycles.
 					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
 					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
@@ -4097,13 +4097,25 @@ namespace PractRand {
 
 
 					// Fails at 8TB. Also fails ReMort after a very short run, about 15 seconds or less.
+					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+					//uint64_t z = stateC + x;
+					//uint64_t w = stateD + y;
+					//stateC = x ^ rotate64(w, 21);
+					//stateD = y ^ rotate64(z, 53);
+					//return stateC + stateD;
+
+					// TernRandom
+					// Passes 64TB with no anomalies.
+					// Again, period is at least 2 to the 64, with 2 to the 64 guaranteed streams.
 					uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
 					uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
-					uint64_t z = stateC + x;
-					uint64_t w = stateD + y;
-					stateC = x ^ rotate64(w, 21);
-					stateD = y ^ rotate64(z, 53);
-					return stateC + stateD;
+					uint64_t z = stateC ^ x;
+					uint64_t w = stateD ^ y;
+					stateC = x + (rotate64(w, 47) ^ rotate64(w, 13) ^ rotate64(w, 53));
+					stateD = y + (rotate64(z, 19) ^ rotate64(z, 37) ^ rotate64(z, 23));
+					return z;
+
 
 				}
 				std::string mars256::get_name() const { return "mars256"; }
