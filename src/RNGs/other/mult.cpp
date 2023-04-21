@@ -4108,13 +4108,24 @@ namespace PractRand {
 					// TernRandom
 					// Passes 64TB with no anomalies.
 					// Again, period is at least 2 to the 64, with 2 to the 64 guaranteed streams.
+					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+					//uint64_t z = stateC ^ x;
+					//uint64_t w = stateD ^ y;
+					//stateC = x + (rotate64(w, 47) ^ rotate64(w, 13) ^ rotate64(w, 53));
+					//stateD = y + (rotate64(z, 19) ^ rotate64(z, 37) ^ rotate64(z, 23));
+					//return z;
+					
+					 
+					// Passes 64TB with no anomalies.
+					// Fails ReMort after about a minute.
 					uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
 					uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
-					uint64_t z = stateC ^ x;
-					uint64_t w = stateD ^ y;
-					stateC = x + (rotate64(w, 47) ^ rotate64(w, 13) ^ rotate64(w, 53));
-					stateD = y + (rotate64(z, 19) ^ rotate64(z, 37) ^ rotate64(z, 23));
-					return z;
+					uint64_t z = stateC + x;
+					uint64_t w = stateD + y;
+					stateC = x + w;
+					return
+					stateD = y + (z ^ rotate64(z, 44) ^ rotate64(z, 19));
 
 
 				}
