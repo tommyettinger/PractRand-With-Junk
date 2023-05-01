@@ -4116,9 +4116,18 @@ namespace PractRand {
 //					stateC = x + (w ^ rotate64(w, 25) ^ rotate64(w, 38));
 //					stateD = y + (z ^ rotate64(z, 47) ^ rotate64(z, 19));
 //					return stateC + stateD;
-
 					// TernRandom
+					// Passes 64TB with no anomalies.
 					// Again, period is at least 2 to the 64, with 2 to the 64 guaranteed streams.
+					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+					//uint64_t z = stateC ^ x;
+					//uint64_t w = stateD ^ y;
+					//stateC = x + (rotate64(w, 47) ^ rotate64(w, 13) ^ rotate64(w, 53));
+					//stateD = y + (rotate64(z, 19) ^ rotate64(z, 37) ^ rotate64(z, 23));
+					//return z;
+
+
 					// Passes 64TB with no anomalies.
 //					uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
 //					uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
@@ -4155,6 +4164,36 @@ namespace PractRand {
 					stateC = x + rotate64(w, 21);
 					stateD = y + (z ^ rotate64(z, 25) ^ rotate64(z, 50));
 					return w;
+					// Fails ReMort after about a minute.
+					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+					//uint64_t z = stateC + x;
+					//uint64_t w = stateD + y;
+					//stateC = x + w;
+					//return
+					//stateD = y + (z ^ rotate64(z, 44) ^ rotate64(z, 19));
+
+					//// No good.
+
+					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+					//uint64_t z = rotate64(stateC, 23);
+					//uint64_t w = rotate64(stateD, 22);
+					//stateC = w ^ x;
+					//stateD = z ^ y;
+					//return z + w;
+					
+					//Passes at least 32TB with no anomalies, BUT
+					//it won't escape if states B, C, and D are all 0.
+//					const uint64_t fa = stateA;
+//					const uint64_t fb = stateB;
+//					const uint64_t fc = stateC;
+//					const uint64_t fd = stateD;
+//					stateA = fa + 0xC13FA9A902A6328EUL;
+//					stateB = fa * fc;
+//					stateC = fb + fd;
+//					stateD = rotate64(fb, 41);
+//					return fc;
 
 				}
 				std::string mars256::get_name() const { return "mars256"; }
