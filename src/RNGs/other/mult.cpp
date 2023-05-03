@@ -4159,16 +4159,29 @@ namespace PractRand {
 					//return z + w;
 					
 					//Passes at least 32TB with no anomalies, BUT
-					//it won't escape if states B, C, and D are all 0.
+//					//it won't escape if states B, C, and D are all 0.
+//					const uint64_t fa = stateA;
+//					const uint64_t fb = stateB;
+//					const uint64_t fc = stateC;
+//					const uint64_t fd = stateD;
+//					stateA = fa + 0xC13FA9A902A6328EUL;
+//					stateB = fa * fc;
+//					stateC = fb + fd;
+//					stateD = rotate64(fb, 41);
+//					return fc;
+
+					//ScruffRandom
+					//Passes 64TB with no anomalies.
+					//Period is at minimum 2 to the 64; all operations have no data dependency on each other.
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
 					const uint64_t fc = stateC;
 					const uint64_t fd = stateD;
-					stateA = fa + 0xC13FA9A902A6328EUL;
-					stateB = fa * fc;
-					stateC = fb + fd;
-					stateD = rotate64(fb, 41);
-					return fc;
+					stateA = fa + 0x9E3779B97F4A7C15UL;
+					stateB = fd * 0xD1342543DE82EF95UL;
+					stateC = fa ^ fb;
+					stateD = rotate64(fc, 21);
+					return fd - fc;
 
 				}
 				std::string mars256::get_name() const { return "mars256"; }
