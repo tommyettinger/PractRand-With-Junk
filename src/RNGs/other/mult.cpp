@@ -4129,6 +4129,41 @@ namespace PractRand {
 
 
 					// Passes 64TB with no anomalies.
+//					uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+//					uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+//					uint64_t z = stateC ^ x;
+//					uint64_t w = stateD ^ y;
+//					stateC = x + (rotate64(w, 47) ^ rotate64(w, 13) ^ rotate64(w, 53));
+//					stateD = y + (rotate64(z, 19) ^ rotate64(z, 37) ^ rotate64(z, 23));
+//					return z;
+
+//Flops on ReMort around 100 to 170PB.
+// 7	                4400  - 5.18470e-02	                4421  + 7.80479e-03	                4457  + 3.97069e-01	                4464  + 5.40934e-01	                4461  + 4.76560e-01	
+// 8	              361114  + 1.88447e-01	              361813  + 2.55273e+00	              360692  - 7.20367e-02	              360394  - 5.84423e-01	              360426  - 5.05813e-01	
+// 9	            22358321  + 8.47010e-02	            22357601  + 1.92544e-02	            22357218  + 3.33608e-03	            22357509  + 1.42332e-02	            22358927  + 1.75727e-01	
+//11	                4502  + 1.70922e+00	                4578  + 6.00814e+00	                4445  + 2.02084e-01	                4334  - 1.49079e+00	                4457  + 3.97069e-01	
+//12	            85022540  + 1.56205e-01	            85032187  + 2.07785e+00	            84993202  - 7.76498e+00	            85031598  + 1.89777e+00	            85011701  - 6.08862e-01	
+//13	          6948693805  + 1.30826e-02	          6948695706  + 1.88195e-02	          6948688485  + 2.55616e-03	          6948791903  + 1.66719e+00	          6948486784  - 5.61271e+00	
+//14	        430510572217  - 8.74323e-01	        430510560593  - 9.07767e-01	        430510157633  - 2.45521e+00	        430510015930  - 3.17865e+00	        430510788585  - 3.66376e-01	
+//16	              360441  - 4.70919e-01	              360108  - 1.53904e+00	              360656  - 1.07798e-01	              361243  + 4.21007e-01	              361681  + 1.89885e+00	
+//17	          6948643492  - 2.39310e-01	          6948513388  - 4.20235e+00	          6948442937  - 8.38171e+00	          6948500944  - 4.83669e+00	          6948650827  - 1.60961e-01	
+//18	        567923307985  - 7.66235e-05	        567921493488  - 5.83949e+00	        567921589565  - 5.23959e+00	        567923486122  + 5.18135e-02	        567922692573  - 6.81245e-01	
+//19	      35186112554203  - 1.37286e+01	      35186114499137  - 1.14064e+01	      35186123616266  - 3.38684e+00	      35186121661115  - 4.70865e+00	      35186113137001  - 1.30102e+01	
+//21	            22357427  + 1.03960e-02	            22359128  + 2.13175e-01	            22358713  + 1.39831e-01	            22356793  - 1.03203e-03	            22356232  - 2.27323e-02	
+//22	        430510172086  - 2.38667e+00	        430510741531  - 4.58335e-01	        430510850931  - 2.60375e-01	        430510305512  - 1.79971e+00	        430510175529  - 2.37048e+00	
+//23	      35186121654661  - 4.71337e+00	      35186114291075  - 1.16445e+01	      35186114203340  - 1.17457e+01	      35186121379146  - 4.91720e+00	      35186122477782  - 4.13010e+00	
+//24	    2179984607618054  + 6.11676e-01	    2179984614410494  + 8.60396e-01	    2179984605696708  + 5.49001e-01	    2179984599068241  + 3.58776e-01	    2179984606818282  + 5.85176e-01	
+//
+//              25.239 15 =>   1-3.226669e-02           47.756 15 =>   1-1.442888e-05           40.708 15 =>   1-1.979981e-04           26.469 15 =>   1-2.258465e-02           31.003 15 =>   1-5.546968e-03
+//
+//--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- Aqua256 -- 64 bits: 	ps: 1-3.227e-02  1-1.443e-05* 1-1.980e-04  1-2.258e-02  1-5.547e-03   => p <   3.95971e-08  **** SUSPECT **** PRNG: Aqua256	  2^54.32 calls, 2^57.32 bytes	2^37.67 bytes/second	used:   9::12:13:29.09
+					uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
+					uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
+					uint64_t z = stateC + x;
+					uint64_t w = stateD + y;
+					stateC = x + rotate64(w, 21);
+					stateD = y + (z ^ rotate64(z, 25) ^ rotate64(z, 50));
+					return w;
 					// Fails ReMort after about a minute.
 					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
 					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
@@ -4137,16 +4172,6 @@ namespace PractRand {
 					//stateC = x + w;
 					//return
 					//stateD = y + (z ^ rotate64(z, 44) ^ rotate64(z, 19));
-
-					// Passes 32TB with no anomalies, maybe 64TB (test cut short).
-					// Trouble with ReMort after about 2 to 2.5 days.
-					//uint64_t x = (stateA += 0xC13FA9A902A6328FUL);
-					//uint64_t y = (stateB += 0x91E10DA5C79E7B1DUL);
-					//uint64_t z = stateC + x;
-					//uint64_t w = stateD + y;
-					//stateC = x + rotate64(w, 21);
-					//stateD = y + (z ^ rotate64(z, 50) ^ rotate64(z, 25));
-					//return w;
 
 					//// No good.
 
@@ -4159,7 +4184,7 @@ namespace PractRand {
 					//return z + w;
 					
 					//Passes at least 32TB with no anomalies, BUT
-//					//it won't escape if states B, C, and D are all 0.
+					//it won't escape if states B, C, and D are all 0.
 //					const uint64_t fa = stateA;
 //					const uint64_t fb = stateB;
 //					const uint64_t fc = stateC;
@@ -4182,12 +4207,10 @@ namespace PractRand {
 					stateC = fa ^ fb;
 					stateD = rotate64(fc, 21);
 					return fd - fc;
-
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
-					stateA |= 1;
 					walker->handle(stateB);
 					walker->handle(stateC);
 					walker->handle(stateD);
