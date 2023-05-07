@@ -4196,6 +4196,7 @@ namespace PractRand {
 //					return fc;
 
 //// ScruffRandom, passes 64TB of PractRand with no anomalies.
+//// Period is at minimum 2 to the 64; all operations have no data dependency on each other.
 //// Passes 89PB of ReMort (half the length of normal because of a planned power outage), with a strong final result:
 // 7	                2142  - 1.94728e+00	                2221  + 8.17651e-02	                2233  + 2.93058e-01	                2247  + 7.04454e-01	                2197  - 5.05612e-02	
 // 8	              181377  + 5.00610e+00	              180722  + 4.83591e-01	              180004  - 9.89892e-01	              180930  + 1.40443e+00	              180728  + 5.03436e-01	
@@ -4226,8 +4227,6 @@ namespace PractRand {
 					stateC = fa ^ fb;
 					stateD = rotate64(fc, 21);
 					return fd - fc;
-
-
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
