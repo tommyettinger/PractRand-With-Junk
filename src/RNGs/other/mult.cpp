@@ -4218,15 +4218,29 @@ namespace PractRand {
 //
 //--- Finished -- ReMort trials: 1125899906842624	2^50.0 (out of 2^50) trials -- Scruff256 -- 64 bits: 	ps: 1-4.586e-02*   8.651e-01    3.784e-01    1.442e-01    2.853e-01   => p <   7.97358e-01   2^53.32 calls, 2^56.32 bytes	2^37.48 bytes/second	used:   5::10:08:40.45
 
-					const uint64_t fa = stateA;
-					const uint64_t fb = stateB;
-					const uint64_t fc = stateC;
-					const uint64_t fd = stateD;
-					stateA = fa + 0x9E3779B97F4A7C15UL;
-					stateB = fd * 0xD1342543DE82EF95UL;
-					stateC = fa ^ fb;
-					stateD = rotate64(fc, 21);
-					return fd - fc;
+//					const uint64_t fa = stateA;
+//					const uint64_t fb = stateB;
+//					const uint64_t fc = stateC;
+//					const uint64_t fd = stateD;
+//					stateA = fa + 0x9E3779B97F4A7C15UL;
+//					stateB = fd * 0xD1342543DE82EF95UL;
+//					stateC = fa ^ fb;
+//					stateD = rotate64(fc, 21);
+//					return fd - fc;
+
+					// SplurgeRandom
+					// Passes 64TB with no anomalies.
+					// Period is exactly 2 to the 64; there are 2 to the 192 possible streams.
+					// It permits O(1) skip to any point in its period.
+					uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
+					uint64_t fb = (stateB += 0xBBE0563303A4615FL);
+					uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
+					uint64_t fd = (stateD += 0x89E182857D9ED689L);
+					fb += fa ^ rotate64(fa, 11) ^ rotate64(fa, 46);
+					fc += fb ^ rotate64(fb, 17) ^ rotate64(fb, 34);
+					fd += fc ^ rotate64(fc,  5) ^ rotate64(fc, 58);
+					fa += fd ^ rotate64(fd, 47) ^ rotate64(fd, 38);
+					return fa;
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
