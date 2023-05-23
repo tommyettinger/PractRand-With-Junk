@@ -4439,10 +4439,10 @@ namespace PractRand {
 //	return fc;
 //0x3943D8696D4A3CDDUL is ~0xC6BC279692B5C323ULL + 1ULL;
 //0xFC0072FA0B15F4FDULL
-	const uint64_t fa = stateA;
-	const uint64_t fb = stateB;
-	const uint64_t fc = stateC;
-	const uint64_t fd = stateD;
+//	const uint64_t fa = stateA;
+//	const uint64_t fb = stateB;
+//	const uint64_t fc = stateC;
+//	const uint64_t fd = stateD;
     //// Good rotations: 11-13, 19, 22, 26, 38, 41-42, 46, 50, 53-55
 	//// 23 gets two mildly suspicious at 4TB
 	//// 39 gets a mildly suspicious at 8TB
@@ -4662,6 +4662,10 @@ namespace PractRand {
 //--- Finished -- BBin trials: 281474976710656	2^48.0 (out of 2^48) trials -- Slash256 -- 	ps:   3.740e-01    2.533e-01    3.441e-01    6.306e-01    8.154e-01*   6.656e-01   => p <   7.62337e-01   2^52.58 calls, 2^55.58 bytes	2^36.59 bytes/second	used:   6::00:59:24.89
 //
 //// I am very confident in this generator now.
+	//const uint64_t fa = stateA;
+	//const uint64_t fb = stateB;
+	//const uint64_t fc = stateC;
+	//const uint64_t fd = stateD;
 	// stateA = fd * 0xF1357AEA2E62A9C5UL;
 	// stateB = rotate64(fa, 44);
 	// stateC = fb + 0x9E3779B97F4A7C15UL;
@@ -4681,10 +4685,28 @@ namespace PractRand {
 	// stateC = fc + 0x9E3779B97F4A7C15UL;
 	// return (stateD = fa + fb ^ fc);
 
-	stateA = fd * 0xF1357AEA2E62A9C5UL;
-	stateB = rotate64(fa, 10);
-	stateC = fc + 0x9E3779B97F4A7C15UL;//0xDE916ABCC965815BUL;
-	return (stateD = fc + fb);
+	//stateA = fd * 0xF1357AEA2E62A9C5UL;
+	//stateB = rotate64(fa, 10);
+	//stateC = fc + 0x9E3779B97F4A7C15UL;//0xDE916ABCC965815BUL;
+	//return (stateD = fc + fb);
+
+// has just one anomaly, at 64TB:
+// [Low4/32]Gap-16:B                 R=  +4.9  p =  3.8e-4   unusual
+//uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
+//uint64_t fb = (stateB += 0xBBE0563303A4615FL);
+//uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
+//fb += fa ^ rotate64(fa, 7) ^ rotate64(fa, 46);
+//fc += fb ^ rotate64(fb, 17) ^ rotate64(fb, 34);
+//fa += fc ^ rotate64(fc, 5) ^ rotate64(fc, 41);
+//return fa;
+
+uint64_t fa = (stateA += 0xD1B54A32D192ED03L);
+uint64_t fb = (stateB += 0xABC98388FB8FAC03L);
+uint64_t fc = (stateC += 0x8CB92BA72F3D8DD7L);
+fb += fa ^ rotate64(fa, 37) ^ rotate64(fa, 53);
+fc += fb ^ rotate64(fb,  7) ^ rotate64(fb, 23);
+fa += fc ^ rotate64(fc, 29) ^ rotate64(fc, 43);
+return fa;
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
