@@ -4241,6 +4241,22 @@ namespace PractRand {
 					fd += fc ^ rotate64(fc,  5) ^ rotate64(fc, 58);
 					fa += fd ^ rotate64(fd, 47) ^ rotate64(fd, 38);
 					return fa;
+
+//					uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
+//					uint64_t fb = (stateB += 0xBBE0563303A4615FL);
+//					uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
+//					uint64_t fd = (stateD += 0x89E182857D9ED689L);
+//					fb += rotate64(fa, 25);// ^ __rolq(fb, 58);
+//					fc += rotate64(fb, 46);// ^ __rolq(fc, 11);
+//					fd += rotate64(fc, 37);// ^ __rolq(fd, 21);
+//					fa += rotate64(fd, 18);// ^ __rolq(fa, 37);
+//					return fa ^ fb ^ fc ^ fd;
+
+//					uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
+//					uint64_t fb = (stateB += 0xBBE0563303A4615FL);
+//					fb += fa ^ rotate64(fa, 11) ^ rotate64(fa, 43);
+//					fa += fb ^ rotate64(fb, 17) ^ rotate64(fb, 37);
+//					return fa ^ fb;
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
