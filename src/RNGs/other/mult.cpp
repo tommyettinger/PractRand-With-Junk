@@ -4232,15 +4232,15 @@ namespace PractRand {
 					// Passes 64TB with no anomalies.
 					// Period is exactly 2 to the 64; there are 2 to the 192 possible streams.
 					// It permits O(1) skip to any point in its period.
-					uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
-					uint64_t fb = (stateB += 0xBBE0563303A4615FL);
-					uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
-					uint64_t fd = (stateD += 0x89E182857D9ED689L);
-					fb += fa ^ rotate64(fa, 11) ^ rotate64(fa, 46);
-					fc += fb ^ rotate64(fb, 17) ^ rotate64(fb, 34);
-					fd += fc ^ rotate64(fc,  5) ^ rotate64(fc, 58);
-					fa += fd ^ rotate64(fd, 47) ^ rotate64(fd, 38);
-					return fa;
+//					uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
+//					uint64_t fb = (stateB += 0xBBE0563303A4615FL);
+//					uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
+//					uint64_t fd = (stateD += 0x89E182857D9ED689L);
+//					fb += fa ^ rotate64(fa, 11) ^ rotate64(fa, 46);
+//					fc += fb ^ rotate64(fb, 17) ^ rotate64(fb, 34);
+//					fd += fc ^ rotate64(fc,  5) ^ rotate64(fc, 58);
+//					fa += fd ^ rotate64(fd, 47) ^ rotate64(fd, 38);
+//					return fa;
 
 //					uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
 //					uint64_t fb = (stateB += 0xBBE0563303A4615FL);
@@ -4257,6 +4257,15 @@ namespace PractRand {
 //					fb += fa ^ rotate64(fa, 11) ^ rotate64(fa, 43);
 //					fa += fb ^ rotate64(fb, 17) ^ rotate64(fb, 37);
 //					return fa ^ fb;
+
+//SparkleRandom
+// Period is 2 to the 64. Passes PractRand to at least 8TB with no anomalies (ongoing).
+uint64_t n = ((stateA += 0xDB4F0B9175AE2165L) ^ (stateC += 0x89E182857D9ED689L)) * 0xC6BC279692B5C323UL ^ 0xF1357AEA2E62A9C5L;
+uint64_t o = ((stateB += 0xBBE0563303A4615FL) ^ 0xA0F2EC75A1FE1575L);
+return (o ^ rotate64(o, 13) ^ rotate64(o, 53)) + (n ^ rotate64(n, 19) ^ rotate64(n, 43));
+
+//return (rotate64(o, 19) ^ rotate64(o, 29) ^ rotate64(o, 47)) + (rotate64(n, 17) ^ rotate64(n, 37) ^ rotate64(n, 43));
+
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
