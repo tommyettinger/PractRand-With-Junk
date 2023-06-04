@@ -4758,6 +4758,10 @@ return (o ^ rotate64(o, 13) ^ rotate64(o, 53)) + (n ^ rotate64(n, 19) ^ rotate64
 //fa += fc ^ rotate64(fc, 37) ^ rotate64(fc, 47);
 //return fa;
 
+// SkinkRandom
+// Passes 64TB with no anomalies.
+// Period is 2 to the 64; there are 2 to the 128 streams possible.
+// How correlated those streams are is unknown.
 uint64_t fa = (stateA += 0xD1B54A32D192ED03L);
 uint64_t fb = (stateB += 0xABC98388FB8FAC03L);
 uint64_t fc = (stateC += 0x8CB92BA72F3D8DD7L);
