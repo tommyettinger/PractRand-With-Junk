@@ -4281,12 +4281,34 @@ namespace PractRand {
 
 //SparkleRandom
 // Period is 2 to the 64. Passes PractRand to at least 8TB with no anomalies (ongoing).
-uint64_t n = ((stateA += 0xDB4F0B9175AE2165L) ^ (stateC += 0x89E182857D9ED689L)) * 0xC6BC279692B5C323UL ^ 0xF1357AEA2E62A9C5L;
-uint64_t o = ((stateB += 0xBBE0563303A4615FL) ^ 0xA0F2EC75A1FE1575L);
-return (o ^ rotate64(o, 13) ^ rotate64(o, 53)) + (n ^ rotate64(n, 19) ^ rotate64(n, 43));
+//uint64_t n = ((stateA += 0xDB4F0B9175AE2165L) ^ (stateC += 0x89E182857D9ED689L)) * 0xC6BC279692B5C323UL ^ 0xF1357AEA2E62A9C5L;
+//uint64_t o = ((stateB += 0xBBE0563303A4615FL) ^ 0xA0F2EC75A1FE1575L);
+//return (o ^ rotate64(o, 13) ^ rotate64(o, 53)) + (n ^ rotate64(n, 19) ^ rotate64(n, 43));
 
 //return (rotate64(o, 19) ^ rotate64(o, 29) ^ rotate64(o, 47)) + (rotate64(n, 17) ^ rotate64(n, 37) ^ rotate64(n, 43));
 
+					uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);// ^ 0xF1357AEA2E62A9C5L;
+					uint64_t fb = (stateB += 0xBBE0563303A4615FL);// ^ 0xC6BC279692B5C323L;
+					uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);// ^ 0x9E3779B97F4A7C15L;
+					uint64_t fd = (stateD += 0x89E182857D9ED689L);// ^ 0xD1342543DE82EF95L;
+					fb += fc ^ rotate64(fa, 11) ^ rotate64(fd, 46);
+					fc += fd ^ rotate64(fa, 17) ^ rotate64(fb, 34);
+					fd += fa ^ rotate64(fc,  5) ^ rotate64(fb, 58);
+					fa += fb ^ rotate64(fc, 47) ^ rotate64(fd, 38);
+					return fa;
+
+					// fb += fa ^ rotate64(fa, 13) ^ rotate64(fa, 53);
+					// fd += fc ^ rotate64(fc, 19) ^ rotate64(fc, 43);
+					// fa += fb ^ rotate64(fb, 11) ^ rotate64(fb, 58);
+					// fc += fd ^ rotate64(fd, 37) ^ rotate64(fd, 21);
+//					uint64_t n = (fa ^ fb) + (fc ^ fd);
+					// uint64_t n = fb + fd ^ fa + fc;
+					// return n ^ rotate64(n, 23) ^ rotate64(n, 37);
+
+					// return (fa ^ rotate64(fa, 13) ^ rotate64(fa, 53)) + 
+					// (fb ^ rotate64(fb, 11) ^ rotate64(fb, 58)) + 
+					// (fc ^ rotate64(fc, 19) ^ rotate64(fc, 43)) +
+					// (fd ^ rotate64(fd, 37) ^ rotate64(fd, 21));
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
@@ -4762,13 +4784,40 @@ return (o ^ rotate64(o, 13) ^ rotate64(o, 53)) + (n ^ rotate64(n, 19) ^ rotate64
 // Passes 64TB with no anomalies.
 // Period is 2 to the 64; there are 2 to the 128 streams possible.
 // How correlated those streams are is unknown.
-uint64_t fa = (stateA += 0xD1B54A32D192ED03L);
-uint64_t fb = (stateB += 0xABC98388FB8FAC03L);
-uint64_t fc = (stateC += 0x8CB92BA72F3D8DD7L);
-fb += rotate64(fa, 31) ^ fc;
-fc += rotate64(fb, 19) ^ fa;
-fa += rotate64(fc, 47) ^ fb;
-return fa ^ rotate64(fa, 29) ^ rotate64(fa, 53);
+//uint64_t fa = (stateA += 0xD1B54A32D192ED03L);
+//uint64_t fb = (stateB += 0xABC98388FB8FAC03L);
+//uint64_t fc = (stateC += 0x8CB92BA72F3D8DD7L);
+//fb += rotate64(fa, 31) ^ fc;
+//fc += rotate64(fb, 19) ^ fa;
+//fa += rotate64(fc, 47) ^ fb;
+//return fa ^ rotate64(fa, 29) ^ rotate64(fa, 53);
+
+// SquashRandom
+// Passes 64TB with no anomalies.
+// Period is 2 to the 64, there arre 2 to the 192 streams possible.
+// How correlated those streams are is unknown.
+// Probably slower than SkinkRandom, above.
+				uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
+				uint64_t fb = (stateB += 0xBBE0563303A4615FL);
+				uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
+				uint64_t fd = (stateD += 0x89E182857D9ED689L);
+				fb += rotate64(fa, 25) ^ fc;
+				fc += rotate64(fb, 46) ^ fd;
+				fd += rotate64(fc, 37) ^ fa;
+				fa += rotate64(fd, 18) ^ fb;
+				return fa ^ rotate64(fa, 13) ^ rotate64(fa, 53);
+
+// just awful.
+//				uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
+//				uint64_t fb = (stateB += 0xBBE0563303A4615FL);
+//				uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
+//				uint64_t fd = (stateD += 0x89E182857D9ED689L);
+//				uint64_t fx = rotate64(fa, 25) + rotate64(fb, 46);
+//				uint64_t fy = rotate64(fc, 18) + rotate64(fd, 37);
+//				uint64_t fz = rotate64(fa, 14) + rotate64(fc, 53);
+//				uint64_t fw = rotate64(fb, 22) + rotate64(fd, 41);
+//				return fx ^ fy ^ fz ^ fw;
+
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
 				void lizard256::walk_state(StateWalkingObject *walker) {
