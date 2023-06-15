@@ -4280,35 +4280,34 @@ namespace PractRand {
 //					return fa ^ fb;
 
 //SparkleRandom
-// Period is 2 to the 64. Passes PractRand to at least 8TB with no anomalies (ongoing).
-//uint64_t n = ((stateA += 0xDB4F0B9175AE2165L) ^ (stateC += 0x89E182857D9ED689L)) * 0xC6BC279692B5C323UL ^ 0xF1357AEA2E62A9C5L;
-//uint64_t o = ((stateB += 0xBBE0563303A4615FL) ^ 0xA0F2EC75A1FE1575L);
-//return (o ^ rotate64(o, 13) ^ rotate64(o, 53)) + (n ^ rotate64(n, 19) ^ rotate64(n, 43));
+// Period is 2 to the 64.
+// Has 2 to the 64 streams.
+// Passes 64TB of PractRand without anomalies.
+//uint64_t n = (stateA += 0xDB4F0B9175AE2165L);
+//uint64_t o = (stateB += 0xBBE0563303A4615FL);
+//n = (n ^ rotate64(n, 17) ^ rotate64(n, 53)) * 0xC6BC279692B5C323L;
+//o = (o ^ rotate64(o, 11) ^ rotate64(o, 47)) * 0xABC98388FB8FAC03L;
+//return (n ^ rotate64(n, 19) ^ rotate64(n, 43)) + (o ^ rotate64(o, 13) ^ rotate64(o, 53));
 
+// ^ (stateC += 0x89E182857D9ED689L)
+//uint64_t n = ((stateA += 0xDB4F0B9175AE2165L) ^ 0xF1357AEA2E62A9C5L) * 0xC6BC279692B5C323L;
+//uint64_t o = ((stateB += 0xBBE0563303A4615FL) ^ 0x91E10DA5C79E7B1DL) * 0xABC98388FB8FAC03L;
 //return (rotate64(o, 19) ^ rotate64(o, 29) ^ rotate64(o, 47)) + (rotate64(n, 17) ^ rotate64(n, 37) ^ rotate64(n, 43));
 
-					uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);// ^ 0xF1357AEA2E62A9C5L;
-					uint64_t fb = (stateB += 0xBBE0563303A4615FL);// ^ 0xC6BC279692B5C323L;
-					uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);// ^ 0x9E3779B97F4A7C15L;
-					uint64_t fd = (stateD += 0x89E182857D9ED689L);// ^ 0xD1342543DE82EF95L;
-					fb += fc ^ rotate64(fa, 11) ^ rotate64(fd, 46);
-					fc += fd ^ rotate64(fa, 17) ^ rotate64(fb, 34);
-					fd += fa ^ rotate64(fc,  5) ^ rotate64(fb, 58);
-					fa += fb ^ rotate64(fc, 47) ^ rotate64(fd, 38);
-					return fa;
-
-					// fb += fa ^ rotate64(fa, 13) ^ rotate64(fa, 53);
-					// fd += fc ^ rotate64(fc, 19) ^ rotate64(fc, 43);
-					// fa += fb ^ rotate64(fb, 11) ^ rotate64(fb, 58);
-					// fc += fd ^ rotate64(fd, 37) ^ rotate64(fd, 21);
-//					uint64_t n = (fa ^ fb) + (fc ^ fd);
-					// uint64_t n = fb + fd ^ fa + fc;
-					// return n ^ rotate64(n, 23) ^ rotate64(n, 37);
-
-					// return (fa ^ rotate64(fa, 13) ^ rotate64(fa, 53)) + 
-					// (fb ^ rotate64(fb, 11) ^ rotate64(fb, 58)) + 
-					// (fc ^ rotate64(fc, 19) ^ rotate64(fc, 43)) +
-					// (fd ^ rotate64(fd, 37) ^ rotate64(fd, 21));
+// SportyRandom
+// Period is 2 to the 64.
+// Has 2 to the 192 streams, but most likely only 2 to the 189 are decorrelated well.
+// (This issue is simply that the lowest bit of states B, C, and D shouldn't be used to help reduce correlation.)
+// Passes 64TB of PractRand without anomalies.
+					uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
+					x ^= x >> 32;
+					x *= (stateB += 0xBBE0563303A4615FL) | 1L;
+					x ^= x >> 33;
+					x *= (stateC += 0xA0F2EC75A1FE1575L) | 1L;
+					x ^= x >> 32;
+					x *= (stateD += 0x89E182857D9ED689L) | 1L;
+					x ^= x >> 31;
+					return x;
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
