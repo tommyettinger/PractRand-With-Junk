@@ -4298,6 +4298,7 @@ namespace PractRand {
 // Period is 2 to the 64.
 // Has 2 to the 192 streams, but most likely only 2 to the 189 are decorrelated well.
 // (This issue is simply that the lowest bit of states B, C, and D shouldn't be used to help reduce correlation.)
+// Nearby stateA and stateB aren't visually correlated, but I don't know about states C and D yet.
 // Passes 64TB of PractRand without anomalies.
 //					uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
 //					x ^= x >> 32;
@@ -4308,6 +4309,20 @@ namespace PractRand {
 //					x *= (stateD += 0x89E182857D9ED689L) | 1L;
 //					x ^= x >> 31;
 //					return x;
+
+//SprawlRandom
+// Passes 64TB of PractRand without anomalies.
+// Nearby stateA and stateB initial values are visually correlated, like LaserRandom.
+// Has a period of 2 to the 64, with 2 to the 192 streams.
+// 190 of those should be decorrelated, but apparently aren't.
+//uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
+//uint64_t y = (stateB += 0xBBE0563303A4615FL);
+//x ^= x >> 35;
+//y ^= y >> 29;
+//x *= (stateC += 0xA0F2EC75A1FE1575L) | 1L;
+//y *= (stateD += 0x89E182857D9ED689L) | 1L;
+//x ^= y;
+//return x ^ x >> 31 ^ x >> 17;
 
 // SprawlRandom (variant)
 // Period is 2 to the 64, still.
