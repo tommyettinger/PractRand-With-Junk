@@ -4299,15 +4299,29 @@ namespace PractRand {
 // Has 2 to the 192 streams, but most likely only 2 to the 189 are decorrelated well.
 // (This issue is simply that the lowest bit of states B, C, and D shouldn't be used to help reduce correlation.)
 // Passes 64TB of PractRand without anomalies.
-					uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
-					x ^= x >> 32;
-					x *= (stateB += 0xBBE0563303A4615FL) | 1L;
-					x ^= x >> 33;
-					x *= (stateC += 0xA0F2EC75A1FE1575L) | 1L;
-					x ^= x >> 32;
-					x *= (stateD += 0x89E182857D9ED689L) | 1L;
-					x ^= x >> 31;
-					return x;
+//					uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
+//					x ^= x >> 32;
+//					x *= (stateB += 0xBBE0563303A4615FL) | 1L;
+//					x ^= x >> 33;
+//					x *= (stateC += 0xA0F2EC75A1FE1575L) | 1L;
+//					x ^= x >> 32;
+//					x *= (stateD += 0x89E182857D9ED689L) | 1L;
+//					x ^= x >> 31;
+//					return x;
+
+// SprawlRandom (variant)
+// Period is 2 to the 64, still.
+// Has 2 to the 192 streams, but nearby initial values for streams are very correlated...
+// Still, passes 64TB of PractRand with no anomalies.
+				uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
+				uint64_t y = (stateB += 0xBBE0563303A4615FL);
+				x ^= x >> 41;
+				y ^= y >> 23;
+				x *= (stateC += 0xA0F2EC75A1FE1575L) | 1L;
+				y *= (stateD += 0x89E182857D9ED689L) | 1L;
+				x ^= y;
+				return x ^ x >> 31 ^ x >> 17;
+
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
