@@ -4328,22 +4328,42 @@ namespace PractRand {
 // Period is 2 to the 64, still.
 // Has 2 to the 192 streams, but nearby initial values for streams are very correlated...
 // Still, passes 64TB of PractRand with no anomalies.
-				uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
-				uint64_t y = (stateB += 0xBBE0563303A4615FL);
-				x ^= x >> 41;
-				y ^= y >> 23;
-				x *= (stateC += 0xA0F2EC75A1FE1575L) | 1L;
-				y *= (stateD += 0x89E182857D9ED689L) | 1L;
-				x ^= y;
-				return x ^ x >> 31 ^ x >> 17;
+//				uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
+//				uint64_t y = (stateB += 0xBBE0563303A4615FL);
+//				x ^= x >> 41;
+//				y ^= y >> 23;
+//				x *= (stateC += 0xA0F2EC75A1FE1575L) | 1L;
+//				y *= (stateD += 0x89E182857D9ED689L) | 1L;
+//				x ^= y;
+//				return x ^ x >> 31 ^ x >> 17;
+
+// SpoonRandom
+// Passes 64TB of PractRand with no anomalies.
+// Period is 2 to the 64, with 2 to the 126 streams.
+// Has a smaller state than SportyRandom, and should be faster, but is otherwise similar.
+// States B and C must be odd, but stateA has no restrictions.
+// Streams do not appear to be correlated at all when stateA and stateB are similar (and stateC is 1).
+// NOTE: This is sensitive to the choice of increment for at least states B and C.
+//       All of the increments are from the R4 sequence, but stateB had 1 subtracted, and stateC had 1 added.
+		uint64_t x = (stateA += 0xDB4F0B9175AE2165L);
+		x ^= x >> 32;
+		x *= (stateB += 0xBBE0563303A4615EL);
+		x ^= x >> 33;
+		x *= (stateC += 0xA0F2EC75A1FE1576L);
+		x ^= x >> 31;
+		return x;
 
 				}
 				std::string mars256::get_name() const { return "mars256"; }
 				void mars256::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
+					stateA |= 1L;
 					walker->handle(stateB);
+					stateB |= 1L;
 					walker->handle(stateC);
+					stateC |= 1L;
 					walker->handle(stateD);
+					stateD |= 1L;
 				}
 
 				Uint64 marsgwt::raw64() {
