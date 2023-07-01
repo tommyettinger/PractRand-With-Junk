@@ -209,6 +209,13 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				class jsf8 : public vRNG8 {
+					Uint8 a, b, c, d;
+				public:
+					Uint8 raw8();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 				class jsf16 : public vRNG16 {
 					Uint16 a, b, c, d;
 				public:

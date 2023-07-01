@@ -508,6 +508,7 @@ namespace RNG_Factories {
 		REGISTER_RNG_0(sap16of48)
 		REGISTER_RNG_0(sap32of96)
 		REGISTER_RNG_0(flea32x1)
+		REGISTER_RNG_0(jsf8)
 		REGISTER_RNG_0(jsf16)
 		REGISTER_RNG_0(sfc_v1_16)
 		REGISTER_RNG_0(sfc_v1_32)
@@ -627,6 +628,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(lizard256)
 			REGISTER_RNG_1(plum256)
 			REGISTER_RNG_0(overload320)
+			REGISTER_RNG_0(joker40)
 
 		// include/PractRand/RNGs/other/fibonacci.h
 		RNG_Factories::RNG_factory_index["bigbadlcg"] = bigbadlcg_factory;

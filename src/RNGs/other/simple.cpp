@@ -467,6 +467,27 @@ namespace PractRand {
 					walker->handle(b);
 					walker->handle(counter);
 				}
+				// A copy of O'Neill's JSF8, I think exactly.
+				// I can't reproduce her results with this version of PractRand.
+				// Running this command,
+				// /RNG_test jsf8 -te 1 -tlmin 10 -tlmax 50 -multithreaded -seed 0
+				// Fails at the 256KB mark.
+				Uint8 jsf8::raw8() {
+					Uint8 e = a - rotate8(b, 1);
+					a = b ^ rotate8(c, 4);
+					b = c + d;
+					c = d + e;
+					d = e + a;
+					return d;
+				}
+				std::string jsf8::get_name() const { return "jsf8"; }
+				void jsf8::walk_state(StateWalkingObject *walker) {
+					walker->handle(a);
+					walker->handle(b);
+					walker->handle(c);
+					walker->handle(d);
+					if (!(a | b) && !(c | d)) d++;
+				}
 				Uint16 jsf16::raw16() {
 					Uint16 e = a - ((b << 13) | (b >> 3));
 					a = b ^ ((c << 9) | (c >> 7));

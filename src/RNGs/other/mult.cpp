@@ -5218,6 +5218,39 @@ return stateA;
 					stream = 1UL;
 				}
 
+// Joker40, a shrunken-down AceRandom.
+// Running this command,
+// ./RNG_test joker40 -te 1 -tlmin 10 -tlmax 50 -multithreaded -seed 0
+// This version fails at the 4GB mark.
+// The length before failure depends on the length of the subcycle.
+				Uint8 joker40::raw8() {
+	const uint8_t fa = stateA;
+	const uint8_t fb = stateB;
+	const uint8_t fc = stateC;
+	const uint8_t fd = stateD;
+	const uint8_t fe = stateE;
+    stateA = fa + 0x97U;
+    stateB = fa ^ fe;
+    stateC = fb + fd;
+    stateD = rotate8(fc, 6);
+    stateE = fb - fc;
+	return fe;
+//    stateA = fa + 0x95U;
+//    stateB = fa ^ rotate8(fe, 5);
+//    stateC = fb + rotate8(fd, 2);
+//    stateD = fe ^ rotate8(fc, 6);
+//    return stateE = fc + rotate8(fb, 3);
+	
+
+				}
+				std::string joker40::get_name() const { return "joker40"; }
+				void joker40::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
+					walker->handle(stateE);
+				}
 
 			}
 		}
