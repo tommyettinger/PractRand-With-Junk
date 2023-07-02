@@ -688,6 +688,13 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				class suit80 : public vRNG16 {
+					Uint16 stateA, stateB, stateC, stateD, stateE;
+				public:
+					Uint16 raw16();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 			}
 		}
 	}

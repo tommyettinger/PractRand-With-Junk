@@ -488,6 +488,10 @@ namespace PractRand {
 					walker->handle(d);
 					if (!(a | b) && !(c | d)) d++;
 				}
+// Fails at 32GB (due to mod3n(5):(1,9-0) ) with the command:
+// ./RNG_test jsf16 -tf 2 -tlmin 10 -tlmax 50 -multithreaded -seed 0
+// with -te 1 instead of -tf2, this fails at 1GB on the same test.
+
 				Uint16 jsf16::raw16() {
 					Uint16 e = a - ((b << 13) | (b >> 3));
 					a = b ^ ((c << 9) | (c >> 7));

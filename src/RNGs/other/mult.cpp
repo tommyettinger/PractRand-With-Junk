@@ -5251,6 +5251,29 @@ return stateA;
 					walker->handle(stateD);
 					walker->handle(stateE);
 				}
+// Fails at 1TB (due to DC6-9x1Bytes-1) with the command:
+// ./RNG_test suit80 -tf 2 -tlmin 10 -tlmax 50 -multithreaded -seed 0
+
+				Uint16 suit80::raw16() {
+	const uint16_t fa = stateA;
+	const uint16_t fb = stateB;
+	const uint16_t fc = stateC;
+	const uint16_t fd = stateD;
+	const uint16_t fe = stateE;
+    stateA = fa + 0x9E3DU;
+    stateB = fa ^ fe;
+    stateC = fb + fd;
+    stateD = rotate16(fc, 5);
+    return stateE = fb - fc;
+				}
+				std::string suit80::get_name() const { return "suit80"; }
+				void suit80::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
+					walker->handle(stateE);
+				}
 
 			}
 		}
