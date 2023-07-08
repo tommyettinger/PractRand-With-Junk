@@ -5251,8 +5251,6 @@ return stateA;
 					walker->handle(stateD);
 					walker->handle(stateE);
 				}
-// Fails at 1TB (due to DC6-9x1Bytes-1) with the command:
-// ./RNG_test suit80 -tf 2 -tlmin 10 -tlmax 50 -multithreaded -seed 0
 
 				Uint16 suit80::raw16() {
 	const uint16_t fa = stateA;
@@ -5260,11 +5258,21 @@ return stateA;
 	const uint16_t fc = stateC;
 	const uint16_t fd = stateD;
 	const uint16_t fe = stateE;
+// Fails at 1TB (due to DC6-9x1Bytes-1) with the command:
+// ./RNG_test suit80 -tf 2 -tlmin 10 -tlmax 50 -multithreaded -seed 0
+    // stateA = fa + 0x9E3DU;
+    // stateB = fa ^ fe;
+    // stateC = fb + fd;
+    // stateD = rotate16(fc, 5);
+    // return stateE = fb - fc;
+// Shockingly, passes 64TB with just one anomaly (a very-low-significance DC6-9x1Bytes-1 at 2 KB).
+// This was run with the same command as above.
     stateA = fa + 0x9E3DU;
     stateB = fa ^ fe;
     stateC = fb + fd;
-    stateD = rotate16(fc, 5);
-    return stateE = fb - fc;
+    stateD = rotate16(fc, 11);
+	stateE = fb + fc;
+	return fb;
 				}
 				std::string suit80::get_name() const { return "suit80"; }
 				void suit80::walk_state(StateWalkingObject *walker) {
