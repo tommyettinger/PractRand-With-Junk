@@ -5210,7 +5210,7 @@ return stateA;
 // Passes 179 PB of ReMort testing without suspicion.
 // Ends with a p-value of p <   5.76107e-01
 // On rather terrible hardware for the task, finishes in 7::18:15:57.98, where other generators have taken over 20 days.
-// Still evaluating with PractRand.
+// Passes 64TB of PractRand with no anomalies.
 
 
 // 7	                4419  + 3.39252e-03	                4384  - 2.19487e-01	                4519  + 2.44365e+00	                4454  + 3.42208e-01	                4442  + 1.63530e-01	
