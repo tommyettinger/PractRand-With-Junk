@@ -562,6 +562,13 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				class chonk8x32 : public vRNG32 {
+					Uint32 a, b, c, d, e, f, g, h;
+				public:
+					Uint32 raw32();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 			}
 		}
 	}

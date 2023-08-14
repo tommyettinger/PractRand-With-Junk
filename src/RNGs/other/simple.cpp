@@ -1859,6 +1859,38 @@ namespace PractRand {
 					walker->handle(j);
 				}
 
+// Chonk8x32
+// Passes 64TB of PractRand without anomalies.
+// Period is at minimum 2 to the 64, max is much higher (a multiple of 2 to the 64).
+				Uint32 chonk8x32::raw32() {
+					const Uint32 fa = a;
+					const Uint32 fb = b;
+					const Uint32 fc = c;
+					const Uint32 fd = d;
+					const Uint32 fe = e;
+					const Uint32 ff = f;
+					const Uint32 fg = g;
+					const Uint32 fh = h;
+					a = fa + 0x9e3779b9;
+					b = fa ^ ff;
+					c = fb + fd;
+					d = rotate32(fc, 25);
+					e = fb - fc;
+					f = fe ^ fh;
+					g = __builtin_ctzll(fa);
+					h = fh + fg;
+					return ff;
+				}
+				std::string chonk8x32::get_name() const { return "chonk8x32"; }
+				void chonk8x32::walk_state(StateWalkingObject *walker) {
+					walker->handle(a);
+					walker->handle(b);
+					walker->handle(c);
+					walker->handle(d);
+					walker->handle(e);
+					walker->handle(f);
+					g = __builtin_ctzll(a);
+					walker->handle(h);				}
 
 			}
 		}

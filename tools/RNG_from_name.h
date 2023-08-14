@@ -559,6 +559,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(xoshiro256scramjet)
 			REGISTER_RNG_0(cloud)
 			REGISTER_RNG_0(acorn64_10)
+			REGISTER_RNG_0(chonk8x32)
 
 		// include/PractRand/RNGs/other/mult.h
 		RNG_Factories::RNG_factory_index["lcg"] = lcg_factory;
