@@ -4909,15 +4909,15 @@ namespace PractRand {
 // Period is 2 to the 64, there arre 2 to the 192 streams possible.
 // How correlated those streams are is unknown.
 // Probably slower than SkinkRandom, above.
-				uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
-				uint64_t fb = (stateB += 0xBBE0563303A4615FL);
-				uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
-				uint64_t fd = (stateD += 0x89E182857D9ED689L);
-				fb += rotate64(fa, 25) ^ fc;
-				fc += rotate64(fb, 46) ^ fd;
-				fd += rotate64(fc, 37) ^ fa;
-				fa += rotate64(fd, 18) ^ fb;
-				return fa ^ rotate64(fa, 13) ^ rotate64(fa, 53);
+				// uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
+				// uint64_t fb = (stateB += 0xBBE0563303A4615FL);
+				// uint64_t fc = (stateC += 0xA0F2EC75A1FE1575L);
+				// uint64_t fd = (stateD += 0x89E182857D9ED689L);
+				// fb += rotate64(fa, 25) ^ fc;
+				// fc += rotate64(fb, 46) ^ fd;
+				// fd += rotate64(fc, 37) ^ fa;
+				// fa += rotate64(fd, 18) ^ fb;
+				// return fa ^ rotate64(fa, 13) ^ rotate64(fa, 53);
 
 // just awful.
 //				uint64_t fa = (stateA += 0xDB4F0B9175AE2165L);
@@ -4930,6 +4930,22 @@ namespace PractRand {
 //				uint64_t fw = rotate64(fb, 22) + rotate64(fd, 41);
 //				return fx ^ fy ^ fz ^ fw;
 
+// PouchRandom
+// Passes 64TB without any anomalies.
+// Minimum period is 2 to the 63.
+// Multiplies a variable by (an odd) variable.
+// 3 other (quicker) operations; 4 math/bit ops total.
+	const uint64_t a = stateA;
+	const uint64_t b = stateB;
+	const uint64_t c = stateC;
+	const uint64_t d = stateD;
+stateA = c * d;
+stateB = rotate64(a, 47);
+stateC = b - a;
+stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
+return c;
+
+
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
 				void lizard256::walk_state(StateWalkingObject *walker) {
@@ -4937,6 +4953,8 @@ namespace PractRand {
 					walker->handle(stateB);
 					walker->handle(stateC);
 					walker->handle(stateD);
+					stateC |= 1UL;
+					stateD |= 1UL;
 				}
 				Uint64 plum256::raw64() {
 					//const uint64_t fa = stateA;
@@ -5021,6 +5039,7 @@ stateB = fa ^ fc;
 stateC = fa ^ fd;
 stateD = fd + 0xDE916ABCC965815BUL;
 return stateA;
+
 				}
 
 				std::string plum256::get_name() const {
