@@ -4939,12 +4939,20 @@ namespace PractRand {
 	const uint64_t b = stateB;
 	const uint64_t c = stateC;
 	const uint64_t d = stateD;
+//stateA = c * d;
+//stateB = rotate64(a, 47);
+//stateC = b - a;
+//stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
+//return c;
+
+// Alternate PouchRandom
+// Also passes 64TB with no anomalies.
+// Different rotation, that's all.
 stateA = c * d;
-stateB = rotate64(a, 47);
+stateB = rotate64(a, 52);
 stateC = b - a;
 stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
 return c;
-
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
