@@ -5197,7 +5197,7 @@ return stateA;
 //  stateD = rotate64(fc, 25);
 //  return stateE = fc + fd;
 
-//  // Ace320.
+//  // Ace320, or AceRandom.
 //  // Passes 64TB with no anomalies.
 //  // Passes over 179PB of ReMort testing without suspicion.
 
@@ -5320,12 +5320,26 @@ return stateA;
 //               6.579 15 =>     5.025017e-02           12.974 15 =>     4.716522e-01           21.466 15 =>   1-9.052175e-02           11.248 15 =>     3.332448e-01            8.548 15 =>     1.409673e-01
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- lantern320 -- 64 bits: 	ps:   5.025e-02*   4.717e-01  1-9.052e-02    3.332e-01    1.410e-01   => p <   5.76107e-01   2^54.32 calls, 2^57.32 bytes	2^37.96 bytes/second	used:   7::18:15:57.98
-    stateA = fa + 0x9E3779B97F4A7C15UL;
-    stateB = fa ^ fe;
-    stateC = fb + fd;
-    stateD = rotate64(fc, 52);
-    stateE = fb + fc;
-	return fb;
+//    stateA = fa + 0x9E3779B97F4A7C15UL;
+//    stateB = fa ^ fe;
+//    stateC = fb + fd;
+//    stateD = rotate64(fc, 52);
+//    stateE = fb + fc;
+//    return fb;
+
+
+// crand64
+// Passes 64TB with one anomaly at 8 TB:
+// [Low1/32]BCFN(2+7,13-0,T)         R= +11.4  p =  1.3e-5   unusual
+// 256 bits of mutable state, 63 bits of unchanging stream.
+// Minimum period is 2 to the 64, ARX, about as fast or a little faster than Xoshiro256**.
+// Unless you need many streams, consider LaceRandom instead, since it's faster and still ARX.
+// from https://github.com/stclib/STC/blob/master/include/stc/crand.h
+    const uint64_t result = (stateA ^ (stateD += stateE)) + stateB;
+    stateA = stateB ^ (stateB >> 11);
+    stateB = stateC + (stateC << 3);
+    stateC = ((stateC << 24) | (stateC >> (64 - 24))) + result;
+    return result;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }
@@ -5335,6 +5349,7 @@ return stateA;
 					walker->handle(stateC);
 					walker->handle(stateD);
 					walker->handle(stateE);
+					stateE |= 1UL;
 					//walker->handle(stream);
 					//stream |= 1UL;
 					stream = 1UL;
