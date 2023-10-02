@@ -569,6 +569,17 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+
+				class spangled_varqual : public vRNG64 {
+					Uint64 stateA, stateB;
+					int rounds;
+				public:
+					spangled_varqual(int rounds_) : rounds(rounds_) {}
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
+
 			}
 		}
 	}
