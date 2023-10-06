@@ -1893,26 +1893,43 @@ namespace PractRand {
 					walker->handle(h);
 				}
 				Uint64 spangled_varqual::raw64() {
-					// SpangledRandom
-					// Passes 64TB with no anomalies when using rounds=4
-					// (Really that means 7 rounds total, since there's a hardcocoded round before and two after)
-					// Period is 2 to the 64; has 2 to the 64 different streams, plus a variable amount of "keys" that may be used
-					// Here, they keys are equal to the current round iteration, starting at 1
-					// This is an ARX generator with constant-time skipping through the state and constant-time stream switching
-					// It uses the round function from the Speck cipher
-					// If all streams are appended to one another, the resulting generator would have a period of 2 to the 128, 1D-equidistributed
-					// You can do that by changing stateB's assignment to:
-					// Uint64 b = (stateB += __builtin_ctzll(a));
-					// This eliminates the fast skipping, makes this have one stream, and makes it no longer an ARX generator
-					// It may also slow it down somewhat
+//					// SpangledRandom
+//					// Passes 64TB with no anomalies when using rounds=4
+//					// (Really that means 7 rounds total, since there's a hardcocoded round before and two after)
+//					// Period is 2 to the 64; has 2 to the 64 different streams, plus a variable amount of "keys" that may be used
+//					// Here, they keys are equal to the current round iteration, starting at 1
+//					// This is an ARX generator with constant-time skipping through the state and constant-time stream switching
+//					// It uses the round function from the Speck cipher
+//					// If all streams are appended to one another, the resulting generator would have a period of 2 to the 128, 1D-equidistributed
+//					// You can do that by changing stateB's assignment to:
+//					// Uint64 b = (stateB += __builtin_ctzll(a));
+//					// This eliminates the fast skipping, makes this have one stream, and makes it no longer an ARX generator
+//					// It may also slow it down somewhat
+//					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+//					Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
+//					b = (rotate64(b, 56) + a ^ 0xA62B82F58DB8A985UL); a = (rotate64(a, 3) ^ b);
+//					for (int i = 1; i <= rounds; i++) {
+//						b = (rotate64(b, 56) + a ^ i);
+//						a = (rotate64(a, 3) ^ b);
+//					}
+//					b = (rotate64(b, 56) + a ^ 0xE35E156A2314DCDAL); a = (rotate64(a, 3) ^ b);
+//					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ 0xBEA225F9EB34556DL));
+
+					// Also passes 64TB with no anomalies when this variant uses rounds=2
+					// So really 5 rounds, with 3 of the states hardcoded.
+					// This adds a rotation of b to a before all rounds except the first.
+					// Here, a left rotation of 41 is the only amount used in the new code.
 					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
 					Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
 					b = (rotate64(b, 56) + a ^ 0xA62B82F58DB8A985UL); a = (rotate64(a, 3) ^ b);
 					for (int i = 1; i <= rounds; i++) {
+						a += rotate64(b, 41);
 						b = (rotate64(b, 56) + a ^ i);
 						a = (rotate64(a, 3) ^ b);
 					}
+					a += rotate64(b, 41);
 					b = (rotate64(b, 56) + a ^ 0xE35E156A2314DCDAL); a = (rotate64(a, 3) ^ b);
+					a += rotate64(b, 41);
 					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ 0xBEA225F9EB34556DL));
 				}
 				std::string spangled_varqual::get_name() const {
