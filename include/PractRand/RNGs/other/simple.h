@@ -571,7 +571,7 @@ namespace PractRand {
 				};
 
 				class spangled_varqual : public vRNG64 {
-					Uint64 stateA, stateB;
+					Uint64 stateA, stateB, stateC;
 					int rounds;
 				public:
 					spangled_varqual(int rounds_) : rounds(rounds_) {}

@@ -1919,18 +1919,33 @@ namespace PractRand {
 					// So really 5 rounds, with 3 of the states hardcoded.
 					// This adds a rotation of b to a before all rounds except the first.
 					// Here, a left rotation of 41 is the only amount used in the new code.
+					// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+					// Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
+					// b = (rotate64(b, 56) + a ^ 0xA62B82F58DB8A985UL); a = (rotate64(a, 3) ^ b);
+					// for (int i = 1; i <= rounds; i++) {
+					// 	a += rotate64(b, 41);
+					// 	b = (rotate64(b, 56) + a ^ i);
+					// 	a = (rotate64(a, 3) ^ b);
+					// }
+					// a += rotate64(b, 41);
+					// b = (rotate64(b, 56) + a ^ 0xE35E156A2314DCDAL); a = (rotate64(a, 3) ^ b);
+					// a += rotate64(b, 41);
+					// return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ 0xBEA225F9EB34556DL));
+
+					// This passes 64TB with rounds=4, which really does mean 4 rounds now.
+					// It has a third state, which it uses like the key in Speck, and changes per-round and per-result.
 					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
 					Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
-					b = (rotate64(b, 56) + a ^ 0xA62B82F58DB8A985UL); a = (rotate64(a, 3) ^ b);
-					for (int i = 1; i <= rounds; i++) {
-						a += rotate64(b, 41);
-						b = (rotate64(b, 56) + a ^ i);
+					Uint64 c = (stateC += 0xDE916ABCC965815BUL);
+					for (int i = 1; i < rounds; i++) {
+						// c += (rotate64(a, 41)) ^ i;
+						b = (rotate64(b, 56) + a ^ (c += 0xBEA225F9EB34556DUL));
 						a = (rotate64(a, 3) ^ b);
 					}
-					a += rotate64(b, 41);
-					b = (rotate64(b, 56) + a ^ 0xE35E156A2314DCDAL); a = (rotate64(a, 3) ^ b);
-					a += rotate64(b, 41);
-					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ 0xBEA225F9EB34556DL));
+					// c += (rotate64(a, 41));
+					b = (rotate64(b, 56) + a ^ c + 0xF1357AEA2E62A9C5UL);
+					a = (rotate64(a, 3) ^ b);
+					return a;
 				}
 				std::string spangled_varqual::get_name() const {
 					std::ostringstream str;
@@ -1940,6 +1955,8 @@ namespace PractRand {
 				void spangled_varqual::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
+					//stateC = 1UL;//stateA ^ stateB + 0xA62B82F58DB8A985UL;
+					walker->handle(stateC);
 				}
 
 			}
