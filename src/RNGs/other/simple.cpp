@@ -1934,17 +1934,31 @@ namespace PractRand {
 
 					// This passes 64TB with rounds=4, which really does mean 4 rounds now.
 					// It has a third state, which it uses like the key in Speck, and changes per-round and per-result.
-					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
-					Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
-					Uint64 c = (stateC += 0xDE916ABCC965815BUL);
-					for (int i = 1; i < rounds; i++) {
-						// c += (rotate64(a, 41)) ^ i;
-						b = (rotate64(b, 56) + a ^ (c += 0xBEA225F9EB34556DUL));
-						a = (rotate64(a, 3) ^ b);
-					}
-					// c += (rotate64(a, 41));
-					b = (rotate64(b, 56) + a ^ c + 0xF1357AEA2E62A9C5UL);
-					a = (rotate64(a, 3) ^ b);
+					// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+					// Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
+					// Uint64 c = (stateC += 0xDE916ABCC965815BUL);
+					// for (int i = 1; i < rounds; i++) {
+					// 	// c += (rotate64(a, 41)) ^ i;
+					// 	b = (rotate64(b, 56) + a ^ (c += 0xBEA225F9EB34556DUL));
+					// 	a = (rotate64(a, 3) ^ b);
+					// }
+					// // c += (rotate64(a, 41));
+					// b = (rotate64(b, 56) + a ^ c + 0xF1357AEA2E62A9C5UL);
+					// a = (rotate64(a, 3) ^ b);
+					// return a;
+
+					// MarshRandom
+					// Passes 64TB of PractRand; not terribly fast.
+					// Period is 2 to the 64. Has 2 to the 128 streams.
+					Uint64 a = (stateA += 0xDE916ABCC965815BUL);
+					Uint64 b = (stateB += 0xF1357AEA2E62A9C5UL);
+					Uint64 c = (stateC += 0xBEA225F9EB34556DUL);
+					a = (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+					a ^= a >> 27;
+					a *= 0x3C79AC492BA7B653UL;
+					a ^= a >> 33;
+					a *= 0x1C69B3F74AC4AE35UL;
+					a ^= a >> 27;
 					return a;
 				}
 				std::string spangled_varqual::get_name() const {
