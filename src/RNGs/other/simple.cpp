@@ -1950,16 +1950,31 @@ namespace PractRand {
 					// MarshRandom
 					// Passes 64TB of PractRand; not terribly fast.
 					// Period is 2 to the 64. Has 2 to the 128 streams.
-					Uint64 a = (stateA += 0xDE916ABCC965815BUL);
-					Uint64 b = (stateB += 0xF1357AEA2E62A9C5UL);
-					Uint64 c = (stateC += 0xBEA225F9EB34556DUL);
-					a = (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
-					a ^= a >> 27;
-					a *= 0x3C79AC492BA7B653UL;
-					a ^= a >> 33;
-					a *= 0x1C69B3F74AC4AE35UL;
-					a ^= a >> 27;
-					return a;
+					// Uint64 a = (stateA += 0xDE916ABCC965815BUL);
+					// Uint64 b = (stateB += 0xF1357AEA2E62A9C5UL);
+					// Uint64 c = (stateC += 0xBEA225F9EB34556DUL);
+					// a = (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+					// a ^= a >> 27;
+					// a *= 0x3C79AC492BA7B653UL;
+					// a ^= a >> 33;
+					// a *= 0x1C69B3F74AC4AE35UL;
+					// a ^= a >> 27;
+					// return a;
+
+//					Uint64 a = (stateA += 0xDE916ABCC965815BUL);
+//					Uint64 b = (stateB += 0xF1357AEA2E62A9C5UL);
+//					Uint64 c = (stateC += 0xBEA225F9EB34556DUL);
+					
+					// DraculaRandom
+					// Passes 64TB of PractRand with no anomalies.
+					// Has a period of 2 to the 192.
+					// Needs at least two rounds of the Speck cipher; fails with one.
+					Uint64 a = (stateA = stateA * 0xD1342543DE82EF95UL + 0x9E3779B97F4A7C15UL);
+					Uint64 b = (stateB = stateB * 0x2C6FE96EE78B6955UL + __builtin_ctzll(a));
+					Uint64 c = (stateC = stateC * 0x369DEA0F31A53F85UL + __builtin_ctzll(a&b));
+					b = rotate64(b, 56) + a ^ c;
+					a = (rotate64(a, 3) ^ b);
+					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
 				}
 				std::string spangled_varqual::get_name() const {
 					std::ostringstream str;
