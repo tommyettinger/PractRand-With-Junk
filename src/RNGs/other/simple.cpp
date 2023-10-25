@@ -1969,9 +1969,27 @@ namespace PractRand {
 					// Passes 64TB of PractRand with no anomalies.
 					// Has a period of 2 to the 192.
 					// Needs at least two rounds of the Speck cipher; fails with one.
-					Uint64 a = (stateA = stateA * 0xD1342543DE82EF95UL + 0x9E3779B97F4A7C15UL);
-					Uint64 b = (stateB = stateB * 0x2C6FE96EE78B6955UL + __builtin_ctzll(a));
-					Uint64 c = (stateC = stateC * 0x369DEA0F31A53F85UL + __builtin_ctzll(a&b));
+//					Uint64 a = (stateA = stateA * 0xD1342543DE82EF95UL + 0x9E3779B97F4A7C15UL);
+//					Uint64 b = (stateB = stateB * 0x2C6FE96EE78B6955UL + __builtin_ctzll(a));
+//					Uint64 c = (stateC = stateC * 0x369DEA0F31A53F85UL + __builtin_ctzll(a&b));
+//					b = rotate64(b, 56) + a ^ c;
+//					a = (rotate64(a, 3) ^ b);
+//					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+
+					
+					// Respect192
+					// 3 uint64_t for state, period of 2 to the 192.
+					// Passes 64TB of PractRand with no anomalies.
+					// Runs 4 rounds of the Speck cipher on its three states as a, b, and c, returning a.
+					// This one might have issues with its increments at extremely long test lengths, for complicated reasons.
+					// At least with uint32_t states, XORing the large constant and the ctz result works better than adding.
+					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+					Uint64 b = (stateB += 0xD1342543DE82EF95UL + __builtin_ctzll(a));
+					Uint64 c = (stateC += 0xA62B82F58DB8A985UL + __builtin_ctzll(a&b));
+					b = rotate64(b, 56) + a ^ c;
+					a = (rotate64(a, 3) ^ b);
+					b = rotate64(b, 56) + a ^ c;
+					a = (rotate64(a, 3) ^ b);
 					b = rotate64(b, 56) + a ^ c;
 					a = (rotate64(a, 3) ^ b);
 					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
