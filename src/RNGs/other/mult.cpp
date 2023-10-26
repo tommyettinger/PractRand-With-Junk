@@ -3132,21 +3132,39 @@ namespace PractRand {
 //					y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
 //					return y;
 
-					uint32_t z = (stateA += 0xC13FA9A9U);
-					//uint32_t y = (stateB += ((z | 0xAEF17502 - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
-					uint32_t y = (stateB += ((z | 0xF1357AEA - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
-					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
-					y += z ^ rotate32(z, 28) ^ rotate32(z, 21);
-					z += y ^ rotate32(y, 12) ^ rotate32(y, 23);
-					y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
-					return y;
+//					uint32_t z = (stateA += 0xC13FA9A9U);
+//					//uint32_t y = (stateB += ((z | 0xAEF17502 - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
+//					uint32_t y = (stateB += ((z | 0xF1357AEA - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
+//					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
+//					y += z ^ rotate32(z, 28) ^ rotate32(z, 21);
+//					z += y ^ rotate32(y, 12) ^ rotate32(y, 23);
+//					y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
+//					return y;
+
+					// Respite96
+					// Passes 64TB of PractRand with no anomalies.
+					// Period is 2 to the 96. Has 96 bits of state, with 32-bit output.
+					// Does not use multiplication, but does use the count-leading-zeros instruction.
+					Uint32 a = (stateA += 0x91E10DA5U);
+					Uint32 b = (stateB += 0x6C8E9CF5U ^ __builtin_ctzll(a));
+					Uint32 c = (stateC += 0x7FEB352DU ^ __builtin_ctzll(a&b));
+					b = rotate32(b, 24) + a ^ c;
+					a = rotate32(a, 3) ^ b;
+					b = rotate32(b, 24) + a ^ c;
+					a = rotate32(a, 3) ^ b;
+					b = rotate32(b, 24) + a ^ c;
+					a = rotate32(a, 3) ^ b;
+					b = rotate32(b, 24) + a ^ c;
+					a = rotate32(a, 3) ^ b;
+					return a;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
+					walker->handle(stateC);
 					//stateB |= (stateB == 0);
-					printf("Seed is 0x%08X, 0x%08X\r\n", stateA, stateB);
+					printf("Seed is 0x%08X, 0x%08X, 0x%08X\r\n", stateA, stateB, stateC);
 				}
 
 
