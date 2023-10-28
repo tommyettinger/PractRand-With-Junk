@@ -1915,6 +1915,28 @@ namespace PractRand {
 //					b = (rotate64(b, 56) + a ^ 0xE35E156A2314DCDAL); a = (rotate64(a, 3) ^ b);
 //					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ 0xBEA225F9EB34556DL));
 
+//// The next variant passes ReMort to 179 PB, somehow.
+//// It doesn't get any results marked suspect, but it isn't in the strongest position at the end.
+//   6	                   0  - 2.29283e-01	                   0  - 2.29283e-01	                   1  + 2.59071e+00	                   0  - 2.29283e-01	                   0  - 2.29283e-01	
+//   7	                4366  - 5.46697e-01	                4482  + 1.01280e+00	                4329  - 1.68021e+00	                4324  - 1.88095e+00	                4424  + 1.78206e-02	
+//   8	              360712  - 5.52733e-02	              360870  + 7.79479e-04	              361736  + 2.15956e+00	              359955  - 2.23585e+00	              360331  - 7.55772e-01	
+//   9	            22346785  - 4.61707e+00	            22346511  - 4.86946e+00	            22361989  + 1.13803e+00	            22363776  + 2.08722e+00	            22347112  - 4.32465e+00	
+//  11	                4533  + 3.14677e+00	                4433  + 7.23294e-02	                4445  + 2.02084e-01	                4354  - 8.46374e-01	                4511  + 2.08173e+00	
+//  12	            85008292  - 1.32253e+00	            85017509  - 2.26202e-02	            85022480  + 1.51104e-01	            85017423  - 2.55128e-02	            85018395  - 2.94966e-03	
+//  13	          6948700313  + 3.70374e-02	          6948681618  - 1.01254e-03	          6948710573  + 9.95614e-02	          6948709724  + 9.32378e-02	          6948599192  - 1.04169e+00	
+//  14	        430509784628  - 4.55994e+00	        430509794206  - 4.49781e+00	        430510189969  - 2.30320e+00	        430510195966  - 2.27554e+00	        430509877592  - 3.97491e+00	
+//  16	              361618  + 1.62081e+00	              360551  - 2.53128e-01	              360281  - 9.07421e-01	              361157  + 2.55719e-01	              361127  + 2.07704e-01	
+//  17	          6948743354  + 5.02377e-01	          6948704209  + 5.72113e-02	          6948671245  - 2.44167e-02	          6948695568  + 1.83680e-02	          6948741199  + 4.66398e-01	
+//  18	        567923660173  + 2.10298e-01	        567922783250  - 4.97098e-01	        567923502019  + 6.18618e-02	        567923723078  + 2.93824e-01	        567922498705  - 1.17209e+00	
+//  19	      35186128925378  - 8.93609e-01	      35186129842513  - 6.25200e-01	      35186133564508  - 2.66440e-02	      35186133318250  - 4.19204e-02	      35186130101405  - 5.58085e-01	
+//  21	            22361897  + 1.09690e+00	            22346883  - 4.52843e+00	            22347140  - 4.30005e+00	            22362537  + 1.39874e+00	            22362410  + 1.33593e+00	
+//  22	        430510168797  - 2.40218e+00	        430509773490  - 4.63272e+00	        430509801636  - 4.44990e+00	        430510207494  - 2.22284e+00	        430510160791  - 2.44015e+00	
+//  23	      35186133416420  - 3.54174e-02	      35186129876698  - 6.16119e-01	      35186129128108  - 8.30162e-01	      35186133344861  - 4.01035e-02	      35186134679390  + 6.11102e-04	
+//  24	    2179984579837982  + 3.50106e-02	    2179984583788025  + 7.38274e-02	    2179984579654789  + 3.35577e-02	    2179984575016781  + 7.03115e-03	    2179984578568664  + 2.55761e-02	
+//  
+//                21.082 15 =>   1-9.942362e-02           21.761 15 =>   1-8.382222e-02           18.368 15 =>     8.081723e-01           13.723 15 =>     5.301854e-01           18.406 15 =>     8.110533e-01
+//  
+//  --- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- spangled128 -- 64 bits: 	ps: 1-9.942e-02  1-8.382e-02*   8.082e-01    5.302e-01    8.111e-01   => p <   3.05979e-02   2^54.32 calls, 2^57.32 bytes	2^36.34 bytes/second	used:  23::20:35:12.35
 					// Also passes 64TB with no anomalies when this variant uses rounds=2
 					// So really 5 rounds, with 3 of the states hardcoded.
 					// This adds a rotation of b to a before all rounds except the first.
@@ -1934,6 +1956,7 @@ namespace PractRand {
 
 					// This passes 64TB with rounds=4, which really does mean 4 rounds now.
 					// It has a third state, which it uses like the key in Speck, and changes per-round and per-result.
+					// A variant is tested many lines below this that does not change the third state per-round, but does per-result.
 					// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
 					// Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
 					// Uint64 c = (stateC += 0xDE916ABCC965815BUL);
@@ -1983,9 +2006,21 @@ namespace PractRand {
 					// Runs 4 rounds of the Speck cipher on its three states as a, b, and c, returning a.
 					// This one might have issues with its increments at extremely long test lengths, for complicated reasons.
 					// At least with uint32_t states, XORing the large constant and the ctz result works better than adding.
-					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
-					Uint64 b = (stateB += 0xD1342543DE82EF95UL + __builtin_ctzll(a));
-					Uint64 c = (stateC += 0xA62B82F58DB8A985UL + __builtin_ctzll(a&b));
+					// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+					// Uint64 b = (stateB += 0xD1342543DE82EF95UL + __builtin_ctzll(a));
+					// Uint64 c = (stateC += 0xA62B82F58DB8A985UL + __builtin_ctzll(a&b));
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+
+					//
+					Uint64 a = (stateA += 0xBEA225F9EB34556DUL);
+					Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ __builtin_ctzll(a));
+					Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ __builtin_ctzll(a&b));
 					b = rotate64(b, 56) + a ^ c;
 					a = (rotate64(a, 3) ^ b);
 					b = rotate64(b, 56) + a ^ c;
