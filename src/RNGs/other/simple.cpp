@@ -2017,7 +2017,9 @@ namespace PractRand {
 					// a = (rotate64(a, 3) ^ b);
 					// return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
 
-					//
+					// InsectRandom
+					// Passes 64TB of PractRand with one anomaly at 64TB:
+					// [Low1/64]TMFn(2+1):wl             R= +20.1  p~=   6e-6    unusual
 					Uint64 a = (stateA += 0xBEA225F9EB34556DUL);
 					Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ __builtin_ctzll(a));
 					Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ __builtin_ctzll(a&b));
