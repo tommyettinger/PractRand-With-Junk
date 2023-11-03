@@ -2017,19 +2017,33 @@ namespace PractRand {
 					// a = (rotate64(a, 3) ^ b);
 					// return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
 
-					// InsectRandom
-					// Passes 64TB of PractRand with one anomaly at 64TB:
-					// [Low1/64]TMFn(2+1):wl             R= +20.1  p~=   6e-6    unusual
+					// // InsectRandom
+					// // Passes 64TB of PractRand with one anomaly at 64TB:
+					// // [Low1/64]TMFn(2+1):wl             R= +20.1  p~=   6e-6    unusual
+					// Uint64 a = (stateA += 0xBEA225F9EB34556DUL);
+					// Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ __builtin_ctzll(a));
+					// Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ __builtin_ctzll(a&b));
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+
+					// RespectfulRandom
+					// Passes 64TB of PractRand with no anomalies.
+					// Period is 2 to the 64; permits O(1) skip to any point; 2 to the 128 streams.
 					Uint64 a = (stateA += 0xBEA225F9EB34556DUL);
-					Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ __builtin_ctzll(a));
-					Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ __builtin_ctzll(a&b));
+					Uint64 b = (stateB += 0xD1342543DE82EF95UL);
+					Uint64 c = (stateC += 0xA62B82F58DB8A985UL);
 					b = rotate64(b, 56) + a ^ c;
 					a = (rotate64(a, 3) ^ b);
-					b = rotate64(b, 56) + a ^ c;
-					a = (rotate64(a, 3) ^ b);
-					b = rotate64(b, 56) + a ^ c;
-					a = (rotate64(a, 3) ^ b);
-					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+					b = rotate64(b, 51) + a ^ c;
+					a = (rotate64(a, 5) ^ b);
+					b = rotate64(b, 43) + a ^ c;
+					a = (rotate64(a, 8) ^ b);
+					return (rotate64(a, 13) ^ (rotate64(b, 30) + a ^ c));
 				}
 				std::string spangled_varqual::get_name() const {
 					std::ostringstream str;
