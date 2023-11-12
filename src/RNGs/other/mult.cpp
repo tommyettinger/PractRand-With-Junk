@@ -3145,18 +3145,38 @@ namespace PractRand {
 					// Passes 64TB of PractRand with no anomalies.
 					// Period is 2 to the 96. Has 96 bits of state, with 32-bit output.
 					// Does not use multiplication, but does use the count-leading-zeros instruction.
+					// Uint32 a = (stateA += 0x91E10DA5U);
+					// Uint32 b = (stateB += 0x6C8E9CF5U ^ __builtin_ctzll(a));
+					// Uint32 c = (stateC += 0x7FEB352DU ^ __builtin_ctzll(a&b));
+					// b = rotate32(b, 24) + a ^ c;
+					// a = rotate32(a, 3) ^ b;
+					// b = rotate32(b, 24) + a ^ c;
+					// a = rotate32(a, 3) ^ b;
+					// b = rotate32(b, 24) + a ^ c;
+					// a = rotate32(a, 3) ^ b;
+					// b = rotate32(b, 24) + a ^ c;
+					// a = rotate32(a, 3) ^ b;
+					// return a;
+
+					// Passes 64TB of PractRand with one anomaly at 16GB:
+					//   [Low4/32]DC6-9x1Bytes-1           R=  -6.1  p =1-4.9e-4   unusual
+					// Same period, output, and state as above, but this one does use multiplication.
 					Uint32 a = (stateA += 0x91E10DA5U);
 					Uint32 b = (stateB += 0x6C8E9CF5U ^ __builtin_ctzll(a));
-					Uint32 c = (stateC += 0x7FEB352DU ^ __builtin_ctzll(a&b));
+					Uint32 c = (stateC += 0xF1357AEAU ^ __builtin_ctzll(a&b));
 					b = rotate32(b, 24) + a ^ c;
 					a = rotate32(a, 3) ^ b;
-					b = rotate32(b, 24) + a ^ c;
-					a = rotate32(a, 3) ^ b;
-					b = rotate32(b, 24) + a ^ c;
-					a = rotate32(a, 3) ^ b;
-					b = rotate32(b, 24) + a ^ c;
-					a = rotate32(a, 3) ^ b;
-					return a;
+					a = rotate32(a, 3) ^ (rotate32(b, 24) + a ^ c);
+					// a = (a ^ a >> 16) * 0x21f0aaad;
+					// a = (a ^ a >> 15) * 0x735a2d97;
+					// a ^= a >> 15;
+
+					    // a ^= a >> 16;
+					    a *= 0x21f0aaadU;
+					    a ^= a >> 15;
+					    a *= 0xd35a2d97U;
+					    a ^= a >> 15;
+						return a;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
