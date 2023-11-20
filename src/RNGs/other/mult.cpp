@@ -3158,25 +3158,59 @@ namespace PractRand {
 					// a = rotate32(a, 3) ^ b;
 					// return a;
 
-					// Passes 64TB of PractRand with one anomaly at 16GB:
-					//   [Low4/32]DC6-9x1Bytes-1           R=  -6.1  p =1-4.9e-4   unusual
-					// Same period, output, and state as above, but this one does use multiplication.
+//					// Passes 64TB of PractRand with one anomaly at 16GB:
+//					//   [Low4/32]DC6-9x1Bytes-1           R=  -6.1  p =1-4.9e-4   unusual
+//					// Same period, output, and state as above, but this one does use multiplication.
+//					Uint32 a = (stateA += 0x91E10DA5U);
+//					Uint32 b = (stateB += 0x6C8E9CF5U ^ __builtin_ctzll(a));
+//					Uint32 c = (stateC += 0xF1357AEAU ^ __builtin_ctzll(a&b));
+//					b = rotate32(b, 24) + a ^ c;
+//					a = rotate32(a, 3) ^ b;
+//					a = rotate32(a, 3) ^ (rotate32(b, 24) + a ^ c);
+//					// a = (a ^ a >> 16) * 0x21f0aaadU;
+//					// a = (a ^ a >> 15) * 0x735a2d97U;
+//					// a ^= a >> 15;
+//
+//					    // a ^= a >> 16;
+//					    a *= 0x21f0aaadU;
+//					    a ^= a >> 15;
+//					    a *= 0xd35a2d97U;
+//					    a ^= a >> 15;
+//						return a;
+
+
 					Uint32 a = (stateA += 0x91E10DA5U);
 					Uint32 b = (stateB += 0x6C8E9CF5U ^ __builtin_ctzll(a));
-					Uint32 c = (stateC += 0xF1357AEAU ^ __builtin_ctzll(a&b));
-					b = rotate32(b, 24) + a ^ c;
-					a = rotate32(a, 3) ^ b;
-					a = rotate32(a, 3) ^ (rotate32(b, 24) + a ^ c);
-					// a = (a ^ a >> 16) * 0x21f0aaad;
-					// a = (a ^ a >> 15) * 0x735a2d97;
-					// a ^= a >> 15;
+					Uint32 c = (stateC += 0x7FEB352DU ^ __builtin_ctzll(a&b));
 
-					    // a ^= a >> 16;
-					    a *= 0x21f0aaadU;
-					    a ^= a >> 15;
-					    a *= 0xd35a2d97U;
-					    a ^= a >> 15;
-						return a;
+					c = rotate32(c, 3) ^ rotate32(b, 24) + c ^ a;
+
+					// c = (c ^ c >> 16) * 0x21f0aaadU;
+	   				// c = (c ^ c >> 15) * 0xd35a2d97U;
+   					// c ^= c >> 15;
+					// return c;
+
+
+//					b ^= rotate32(a, 11) * 0x21f0aaadU;
+//					c ^= rotate32(b, 19) * 0xd35a2d97U;
+//					a ^= rotate32(c, 26) * 0x31848babU;
+					// return a + b ^ c;
+					// b ^= rotate32(a, 11) + c * 0x21f0aaadU;
+					// c ^= rotate32(b, 25) + a * 0xd35a2d97U;
+					// a ^= rotate32(c, 19) + b * 0x31848babU;
+
+					// return rotate32(a, 3) ^ rotate32(b, 24) + a ^ c;
+					// return c; // fails quickly, 4GB
+					// return b ^ a + c;
+
+					c ^= c >> 17;
+					c *= 0xed5ad4bb;
+					c ^= c >> 11;
+					c *= 0xac4c1b51;
+					c ^= c >> 15;
+					c *= 0x31848bab;
+					c ^= c >> 14;
+					return c;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
@@ -4993,24 +5027,82 @@ namespace PractRand {
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- Pouch256 -- 64 bits: 	ps:   1.589e-01    2.643e-01  1-7.056e-02*   8.828e-01    2.611e-01   => p <   5.76370e-01   2^54.32 calls, 2^57.32 bytes	2^37.57 bytes/second	used:  10::03:48:02.88
 
-	const uint64_t a = stateA;
-	const uint64_t b = stateB;
-	const uint64_t c = stateC;
-	const uint64_t d = stateD;
+	// const uint64_t a = stateA;
+	// const uint64_t b = stateB;
+	// const uint64_t c = stateC;
+	// const uint64_t d = stateD;
 //stateA = c * d;
 //stateB = rotate64(a, 47);
 //stateC = b - a;
 //stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
 //return c;
 
-// Alternate PouchRandom
-// Also passes 64TB with no anomalies.
-// Different rotation, that's all.
-stateA = c * d;
-stateB = rotate64(a, 52);
-stateC = b - a;
-stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
-return c;
+// // Alternate PouchRandom
+// // Also passes 64TB with no anomalies.
+// // Different rotation, that's all.
+// stateA = c * d;
+// stateB = rotate64(a, 52);
+// stateC = b - a;
+// stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
+// return c;
+
+// SnoutRandom
+// rot 7, fails 8GB,
+//  [Low8/64]DC6-9x1Bytes-1           R= +27.3  p =  2.6e-14    FAIL           
+// rot 8, fails 16GB,
+//  [Low1/8]DC6-9x1Bytes-1            R= +37.6  p =  3.5e-20    FAIL !!        
+//  [Low1/8]BRank(12):4K(1)           R=+152.8  p~=  5.1e-47    FAIL !!! 
+// rot 9, fails 32GB,
+//  BCFN(2+0,13-0,T)                  R= +27.5  p =  3.1e-14    FAIL           
+// rot 10, fails 128,
+//  BCFN(2+0,13-0,T)                  R= +23.8  p =  2.8e-12    FAIL           
+// rot 11, fails 256GB,
+//  BCFN(2+0,13-0,T)                  R= +33.5  p =  1.9e-17    FAIL !         
+//  BCFN(2+1,13-0,T)                  R= +27.0  p =  5.9e-14    FAIL
+// rot 12, fails 128GB,
+//  BCFN(2+0,13-0,T)                  R= +25.4  p =  3.8e-13    FAIL           
+// rot 13, fails 128GB,
+//  BCFN(2+0,13-0,T)                  R= +39.3  p =  1.4e-20    FAIL !!    
+// rot 17, fails 128GB,
+//  [Low4/16]BCFN(2+1,13-0,T)         R= +32.2  p =  9.7e-17    FAIL !         
+// rot 20, fails 128GB,
+//  BRank(12):4K(1)                   R=+540.3  p~=  1.1e-163   FAIL !!!!!     
+// rot 23, fails 64GB,
+//  BCFN(2+0,13-0,T)                  R= +23.1  p =  7.0e-12    FAIL
+// rot 42, fails 256 GB,
+//  BCFN(2+0,13-0,T)                  R= +44.5  p =  2.5e-23    FAIL !!        
+// rot 53, fails 2GB,
+//  BRank(12):4K(1)                   R=+540.3  p~=  1.1e-163   FAIL !!!!!     
+
+//	const uint64_t a = stateA;
+//	const uint64_t b = stateB;
+//	const uint64_t c = stateC;
+//	const uint64_t d = stateD;
+//		stateA = a + 0xD1B54A32D192ED03UL;
+//		stateB = a ^ d;
+//		stateC = rotate64(b, 42);
+//		stateD = c + b;
+//		return d;
+
+// FloodRandom
+// Passes 64TB of PractRand with no anomalies.
+// Period is 2 to the 64. There are 2 to the 128 possible streams.
+					uint64_t fa = (stateA += 0xD1B54A32D192ED03L);
+					uint64_t fb = (stateB += 0xABC98388FB8FAC03L);
+					uint64_t fc = (stateC += 0x8CB92BA72F3D8DD7L);
+					uint64_t x = fa ^ rotate64(fb, 19) ^ rotate64(fc, 47);
+					x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
+					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					x ^= x >> 27;
+					return x;
+
+//fb ^= (fc += rotate64(fa, 31));
+//fc ^= (fa += rotate64(fb, 19));
+//fa ^= (fb += rotate64(fc, 47));
+//return fa;
+// return (fa ^ rotate64(fa, 29) ^ rotate64(fa, 50)) +
+//        (fb ^ rotate64(fb, 19) ^ rotate64(fb, 37)) +
+//        (fc ^ rotate64(fc, 13) ^ rotate64(fc, 44));
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
@@ -5019,8 +5111,8 @@ return c;
 					walker->handle(stateB);
 					walker->handle(stateC);
 					walker->handle(stateD);
-					stateC |= 1UL;
-					stateD |= 1UL;
+					// stateC |= 1UL;
+					// stateD |= 1UL;
 				}
 				Uint64 plum256::raw64() {
 					//const uint64_t fa = stateA;
