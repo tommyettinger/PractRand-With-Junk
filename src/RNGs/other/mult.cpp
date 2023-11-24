@@ -5087,14 +5087,14 @@ namespace PractRand {
 // FloodRandom
 // Passes 64TB of PractRand with no anomalies.
 // Period is 2 to the 64. There are 2 to the 128 possible streams.
-					uint64_t fa = (stateA += 0xD1B54A32D192ED03L);
-					uint64_t fb = (stateB += 0xABC98388FB8FAC03L);
-					uint64_t fc = (stateC += 0x8CB92BA72F3D8DD7L);
-					uint64_t x = fa ^ rotate64(fb, 19) ^ rotate64(fc, 47);
-					x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
-					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
-					x ^= x >> 27;
-					return x;
+					// uint64_t fa = (stateA += 0xD1B54A32D192ED03L);
+					// uint64_t fb = (stateB += 0xABC98388FB8FAC03L);
+					// uint64_t fc = (stateC += 0x8CB92BA72F3D8DD7L);
+					// uint64_t x = fa ^ rotate64(fb, 19) ^ rotate64(fc, 47);
+					// x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
+					// x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					// x ^= x >> 27;
+					// return x;
 
 //fb ^= (fc += rotate64(fa, 31));
 //fc ^= (fa += rotate64(fb, 19));
@@ -5103,6 +5103,18 @@ namespace PractRand {
 // return (fa ^ rotate64(fa, 29) ^ rotate64(fa, 50)) +
 //        (fb ^ rotate64(fb, 19) ^ rotate64(fb, 37)) +
 //        (fc ^ rotate64(fc, 13) ^ rotate64(fc, 44));
+
+					// FlowRandom
+					// Period is 2 to the 64, has 2 to the 64 streams.
+					// Passes 64TB of PractRand with no anomalies.
+					// Uses one more numerical operation than DistinctRandom/SplitMix64.
+					// Based on Moremur for its constants.
+					uint64_t x = (stateA += 0xD1B54A32D192ED03L);
+					uint64_t y = (stateB += 0x8CB92BA72F3D8DD7L);
+					x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653UL;
+					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					x ^= x >> 27;
+					return x;
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
