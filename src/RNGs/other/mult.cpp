@@ -3179,38 +3179,54 @@ namespace PractRand {
 //						return a;
 
 
-					Uint32 a = (stateA += 0x91E10DA5U);
-					Uint32 b = (stateB += 0x6C8E9CF5U ^ __builtin_ctzll(a));
-					Uint32 c = (stateC += 0x7FEB352DU ^ __builtin_ctzll(a&b));
+// 					Uint32 a = (stateA += 0x91E10DA5U);
+// 					Uint32 b = (stateB += 0x6C8E9CF5U ^ __builtin_ctzll(a));
+// 					Uint32 c = (stateC += 0x7FEB352DU ^ __builtin_ctzll(a&b));
 
-					c = rotate32(c, 3) ^ rotate32(b, 24) + c ^ a;
+// 					c = rotate32(c, 3) ^ rotate32(b, 24) + c ^ a;
 
-					// c = (c ^ c >> 16) * 0x21f0aaadU;
-	   				// c = (c ^ c >> 15) * 0xd35a2d97U;
-   					// c ^= c >> 15;
-					// return c;
+// 					// c = (c ^ c >> 16) * 0x21f0aaadU;
+// 	   				// c = (c ^ c >> 15) * 0xd35a2d97U;
+//    					// c ^= c >> 15;
+// 					// return c;
 
 
-//					b ^= rotate32(a, 11) * 0x21f0aaadU;
-//					c ^= rotate32(b, 19) * 0xd35a2d97U;
-//					a ^= rotate32(c, 26) * 0x31848babU;
-					// return a + b ^ c;
-					// b ^= rotate32(a, 11) + c * 0x21f0aaadU;
-					// c ^= rotate32(b, 25) + a * 0xd35a2d97U;
-					// a ^= rotate32(c, 19) + b * 0x31848babU;
+// //					b ^= rotate32(a, 11) * 0x21f0aaadU;
+// //					c ^= rotate32(b, 19) * 0xd35a2d97U;
+// //					a ^= rotate32(c, 26) * 0x31848babU;
+// 					// return a + b ^ c;
+// 					// b ^= rotate32(a, 11) + c * 0x21f0aaadU;
+// 					// c ^= rotate32(b, 25) + a * 0xd35a2d97U;
+// 					// a ^= rotate32(c, 19) + b * 0x31848babU;
 
-					// return rotate32(a, 3) ^ rotate32(b, 24) + a ^ c;
-					// return c; // fails quickly, 4GB
-					// return b ^ a + c;
+// 					// return rotate32(a, 3) ^ rotate32(b, 24) + a ^ c;
+// 					// return c; // fails quickly, 4GB
+// 					// return b ^ a + c;
 
-					c ^= c >> 17;
-					c *= 0xed5ad4bb;
-					c ^= c >> 11;
-					c *= 0xac4c1b51;
-					c ^= c >> 15;
-					c *= 0x31848bab;
-					c ^= c >> 14;
-					return c;
+// 					c ^= c >> 17;
+// 					c *= 0xed5ad4bb;
+// 					c ^= c >> 11;
+// 					c *= 0xac4c1b51;
+// 					c ^= c >> 15;
+// 					c *= 0x31848bab;
+// 					c ^= c >> 14;
+// 					return c;
+
+                    // Evasive96
+                    // Passes 64TB of PractRand with no anomalies.
+                    // Period is 2 to the 96. Has 96 bits of state, with 32-bit output.
+                    // Does not use multiplication, but does use the count-leading-zeros instruction.
+                    // Structured so that the step for w can be repeated for additional states, with the last step calling the variable w.
+                    // That means in an extended form, the w line would change to use z, the new line would use w, and this would use (x&=z) on the extra line.
+                    // This could also use |= , or mix that with &= .
+                    uint32_t x = (stateA += 0x9E3779BB);
+                    uint32_t y = (stateB += 0xC13FA9A9 ^ __builtin_ctzll(x));
+                    uint32_t w = (stateC += 0x915F77F5 ^ __builtin_ctzll(x&=y));
+                    w += x ^ rotate32(x, 3) ^ rotate32(x, 14);
+                    x += w ^ rotate32(w, 28) ^ rotate32(w, 21);
+                    w += x ^ rotate32(x, 12) ^ rotate32(x, 23);
+                    x += w ^ rotate32(w, 10) ^ rotate32(w, 17);
+                    return x;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
