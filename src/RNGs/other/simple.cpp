@@ -1889,9 +1889,7 @@ namespace PractRand {
 					walker->handle(d);
 					walker->handle(e);
 					walker->handle(f);
-					g = __lzcnt32(a);//__lzcnt64(a);// __builtin_ctzll(a);
-					walker->handle(h);				}
-					g = __builtin_ctzll(a);
+					g = __lzcnt(a);//__lzcnt64(a);// __builtin_ctzll(a);
 					walker->handle(h);
 				}
 				Uint64 spangled_varqual::raw64() {
@@ -1904,7 +1902,7 @@ namespace PractRand {
 //					// It uses the round function from the Speck cipher
 //					// If all streams are appended to one another, the resulting generator would have a period of 2 to the 128, 1D-equidistributed
 //					// You can do that by changing stateB's assignment to:
-//					// Uint64 b = (stateB += __builtin_ctzll(a));
+//					// Uint64 b = (stateB += __lzcnt64(a));
 //					// This eliminates the fast skipping, makes this have one stream, and makes it no longer an ARX generator
 //					// It may also slow it down somewhat
 //					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
@@ -1995,8 +1993,8 @@ namespace PractRand {
 					// Has a period of 2 to the 192.
 					// Needs at least two rounds of the Speck cipher; fails with one.
 //					Uint64 a = (stateA = stateA * 0xD1342543DE82EF95UL + 0x9E3779B97F4A7C15UL);
-//					Uint64 b = (stateB = stateB * 0x2C6FE96EE78B6955UL + __builtin_ctzll(a));
-//					Uint64 c = (stateC = stateC * 0x369DEA0F31A53F85UL + __builtin_ctzll(a&b));
+//					Uint64 b = (stateB = stateB * 0x2C6FE96EE78B6955UL + __lzcnt64(a));
+//					Uint64 c = (stateC = stateC * 0x369DEA0F31A53F85UL + __lzcnt64(a&b));
 //					b = rotate64(b, 56) + a ^ c;
 //					a = (rotate64(a, 3) ^ b);
 //					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
@@ -2009,8 +2007,8 @@ namespace PractRand {
 					// This one might have issues with its increments at extremely long test lengths, for complicated reasons.
 					// At least with uint32_t states, XORing the large constant and the ctz result works better than adding.
 					// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
-					// Uint64 b = (stateB += 0xD1342543DE82EF95UL + __builtin_ctzll(a));
-					// Uint64 c = (stateC += 0xA62B82F58DB8A985UL + __builtin_ctzll(a&b));
+					// Uint64 b = (stateB += 0xD1342543DE82EF95UL + __lzcnt64(a));
+					// Uint64 c = (stateC += 0xA62B82F58DB8A985UL + __lzcnt64(a&b));
 					// b = rotate64(b, 56) + a ^ c;
 					// a = (rotate64(a, 3) ^ b);
 					// b = rotate64(b, 56) + a ^ c;
@@ -2023,8 +2021,8 @@ namespace PractRand {
 					// // Passes 64TB of PractRand with one anomaly at 64TB:
 					// // [Low1/64]TMFn(2+1):wl             R= +20.1  p~=   6e-6    unusual
 					// Uint64 a = (stateA += 0xBEA225F9EB34556DUL);
-					// Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ __builtin_ctzll(a));
-					// Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ __builtin_ctzll(a&b));
+					// Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ __lzcnt64(a));
+					// Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ __lzcnt64(a&b));
 					// b = rotate64(b, 56) + a ^ c;
 					// a = (rotate64(a, 3) ^ b);
 					// b = rotate64(b, 56) + a ^ c;

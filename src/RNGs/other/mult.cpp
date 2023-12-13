@@ -3166,8 +3166,8 @@ namespace PractRand {
 					// That means in an extended form, the w line would change to use z, the new line would use w, and this would use (x&=z) on the extra line.
 					// This could also use |= , or mix that with &= .
 					//uint32_t x = (stateA += 0x9E3779BB);
-					//uint32_t y = (stateB += 0xC13FA9A9 ^ __builtin_ctzll(x));
-					//uint32_t w = (stateC += 0x915F77F5 ^ __builtin_ctzll(x&=y));
+					//uint32_t y = (stateB += 0xC13FA9A9 ^ __lzcnt(x));
+					//uint32_t w = (stateC += 0x915F77F5 ^ __lzcnt(x&=y));
 					//w += x ^ rotate32(x, 3) ^ rotate32(x, 14);
 					//x += w ^ rotate32(w, 28) ^ rotate32(w, 21);
 					//w += x ^ rotate32(x, 12) ^ rotate32(x, 23);
@@ -3181,9 +3181,9 @@ namespace PractRand {
 					// It needs to not repeat "x &= whatever" operations too much, so this uses "|=".
 					// With two "&=" ops in a row, this starts to see serious trouble at 8TB or earlier.
 					uint32_t x = (stateA += 0x9E3779BBU);
-					uint32_t y = (stateB += (0x9E3779BBU * 421U) ^ __lzcnt64(x));
-					uint32_t z = (stateC += (0x9E3779BBU * 421U * 412U) ^ __lzcnt64(x &= y));
-					uint32_t w = (stateD += (0x9E3779BBU * 421U * 412U * 421U) ^ __lzcnt64(x |= z));
+					uint32_t y = (stateB += (0x9E3779BBU * 421U) ^ __lzcnt(x));
+					uint32_t z = (stateC += (0x9E3779BBU * 421U * 412U) ^ __lzcnt(x &= y));
+					uint32_t w = (stateD += (0x9E3779BBU * 421U * 412U * 421U) ^ __lzcnt(x |= z));
 					w += x ^ rotate32(x, 3) ^ rotate32(x, 14);
 					x += w ^ rotate32(w, 28) ^ rotate32(w, 21);
 					w += x ^ rotate32(x, 12) ^ rotate32(x, 23);
