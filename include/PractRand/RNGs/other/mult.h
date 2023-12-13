@@ -475,7 +475,7 @@ namespace PractRand {
 				};
 
 				class ta32 : public vRNG32 {
-					Uint32 stateA, stateB;
+					Uint32 stateA, stateB, stateC, stateD;
 				public:
 					Uint32 raw32();
 					std::string get_name() const;

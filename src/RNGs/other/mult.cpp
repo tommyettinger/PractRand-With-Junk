@@ -3028,7 +3028,7 @@ namespace PractRand {
 // count leading zeroes function here returns any even constant, but if it doesn't return
 // 64 when given 0, the output will eventually be different for the same seed.
 					uint64_t q = (stateA += 0x9E3779B97F4A7C15ULL);
-					uint64_t r = (stateB += 0xC6BC279692B5C323ULL ^ __builtin_ctzll(q));
+					uint64_t r = (stateB += 0xC6BC279692B5C323ULL ^ __lzcnt64(q));
 					r ^= r >> 28;
 					r *= q | 1ULL;
 					r ^= r >> 30 ^ r >> 6;
@@ -3132,21 +3132,99 @@ namespace PractRand {
 //					y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
 //					return y;
 
-					uint32_t z = (stateA += 0xC13FA9A9U);
-					//uint32_t y = (stateB += ((z | 0xAEF17502 - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
-					uint32_t y = (stateB += ((z | 0xF1357AEA - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
-					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
-					y += z ^ rotate32(z, 28) ^ rotate32(z, 21);
-					z += y ^ rotate32(y, 12) ^ rotate32(y, 23);
-					y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
-					return y;
+					//uint32_t z = (stateA += 0xC13FA9A9U);
+					////uint32_t y = (stateB += ((z | 0xAEF17502U - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
+					//uint32_t y = (stateB += ((z | 0xF1357AEAU - z) >> 31) + 0x91E10DA5U); //0xAEF17502 or 0xF1357AEA //0x91E10DA5U
+					//z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
+					//y += z ^ rotate32(z, 28) ^ rotate32(z, 21);
+					//z += y ^ rotate32(y, 12) ^ rotate32(y, 23);
+					//y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
+					//return y;
+					
+					// Respite96
+					// Passes 64TB of PractRand.
+					// Period is 2 to the 96. Has 96 bits of state, with 32-bit output.
+					// Does not use multiplication, but does use the count-leading-zeros instruction.
+//					uint32_t a = (stateA += 0x91E10DA5U);
+//					uint32_t b = (stateB += 0x6C8E9CF5U ^ __lzcnt(a));
+//					uint32_t c = (stateC += 0x7FEB352DU ^ __lzcnt(a&b));
+//					b = rotate32(b, 24) + a ^ c;
+//					a = rotate32(a, 3) ^ b;
+//					b = rotate32(b, 24) + a ^ c;
+//					a = rotate32(a, 3) ^ b;
+//					b = rotate32(b, 24) + a ^ c;
+//					a = rotate32(a, 3) ^ b;
+//					b = rotate32(b, 24) + a ^ c;
+//					a = rotate32(a, 3) ^ b;
+//					return a;
+
+ 					// Evasive96
+					// Passes 64TB of PractRand with no anomalies.
+					// Period is 2 to the 96. Has 96 bits of state, with 32-bit output.
+					// Does not use multiplication, but does use the count-leading-zeros instruction.
+					// Structured so that the step for w can be repeated for additional states, with the last step calling the variable w.
+					// That means in an extended form, the w line would change to use z, the new line would use w, and this would use (x&=z) on the extra line.
+					// This could also use |= , or mix that with &= .
+					//uint32_t x = (stateA += 0x9E3779BB);
+					//uint32_t y = (stateB += 0xC13FA9A9 ^ __builtin_ctzll(x));
+					//uint32_t w = (stateC += 0x915F77F5 ^ __builtin_ctzll(x&=y));
+					//w += x ^ rotate32(x, 3) ^ rotate32(x, 14);
+					//x += w ^ rotate32(w, 28) ^ rotate32(w, 21);
+					//w += x ^ rotate32(x, 12) ^ rotate32(x, 23);
+					//x += w ^ rotate32(w, 10) ^ rotate32(w, 17);
+					//return x;
+
+					// Trying to actually extend Evasive96 to Evasive128...
+					// Period is 2 to the 128. Has 128 bits of state, with 32-bit output.
+					// This gets one anomaly at only 8GB,
+					//   [Low4/16]BCFN(2+2,13-1,T)         R=  +9.0  p =  2.5e-4   unusual
+					// It needs to not repeat "x &= whatever" operations too much, so this uses "|=".
+					// With two "&=" ops in a row, this starts to see serious trouble at 8TB or earlier.
+					uint32_t x = (stateA += 0x9E3779BBU);
+					uint32_t y = (stateB += (0x9E3779BBU * 421U) ^ __lzcnt64(x));
+					uint32_t z = (stateC += (0x9E3779BBU * 421U * 412U) ^ __lzcnt64(x &= y));
+					uint32_t w = (stateD += (0x9E3779BBU * 421U * 412U * 421U) ^ __lzcnt64(x |= z));
+					w += x ^ rotate32(x, 3) ^ rotate32(x, 14);
+					x += w ^ rotate32(w, 28) ^ rotate32(w, 21);
+					w += x ^ rotate32(x, 12) ^ rotate32(x, 23);
+					x += w ^ rotate32(w, 10) ^ rotate32(w, 17);
+					return x;
+
+
+
+//					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
+//					y += z ^ rotate32(z, 28) ^ rotate32(z, 21);
+//					z += y ^ rotate32(y, 12) ^ rotate32(y, 23);
+//					y += z ^ rotate32(z, 10) ^ rotate32(z, 17);
+//					return y;
+					//x ^= x >> 17;
+					//x *= 0xed5ad4bb;
+					//x ^= x >> 11;
+					//x *= 0xac4c1b51;
+					//x ^= x >> 15;
+					//x *= 0x31848bab;
+					//x ^= x >> 14;
+					//return x;
+
+					//x = (x ^ x >> 15) * 0x2c1b3c6d;
+					//x = (x ^ x >> 12) * 0x297a2d39;
+					//x ^= x >> 15;
+					//return x;
+
+//					x = (x ^ x >> 15) * 0xd168aaad;
+//					x = (x ^ x >> 15) * 0xaf723597;
+//					x ^= x >> 15;
+//					return x;
+					 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
 					//stateB |= (stateB == 0);
-					printf("Seed is 0x%08X, 0x%08X\r\n", stateA, stateB);
+					printf("Seed is 0x%08X, 0x%08X, 0x%08X, 0x%08X\r\n", stateA, stateB, stateC, stateD);
 				}
 
 

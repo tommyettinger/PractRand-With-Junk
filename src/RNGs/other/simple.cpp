@@ -163,26 +163,26 @@ namespace PractRand {
 				}
 				Uint32 xorwow32x6::raw32() {
 //					//kotlin's version
-//					Uint32 t = x;
-//					t ^= t >> 2;
-//					x = y;
-//					y = z;
-//					z = w;
-//					Uint32 v0 = v;
-//					w = v0;
-//					t ^= t << 1 ^ v0 ^ v0 << 4;
-//					v = t;
-//					d += 362437;
-//					return t + d;
-					////original
-					Uint32 tmp = x;
+					Uint32 t = x;
+					t ^= t >> 2;
 					x = y;
 					y = z;
-					z = w ^ (w << 1);
-					w = v ^ (v >> 7);
-					v ^= (v << 4) ^ tmp;
+					z = w;
+					Uint32 v0 = v;
+					w = v0;
+					t ^= t << 1 ^ v0 ^ v0 << 4;
+					v = t;
 					d += 362437;
-					return v + d;
+					return t + d;
+					////original
+					//Uint32 tmp = x;
+					//x = y;
+					//y = z;
+					//z = w ^ (w << 1);
+					//w = v ^ (v >> 7);
+					//v ^= (v << 4) ^ tmp;
+					//d += 362437;
+					//return v + d;
 				}
 				std::string xorwow32x6::get_name() const { return "xorwow32x6"; }
 				void xorwow32x6::walk_state(StateWalkingObject *walker) {
@@ -1877,7 +1877,7 @@ namespace PractRand {
 					d = rotate32(fc, 25);
 					e = fb - fc;
 					f = fe ^ fh;
-					g = __builtin_ctzll(fa);
+					g = __lzcnt64(fa);
 					h = fh + fg;
 					return ff;
 				}
@@ -1889,7 +1889,7 @@ namespace PractRand {
 					walker->handle(d);
 					walker->handle(e);
 					walker->handle(f);
-					g = __builtin_ctzll(a);
+					g = __lzcnt64(a);// __builtin_ctzll(a);
 					walker->handle(h);				}
 
 			}
