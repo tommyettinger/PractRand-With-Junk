@@ -3215,7 +3215,6 @@ namespace PractRand {
 //					x = (x ^ x >> 15) * 0xaf723597;
 //					x ^= x >> 15;
 //					return x;
-					 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
@@ -5033,24 +5032,94 @@ namespace PractRand {
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- Pouch256 -- 64 bits: 	ps:   1.589e-01    2.643e-01  1-7.056e-02*   8.828e-01    2.611e-01   => p <   5.76370e-01   2^54.32 calls, 2^57.32 bytes	2^37.57 bytes/second	used:  10::03:48:02.88
 
-	const uint64_t a = stateA;
-	const uint64_t b = stateB;
-	const uint64_t c = stateC;
-	const uint64_t d = stateD;
+	// const uint64_t a = stateA;
+	// const uint64_t b = stateB;
+	// const uint64_t c = stateC;
+	// const uint64_t d = stateD;
 //stateA = c * d;
 //stateB = rotate64(a, 47);
 //stateC = b - a;
 //stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
 //return c;
 
-// Alternate PouchRandom
-// Also passes 64TB with no anomalies.
-// Different rotation, that's all.
-stateA = c * d;
-stateB = rotate64(a, 52);
-stateC = b - a;
-stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
-return c;
+// // Alternate PouchRandom
+// // Also passes 64TB with no anomalies.
+// // Different rotation, that's all.
+// stateA = c * d;
+// stateB = rotate64(a, 52);
+// stateC = b - a;
+// stateD = d + 0xE35E156A2314DCDAL;// 0x9E3779B97F4A7C16L;
+// return c;
+
+// SnoutRandom
+// rot 7, fails 8GB,
+//  [Low8/64]DC6-9x1Bytes-1           R= +27.3  p =  2.6e-14    FAIL           
+// rot 8, fails 16GB,
+//  [Low1/8]DC6-9x1Bytes-1            R= +37.6  p =  3.5e-20    FAIL !!        
+//  [Low1/8]BRank(12):4K(1)           R=+152.8  p~=  5.1e-47    FAIL !!! 
+// rot 9, fails 32GB,
+//  BCFN(2+0,13-0,T)                  R= +27.5  p =  3.1e-14    FAIL           
+// rot 10, fails 128,
+//  BCFN(2+0,13-0,T)                  R= +23.8  p =  2.8e-12    FAIL           
+// rot 11, fails 256GB,
+//  BCFN(2+0,13-0,T)                  R= +33.5  p =  1.9e-17    FAIL !         
+//  BCFN(2+1,13-0,T)                  R= +27.0  p =  5.9e-14    FAIL
+// rot 12, fails 128GB,
+//  BCFN(2+0,13-0,T)                  R= +25.4  p =  3.8e-13    FAIL           
+// rot 13, fails 128GB,
+//  BCFN(2+0,13-0,T)                  R= +39.3  p =  1.4e-20    FAIL !!    
+// rot 17, fails 128GB,
+//  [Low4/16]BCFN(2+1,13-0,T)         R= +32.2  p =  9.7e-17    FAIL !         
+// rot 20, fails 128GB,
+//  BRank(12):4K(1)                   R=+540.3  p~=  1.1e-163   FAIL !!!!!     
+// rot 23, fails 64GB,
+//  BCFN(2+0,13-0,T)                  R= +23.1  p =  7.0e-12    FAIL
+// rot 42, fails 256 GB,
+//  BCFN(2+0,13-0,T)                  R= +44.5  p =  2.5e-23    FAIL !!        
+// rot 53, fails 2GB,
+//  BRank(12):4K(1)                   R=+540.3  p~=  1.1e-163   FAIL !!!!!     
+
+//	const uint64_t a = stateA;
+//	const uint64_t b = stateB;
+//	const uint64_t c = stateC;
+//	const uint64_t d = stateD;
+//		stateA = a + 0xD1B54A32D192ED03UL;
+//		stateB = a ^ d;
+//		stateC = rotate64(b, 42);
+//		stateD = c + b;
+//		return d;
+
+// FloodRandom
+// Passes 64TB of PractRand with no anomalies.
+// Period is 2 to the 64. There are 2 to the 128 possible streams.
+					// uint64_t fa = (stateA += 0xD1B54A32D192ED03L);
+					// uint64_t fb = (stateB += 0xABC98388FB8FAC03L);
+					// uint64_t fc = (stateC += 0x8CB92BA72F3D8DD7L);
+					// uint64_t x = fa ^ rotate64(fb, 19) ^ rotate64(fc, 47);
+					// x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
+					// x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					// x ^= x >> 27;
+					// return x;
+
+//fb ^= (fc += rotate64(fa, 31));
+//fc ^= (fa += rotate64(fb, 19));
+//fa ^= (fb += rotate64(fc, 47));
+//return fa;
+// return (fa ^ rotate64(fa, 29) ^ rotate64(fa, 50)) +
+//        (fb ^ rotate64(fb, 19) ^ rotate64(fb, 37)) +
+//        (fc ^ rotate64(fc, 13) ^ rotate64(fc, 44));
+
+					// FlowRandom
+					// Period is 2 to the 64, has 2 to the 64 streams.
+					// Passes 64TB of PractRand with no anomalies.
+					// Uses one more numerical operation than DistinctRandom/SplitMix64.
+					// Based on Moremur for its constants.
+					uint64_t x = (stateA += 0xD1B54A32D192ED03L);
+					uint64_t y = (stateB += 0x8CB92BA72F3D8DD7L);
+					x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653UL;
+					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					x ^= x >> 27;
+					return x;
 
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
@@ -5059,8 +5128,8 @@ return c;
 					walker->handle(stateB);
 					walker->handle(stateC);
 					walker->handle(stateD);
-					stateC |= 1UL;
-					stateD |= 1UL;
+					// stateC |= 1UL;
+					// stateD |= 1UL;
 				}
 				Uint64 plum256::raw64() {
 					//const uint64_t fa = stateA;
@@ -5275,7 +5344,7 @@ return stateA;
 //  stateD = rotate64(fc, 25);
 //  return stateE = fc + fd;
 
-//  // Ace320.
+//  // Ace320, or AceRandom.
 //  // Passes 64TB with no anomalies.
 //  // Passes over 179PB of ReMort testing without suspicion.
 
@@ -5398,12 +5467,50 @@ return stateA;
 //               6.579 15 =>     5.025017e-02           12.974 15 =>     4.716522e-01           21.466 15 =>   1-9.052175e-02           11.248 15 =>     3.332448e-01            8.548 15 =>     1.409673e-01
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- lantern320 -- 64 bits: 	ps:   5.025e-02*   4.717e-01  1-9.052e-02    3.332e-01    1.410e-01   => p <   5.76107e-01   2^54.32 calls, 2^57.32 bytes	2^37.96 bytes/second	used:   7::18:15:57.98
-    stateA = fa + 0x9E3779B97F4A7C15UL;
-    stateB = fa ^ fe;
-    stateC = fb + fd;
-    stateD = rotate64(fc, 52);
-    stateE = fb + fc;
-	return fb;
+//    stateA = fa + 0x9E3779B97F4A7C15UL;
+//    stateB = fa ^ fe;
+//    stateC = fb + fd;
+//    stateD = rotate64(fc, 52);
+//    stateE = fb + fc;
+//    return fb;
+
+
+// crand64
+// Passes 64TB with one anomaly at 8 TB:
+// [Low1/32]BCFN(2+7,13-0,T)         R= +11.4  p =  1.3e-5   unusual
+// 256 bits of mutable state, 63 bits of unchanging stream.
+// Minimum period is 2 to the 64, ARX, about as fast or a little faster than Xoshiro256**.
+// Unless you need many streams, consider LaceRandom instead, since it's faster and still ARX.
+// from https://github.com/stclib/STC/blob/master/include/stc/crand.h
+//
+// Passes ReMort (179 PB of it) rather well; it spends a lot of time between 1E-1 and 1E-2, but rarely gets any worse.
+//
+// 6	                   0  - 2.29283e-01	                   0  - 2.29283e-01	                   1  + 2.59071e+00	                   0  - 2.29283e-01	                   0  - 2.29283e-01	
+// 7	                4445  + 2.02084e-01	                4365  - 5.69179e-01	                4433  + 7.23294e-02	                4517  + 2.35045e+00	                4349  - 9.90492e-01	
+// 8	              360108  - 1.53904e+00	              360747  - 3.12718e-02	              360361  - 6.71434e-01	              360765  - 2.15719e-02	              360369  - 6.49786e-01	
+// 9	            22350788  - 1.69555e+00	            22350229  - 2.01742e+00	            22352952  - 7.13122e-01	            22352465  - 8.97685e-01	            22350631  - 1.78313e+00	
+//11	                4434  + 8.06509e-02	                4402  - 3.90457e-02	                4293  - 3.37831e+00	                4551  + 4.18124e+00	                4446  + 2.15842e-01	
+//12	            85012453  - 4.88237e-01	            85016188  - 8.62403e-02	            85016839  - 4.97575e-02	            85029017  + 1.20490e+00	            85010333  - 8.62410e-01	
+//13	          6948647997  - 1.89355e-01	          6948679614  - 3.12046e-03	          6948764803  + 9.33340e-01	          6948653994  - 1.31920e-01	          6948623502  - 5.31440e-01	
+//14	        430511379502  + 8.72108e-02	        430511344182  + 5.83146e-02	        430511890182  + 1.15269e+00	        430511988555  + 1.49710e+00	        430511406211  + 1.12910e-01	
+//16	              359625  - 4.18050e+00	              361473  + 1.06447e+00	              360789  - 1.14321e-02	              360862  + 2.13206e-04	              360388  - 5.99794e-01	
+//17	          6948531755  - 3.34754e+00	          6948415899  - 1.03650e+01	          6948575376  - 1.70651e+00	          6948642018  - 2.56923e-01	          6948658529  - 9.53598e-02	
+//18	        567922234663  - 2.05349e+00	        567923531404  + 8.27786e-02	        567923629325  + 1.74431e-01	        567925252139  + 6.61027e+00	        567924926203  + 4.57337e+00	
+//19	      35186133600185  - 2.47167e-02	      35186132417452  - 1.27167e-01	      35186141848070  + 1.52088e+00	      35186140158541  + 8.99487e-01	      35186130797067  - 3.96615e-01	
+//21	            22353668  - 4.80301e-01	            22349474  - 2.49651e+00	            22350266  - 1.99525e+00	            22352314  - 9.59220e-01	            22352893  - 7.34353e-01	
+//22	        430512125854  + 2.05296e+00	        430511608040  + 4.14253e-01	        430511447844  + 1.59579e-01	        430511998955  + 1.53614e+00	        430512001296  + 1.54500e+00	
+//23	      35186143151257  + 2.11102e+00	      35186132170422  - 1.58603e-01	      35186131987698  - 1.84087e-01	      35186140127127  + 8.89470e-01	      35186140483951  + 1.00655e+00	
+//24	    2179984563568514  - 2.60318e-02	    2179984575071357  + 7.22855e-03	    2179984565092016  - 1.65673e-02	    2179984556399428  - 9.91553e-02	    2179984566345080  - 1.03787e-02	
+//
+//              18.559 15 =>     8.173645e-01           17.521 15 =>     7.707619e-01           12.740 15 =>     4.533926e-01           21.536 15 =>   1-8.891471e-02           14.107 15 =>     5.587667e-01
+//
+//--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- crand320 -- 64 bits: 	ps:   8.174e-01    7.708e-01    4.534e-01  1-8.891e-02*   5.588e-01   => p <   1.94859e-01   2^54.32 calls, 2^57.32 bytes	2^37.47 bytes/second	used:  10::21:40:48.42
+
+    const uint64_t result = (stateA ^ (stateD += stateE)) + stateB;
+    stateA = stateB ^ (stateB >> 11);
+    stateB = stateC + (stateC << 3);
+    stateC = ((stateC << 24) | (stateC >> (64 - 24))) + result;
+    return result;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }
@@ -5413,6 +5520,7 @@ return stateA;
 					walker->handle(stateC);
 					walker->handle(stateD);
 					walker->handle(stateE);
+					stateE |= 1UL;
 					//walker->handle(stream);
 					//stream |= 1UL;
 					stream = 1UL;

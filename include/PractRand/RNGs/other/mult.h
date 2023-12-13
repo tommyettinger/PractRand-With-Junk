@@ -695,6 +695,7 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+
 			}
 		}
 	}

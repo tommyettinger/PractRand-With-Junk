@@ -1889,9 +1889,175 @@ namespace PractRand {
 					walker->handle(d);
 					walker->handle(e);
 					walker->handle(f);
-					g = __lzcnt64(a);// __builtin_ctzll(a);
+					g = __lzcnt32(a);//__lzcnt64(a);// __builtin_ctzll(a);
 					walker->handle(h);				}
+					g = __builtin_ctzll(a);
+					walker->handle(h);
+				}
+				Uint64 spangled_varqual::raw64() {
+//					// SpangledRandom
+//					// Passes 64TB with no anomalies when using rounds=4
+//					// (Really that means 7 rounds total, since there's a hardcocoded round before and two after)
+//					// Period is 2 to the 64; has 2 to the 64 different streams, plus a variable amount of "keys" that may be used
+//					// Here, they keys are equal to the current round iteration, starting at 1
+//					// This is an ARX generator with constant-time skipping through the state and constant-time stream switching
+//					// It uses the round function from the Speck cipher
+//					// If all streams are appended to one another, the resulting generator would have a period of 2 to the 128, 1D-equidistributed
+//					// You can do that by changing stateB's assignment to:
+//					// Uint64 b = (stateB += __builtin_ctzll(a));
+//					// This eliminates the fast skipping, makes this have one stream, and makes it no longer an ARX generator
+//					// It may also slow it down somewhat
+//					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+//					Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
+//					b = (rotate64(b, 56) + a ^ 0xA62B82F58DB8A985UL); a = (rotate64(a, 3) ^ b);
+//					for (int i = 1; i <= rounds; i++) {
+//						b = (rotate64(b, 56) + a ^ i);
+//						a = (rotate64(a, 3) ^ b);
+//					}
+//					b = (rotate64(b, 56) + a ^ 0xE35E156A2314DCDAL); a = (rotate64(a, 3) ^ b);
+//					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ 0xBEA225F9EB34556DL));
 
+//// The next variant passes ReMort to 179 PB, somehow.
+//// It doesn't get any results marked suspect, but it isn't in the strongest position at the end.
+//   6	                   0  - 2.29283e-01	                   0  - 2.29283e-01	                   1  + 2.59071e+00	                   0  - 2.29283e-01	                   0  - 2.29283e-01	
+//   7	                4366  - 5.46697e-01	                4482  + 1.01280e+00	                4329  - 1.68021e+00	                4324  - 1.88095e+00	                4424  + 1.78206e-02	
+//   8	              360712  - 5.52733e-02	              360870  + 7.79479e-04	              361736  + 2.15956e+00	              359955  - 2.23585e+00	              360331  - 7.55772e-01	
+//   9	            22346785  - 4.61707e+00	            22346511  - 4.86946e+00	            22361989  + 1.13803e+00	            22363776  + 2.08722e+00	            22347112  - 4.32465e+00	
+//  11	                4533  + 3.14677e+00	                4433  + 7.23294e-02	                4445  + 2.02084e-01	                4354  - 8.46374e-01	                4511  + 2.08173e+00	
+//  12	            85008292  - 1.32253e+00	            85017509  - 2.26202e-02	            85022480  + 1.51104e-01	            85017423  - 2.55128e-02	            85018395  - 2.94966e-03	
+//  13	          6948700313  + 3.70374e-02	          6948681618  - 1.01254e-03	          6948710573  + 9.95614e-02	          6948709724  + 9.32378e-02	          6948599192  - 1.04169e+00	
+//  14	        430509784628  - 4.55994e+00	        430509794206  - 4.49781e+00	        430510189969  - 2.30320e+00	        430510195966  - 2.27554e+00	        430509877592  - 3.97491e+00	
+//  16	              361618  + 1.62081e+00	              360551  - 2.53128e-01	              360281  - 9.07421e-01	              361157  + 2.55719e-01	              361127  + 2.07704e-01	
+//  17	          6948743354  + 5.02377e-01	          6948704209  + 5.72113e-02	          6948671245  - 2.44167e-02	          6948695568  + 1.83680e-02	          6948741199  + 4.66398e-01	
+//  18	        567923660173  + 2.10298e-01	        567922783250  - 4.97098e-01	        567923502019  + 6.18618e-02	        567923723078  + 2.93824e-01	        567922498705  - 1.17209e+00	
+//  19	      35186128925378  - 8.93609e-01	      35186129842513  - 6.25200e-01	      35186133564508  - 2.66440e-02	      35186133318250  - 4.19204e-02	      35186130101405  - 5.58085e-01	
+//  21	            22361897  + 1.09690e+00	            22346883  - 4.52843e+00	            22347140  - 4.30005e+00	            22362537  + 1.39874e+00	            22362410  + 1.33593e+00	
+//  22	        430510168797  - 2.40218e+00	        430509773490  - 4.63272e+00	        430509801636  - 4.44990e+00	        430510207494  - 2.22284e+00	        430510160791  - 2.44015e+00	
+//  23	      35186133416420  - 3.54174e-02	      35186129876698  - 6.16119e-01	      35186129128108  - 8.30162e-01	      35186133344861  - 4.01035e-02	      35186134679390  + 6.11102e-04	
+//  24	    2179984579837982  + 3.50106e-02	    2179984583788025  + 7.38274e-02	    2179984579654789  + 3.35577e-02	    2179984575016781  + 7.03115e-03	    2179984578568664  + 2.55761e-02	
+//  
+//                21.082 15 =>   1-9.942362e-02           21.761 15 =>   1-8.382222e-02           18.368 15 =>     8.081723e-01           13.723 15 =>     5.301854e-01           18.406 15 =>     8.110533e-01
+//  
+//  --- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- spangled128 -- 64 bits: 	ps: 1-9.942e-02  1-8.382e-02*   8.082e-01    5.302e-01    8.111e-01   => p <   3.05979e-02   2^54.32 calls, 2^57.32 bytes	2^36.34 bytes/second	used:  23::20:35:12.35
+					// Also passes 64TB with no anomalies when this variant uses rounds=2
+					// So really 5 rounds, with 3 of the states hardcoded.
+					// This adds a rotation of b to a before all rounds except the first.
+					// Here, a left rotation of 41 is the only amount used in the new code.
+					// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+					// Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
+					// b = (rotate64(b, 56) + a ^ 0xA62B82F58DB8A985UL); a = (rotate64(a, 3) ^ b);
+					// for (int i = 1; i <= rounds; i++) {
+					// 	a += rotate64(b, 41);
+					// 	b = (rotate64(b, 56) + a ^ i);
+					// 	a = (rotate64(a, 3) ^ b);
+					// }
+					// a += rotate64(b, 41);
+					// b = (rotate64(b, 56) + a ^ 0xE35E156A2314DCDAL); a = (rotate64(a, 3) ^ b);
+					// a += rotate64(b, 41);
+					// return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ 0xBEA225F9EB34556DL));
+
+					// This passes 64TB with rounds=4, which really does mean 4 rounds now.
+					// It has a third state, which it uses like the key in Speck, and changes per-round and per-result.
+					// A variant is tested many lines below this that does not change the third state per-round, but does per-result.
+					// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+					// Uint64 b = (stateB += 0xD1B54A32D192ED03UL);
+					// Uint64 c = (stateC += 0xDE916ABCC965815BUL);
+					// for (int i = 1; i < rounds; i++) {
+					// 	// c += (rotate64(a, 41)) ^ i;
+					// 	b = (rotate64(b, 56) + a ^ (c += 0xBEA225F9EB34556DUL));
+					// 	a = (rotate64(a, 3) ^ b);
+					// }
+					// // c += (rotate64(a, 41));
+					// b = (rotate64(b, 56) + a ^ c + 0xF1357AEA2E62A9C5UL);
+					// a = (rotate64(a, 3) ^ b);
+					// return a;
+
+					// MarshRandom
+					// Passes 64TB of PractRand; not terribly fast.
+					// Period is 2 to the 64. Has 2 to the 128 streams.
+					// Uint64 a = (stateA += 0xDE916ABCC965815BUL);
+					// Uint64 b = (stateB += 0xF1357AEA2E62A9C5UL);
+					// Uint64 c = (stateC += 0xBEA225F9EB34556DUL);
+					// a = (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+					// a ^= a >> 27;
+					// a *= 0x3C79AC492BA7B653UL;
+					// a ^= a >> 33;
+					// a *= 0x1C69B3F74AC4AE35UL;
+					// a ^= a >> 27;
+					// return a;
+
+//					Uint64 a = (stateA += 0xDE916ABCC965815BUL);
+//					Uint64 b = (stateB += 0xF1357AEA2E62A9C5UL);
+//					Uint64 c = (stateC += 0xBEA225F9EB34556DUL);
+					
+					// DraculaRandom
+					// Passes 64TB of PractRand with no anomalies.
+					// Has a period of 2 to the 192.
+					// Needs at least two rounds of the Speck cipher; fails with one.
+//					Uint64 a = (stateA = stateA * 0xD1342543DE82EF95UL + 0x9E3779B97F4A7C15UL);
+//					Uint64 b = (stateB = stateB * 0x2C6FE96EE78B6955UL + __builtin_ctzll(a));
+//					Uint64 c = (stateC = stateC * 0x369DEA0F31A53F85UL + __builtin_ctzll(a&b));
+//					b = rotate64(b, 56) + a ^ c;
+//					a = (rotate64(a, 3) ^ b);
+//					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+
+					
+					// Respect192
+					// 3 uint64_t for state, period of 2 to the 192.
+					// Passes 64TB of PractRand with no anomalies.
+					// Runs 4 rounds of the Speck cipher on its three states as a, b, and c, returning a.
+					// This one might have issues with its increments at extremely long test lengths, for complicated reasons.
+					// At least with uint32_t states, XORing the large constant and the ctz result works better than adding.
+					// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
+					// Uint64 b = (stateB += 0xD1342543DE82EF95UL + __builtin_ctzll(a));
+					// Uint64 c = (stateC += 0xA62B82F58DB8A985UL + __builtin_ctzll(a&b));
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+
+					// // InsectRandom
+					// // Passes 64TB of PractRand with one anomaly at 64TB:
+					// // [Low1/64]TMFn(2+1):wl             R= +20.1  p~=   6e-6    unusual
+					// Uint64 a = (stateA += 0xBEA225F9EB34556DUL);
+					// Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ __builtin_ctzll(a));
+					// Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ __builtin_ctzll(a&b));
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// b = rotate64(b, 56) + a ^ c;
+					// a = (rotate64(a, 3) ^ b);
+					// return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
+
+					// RespectfulRandom
+					// Passes 64TB of PractRand with no anomalies.
+					// Period is 2 to the 64; permits O(1) skip to any point; 2 to the 128 streams.
+					Uint64 a = (stateA += 0xBEA225F9EB34556DUL);
+					Uint64 b = (stateB += 0xD1342543DE82EF95UL);
+					Uint64 c = (stateC += 0xA62B82F58DB8A985UL);
+					b = rotate64(b, 56) + a ^ c;
+					a = (rotate64(a, 3) ^ b);
+					b = rotate64(b, 51) + a ^ c;
+					a = (rotate64(a, 5) ^ b);
+					b = rotate64(b, 43) + a ^ c;
+					a = (rotate64(a, 8) ^ b);
+					return (rotate64(a, 13) ^ (rotate64(b, 30) + a ^ c));
+				}
+				std::string spangled_varqual::get_name() const {
+					std::ostringstream str;
+					str << "spangled" << rounds;
+					return str.str();
+				}
+				void spangled_varqual::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					//stateC = 1UL;//stateA ^ stateB + 0xA62B82F58DB8A985UL;
+					walker->handle(stateC);
+				}
 			}
 		}
 	}
