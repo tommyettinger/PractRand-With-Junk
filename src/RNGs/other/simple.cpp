@@ -1877,7 +1877,7 @@ namespace PractRand {
 					d = rotate32(fc, 25);
 					e = fb - fc;
 					f = fe ^ fh;
-					g = __lzcnt64(fa);
+					g = __lzcnt(fa);
 					h = fh + fg;
 					return ff;
 				}

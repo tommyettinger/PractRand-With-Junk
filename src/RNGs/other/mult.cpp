@@ -3180,15 +3180,24 @@ namespace PractRand {
 					//   [Low4/16]BCFN(2+2,13-1,T)         R=  +9.0  p =  2.5e-4   unusual
 					// It needs to not repeat "x &= whatever" operations too much, so this uses "|=".
 					// With two "&=" ops in a row, this starts to see serious trouble at 8TB or earlier.
-					uint32_t x = (stateA += 0x9E3779BBU);
-					uint32_t y = (stateB += (0x9E3779BBU * 421U) ^ __lzcnt(x));
-					uint32_t z = (stateC += (0x9E3779BBU * 421U * 412U) ^ __lzcnt(x &= y));
-					uint32_t w = (stateD += (0x9E3779BBU * 421U * 412U * 421U) ^ __lzcnt(x |= z));
-					w += x ^ rotate32(x, 3) ^ rotate32(x, 14);
-					x += w ^ rotate32(w, 28) ^ rotate32(w, 21);
-					w += x ^ rotate32(x, 12) ^ rotate32(x, 23);
-					x += w ^ rotate32(w, 10) ^ rotate32(w, 17);
-					return x;
+//					uint32_t x = (stateA += 0x9E3779BBU);
+//					uint32_t y = (stateB += (0x9E3779BBU * 421U) ^ __lzcnt(x));
+//					uint32_t z = (stateC += (0x9E3779BBU * 421U * 412U) ^ __lzcnt(x &= y));
+//					uint32_t w = (stateD += (0x9E3779BBU * 421U * 412U * 421U) ^ __lzcnt(x |= z));
+//					w += x ^ rotate32(x, 3) ^ rotate32(x, 14);
+//					x += w ^ rotate32(w, 28) ^ rotate32(w, 21);
+//					w += x ^ rotate32(x, 12) ^ rotate32(x, 23);
+//					x += w ^ rotate32(w, 10) ^ rotate32(w, 17);
+//					return x;
+
+					// I'm not sure what to call this. It's an experiment, at least.
+					// Passes 64TB with no anomalies. Period is 2 to the 128. 128 state bits. 32-bit output.
+					uint32_t n, x, y, z, w;
+					n = (x = (stateA += 0x9E3779BBU));
+					n = (y = (stateB += 0x6C8E9CF5U ^ __lzcnt(x))) + (n ^ rotate32(n, 3) ^ rotate32(n, 14));
+					n = (z = (stateC += 0x7FEB352DU ^ __lzcnt(x &= y))) + (n ^ rotate32(n, 10) ^ rotate32(n, 17));
+					n = (w = (stateD += 0x91E10DA5U ^ __lzcnt(x &= z))) + (n ^ rotate32(n, 21) ^ rotate32(n, 28));
+					return x + (n ^ rotate32(n, 12) ^ rotate32(n, 23));
 
 
 
