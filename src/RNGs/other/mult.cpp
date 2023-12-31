@@ -3192,13 +3192,33 @@ namespace PractRand {
 
 					// I'm not sure what to call this. It's an experiment, at least.
 					// Passes 64TB with no anomalies. Period is 2 to the 128. 128 state bits. 32-bit output.
-					uint32_t n, x, y, z, w;
-					n = (x = (stateA += 0x9E3779BBU));
-					n = (y = (stateB += 0x6C8E9CF5U ^ __lzcnt(x))) + (n ^ rotate32(n, 3) ^ rotate32(n, 14));
-					n = (z = (stateC += 0x7FEB352DU ^ __lzcnt(x &= y))) + (n ^ rotate32(n, 10) ^ rotate32(n, 17));
-					n = (w = (stateD += 0x91E10DA5U ^ __lzcnt(x &= z))) + (n ^ rotate32(n, 21) ^ rotate32(n, 28));
-					return x + (n ^ rotate32(n, 12) ^ rotate32(n, 23));
+					//uint32_t n, x, y, z, w;
+					//n = (x = (stateA += 0x9E3779BBU));
+					//n = (y = (stateB += 0x6C8E9CF5U ^ __lzcnt(x))) + (n ^ rotate32(n, 3) ^ rotate32(n, 14));
+					//n = (z = (stateC += 0x7FEB352DU ^ __lzcnt(x &= y))) + (n ^ rotate32(n, 10) ^ rotate32(n, 17));
+					//n = (w = (stateD += 0x91E10DA5U ^ __lzcnt(x &= z))) + (n ^ rotate32(n, 21) ^ rotate32(n, 28));
+					//return x + (n ^ rotate32(n, 12) ^ rotate32(n, 23));
 
+					// Passes at least 16TB with no anomalies.
+					// Without the rotations by 21, this has at least some minor anomalies at 16TB.
+					//uint32_t x, y, z, w;
+					//x = (stateA += 0x9E3779BBU);
+					//y = (stateB += rotate32(x, 21) + __lzcnt(x));
+					//z = (stateC += rotate32(y, 21) + __lzcnt(x &= y));
+					//w = (stateD += rotate32(z, 21) + __lzcnt(x &= z));
+					//w = (w + rotate32(x, 5)) * 0x21f0aaad;
+					//w = (w ^ w >> 15) * 0x735a2d97;
+					//return w ^ w >> 15;
+
+// Eve32Random
+// Passes 64TB with no anomalies; period is 2 to the 128; 32-bit output.
+// This took a while to get to pass, and it still uses three multiplications...
+uint32_t x, y, z, w;
+x = (stateA += 0xDB4F0B91);
+y = (stateB += 0x9E3779BD * (rotate32(x, 21) + __lzcnt(x)));
+z = (stateC += 0x9E3779BD * (rotate32(y, 21) + __lzcnt(x &= y)));
+w = (stateD += 0x9E3779BD * (rotate32(z, 21) + __lzcnt(x &= z)));
+return x ^ w ^ rotate32(w, 7) ^ rotate32(w, 24);
 
 
 //					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
