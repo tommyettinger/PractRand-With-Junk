@@ -3213,12 +3213,31 @@ namespace PractRand {
 // Eve32Random
 // Passes 64TB with no anomalies; period is 2 to the 128; 32-bit output.
 // This took a while to get to pass, and it still uses three multiplications...
+//uint32_t x, y, z, w;
+//x = (stateA += 0xDB4F0B91);
+//y = (stateB += 0x9E3779BD * (rotate32(x, 21) + __lzcnt(x)));
+//z = (stateC += 0x9E3779BD * (rotate32(y, 21) + __lzcnt(x &= y)));
+//w = (stateD += 0x9E3779BD * (rotate32(z, 21) + __lzcnt(x &= z)));
+//return x ^ w ^ rotate32(w, 7) ^ rotate32(w, 24);
+
+// Berry32Random
+// Passes 64TB with no anomalies; period is 2 to the 128; 32-bit output.
+// Uses a unary hash from skeeto/hash-prospector, prospector32 .
+// Because of https://github.com/skeeto/hash-prospector/issues/28 , I tried a different hash that didn't rate as highly.
+// Does not use any multiplication before the unary hash.
+// Does use the 32-bit count-leading-zeros instruction (which should be an intrinsic).
 uint32_t x, y, z, w;
 x = (stateA += 0xDB4F0B91);
-y = (stateB += 0x9E3779BD * (rotate32(x, 21) + __lzcnt(x)));
-z = (stateC += 0x9E3779BD * (rotate32(y, 21) + __lzcnt(x &= y)));
-w = (stateD += 0x9E3779BD * (rotate32(z, 21) + __lzcnt(x &= z)));
-return x ^ w ^ rotate32(w, 7) ^ rotate32(w, 24);
+y = (stateB += (rotate32(x, 21) + __lzcnt(x)));
+z = (stateC += (rotate32(y, 21) + __lzcnt(x &= y)));
+w = (stateD += (rotate32(z, 21) + __lzcnt(x &= z)));
+x += rotate32(w, 21);
+x ^= x >> 15;
+x *= 0x2c1b3c6d;
+x ^= x >> 12;
+x *= 0x297a2d39;
+x ^= x >> 15;
+return x;
 
 
 //					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
