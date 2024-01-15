@@ -3239,17 +3239,36 @@ namespace PractRand {
 //x ^= x >> 15;
 //return x;
 
-// Bear32Random
+// Bear32Random, 1.0
+// Passes 64TB with no anomalies; period is 2 to the 128; 32-bit output.
+// Uses (most of) a unary hash from skeeto/hash-prospector, prospector32, but elides the first xorshift.
+// Does not use any multiplication before the unary hash.
+// Does use the 32-bit count-leading-zeros instruction (which should be an intrinsic).
+//uint32_t x, y, z, w;
+//x = (stateA += 0x9E3779B9);
+//y = (stateB += (x + __lzcnt(x)));
+//z = (stateC += (y + __lzcnt(x &= y)));
+//w = (stateD += (z + __lzcnt(x &= z)));
+//w +=  rotate32(x, 21);
+//w *= 0x2C1B3C6D;
+//w ^= w >> 12;
+//w *= 0x297A2D39;
+//w ^= w >> 15;
+//return w;
+
+// Bear32Random, 2.0
+// Meant to improve decorrelation between similar initial states more quickly.
+// The main difference with 1.0 is that this uses XOR where 1.0 used addition, and a rotation changed.
 // Passes 64TB with no anomalies; period is 2 to the 128; 32-bit output.
 // Uses (most of) a unary hash from skeeto/hash-prospector, prospector32, but elides the first xorshift.
 // Does not use any multiplication before the unary hash.
 // Does use the 32-bit count-leading-zeros instruction (which should be an intrinsic).
 uint32_t x, y, z, w;
 x = (stateA += 0x9E3779B9);
-y = (stateB += (x + __lzcnt(x)));
-z = (stateC += (y + __lzcnt(x &= y)));
-w = (stateD += (z + __lzcnt(x &= z)));
-w +=  rotate32(x, 21);
+y = (stateB += (x ^ __lzcnt(x)));
+z = (stateC += (y ^ __lzcnt(x &= y)));
+w = (stateD += (z ^ __lzcnt(x &= z)));
+w += rotate32(x, 13);
 w *= 0x2C1B3C6D;
 w ^= w >> 12;
 w *= 0x297A2D39;
