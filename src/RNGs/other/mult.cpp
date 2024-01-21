@@ -3263,17 +3263,31 @@ namespace PractRand {
 // Uses (most of) a unary hash from skeeto/hash-prospector, prospector32, but elides the first xorshift.
 // Does not use any multiplication before the unary hash.
 // Does use the 32-bit count-leading-zeros instruction (which should be an intrinsic).
-uint32_t x, y, z, w;
-x = (stateA += 0x9E3779B9);
-y = (stateB += (x ^ __lzcnt(x)));
-z = (stateC += (y ^ __lzcnt(x &= y)));
-w = (stateD += (z ^ __lzcnt(x &= z)));
-w += rotate32(x, 13);
-w *= 0x2C1B3C6D;
-w ^= w >> 12;
-w *= 0x297A2D39;
-w ^= w >> 15;
-return w;
+//uint32_t x, y, z, w;
+//x = (stateA += 0x9E3779B9);
+//y = (stateB += (x ^ __lzcnt(x)));
+//z = (stateC += (y ^ __lzcnt(x &= y)));
+//w = (stateD += (z ^ __lzcnt(x &= z)));
+//w += rotate32(x, 13);
+//w *= 0x2C1B3C6D;
+//w ^= w >> 12;
+//w *= 0x297A2D39;
+//w ^= w >> 15;
+//return w;
+
+// Rawr32Random
+// Passes 64TB with no anomalies. Minimum period is 2 to the 64. Maximum period is 2 to the 128, but almost guaranteed to be less than that.
+// This one's quite finicky about rotation amounts.
+// All states are updated independently of the returned value calculation.
+// Uses no multiplication; does use  32-bit count-leading-zeros instruction (which should be an intrinsic).
+uint32_t x = stateA, y = stateB, z = stateC, w = stateD;
+stateA = x + 0x9E3779B9;
+stateB = y + __lzcnt(x);
+stateC = rotate32(w, 3)  - x;
+stateD = rotate32(z, 24) ^ y;
+x ^= rotate32(w, 29) + y;
+y += rotate32(z, 19) ^ x;
+return x - rotate32(y, 21);
 
 
 //					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
