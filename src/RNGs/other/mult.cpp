@@ -3280,14 +3280,14 @@ namespace PractRand {
 // This one's quite finicky about rotation amounts.
 // All states are updated independently of the returned value calculation.
 // Uses no multiplication; does use  32-bit count-leading-zeros instruction (which should be an intrinsic).
-uint32_t x = stateA, y = stateB, z = stateC, w = stateD;
-stateA = x + 0x9E3779B9;
-stateB = y + __lzcnt(x);
-stateC = rotate32(w, 3)  - x;
-stateD = rotate32(z, 24) ^ y;
-x ^= rotate32(w, 29) + y;
-y += rotate32(z, 19) ^ x;
-return x - rotate32(y, 21);
+//uint32_t x = stateA, y = stateB, z = stateC, w = stateD;
+//stateA = x + 0x9E3779B9;
+//stateB = y + __lzcnt(x);
+//stateC = rotate32(w, 3)  - x;
+//stateD = rotate32(z, 24) ^ y;
+//x ^= rotate32(w, 29) + y;
+//y += rotate32(z, 19) ^ x;
+//return x - rotate32(y, 21);
 
 
 //					z += y ^ rotate32(y, 3) ^ rotate32(y, 14);
@@ -3313,6 +3313,52 @@ return x - rotate32(y, 21);
 //					x = (x ^ x >> 15) * 0xaf723597;
 //					x ^= x >> 15;
 //					return x;
+
+// Passes 2TB without anomalies, but fails around 8TB.
+//uint32_t x = stateA, y = stateB, z = stateC, w = stateD, n = x;
+//stateA = x + 0x9E3779B9;
+//stateB += x + (__lzcnt(n));
+//stateC += y + (__lzcnt(n &= y));
+//stateD += z + (__lzcnt(n & z));
+//w = (w ^ rotate32(z, 19) + (y ^ rotate32(x, 7) + w) + rotate32(y, 27)) + rotate32(w, 11);
+//return w;
+
+uint32_t x = stateA, y = stateB, z = stateC;
+//stateA += 0x6C8E9CF5U;
+//stateB += 0x7FEB352DU + (__lzcnt(x));
+//stateC += 0x91E10DA5U + (__lzcnt(x & y));
+stateA = x + 0x9E3779B9;
+stateB += x + (__lzcnt(x));
+stateC += y + (__lzcnt(x & y));
+//x = (y ^ rotate32(x, 7) + z);
+//y = x + rotate32(y, 27);
+//x = rotate32(x, 29) ^ (z * y | 1);
+//y = rotate32(y,  5) ^ (x * z | 1);
+//z = rotate32(z, 14) ^ (y * x | 1);
+//x = (y ^ rotate32(x, 19) + z);
+//y = x + rotate32(y, 11) ^ z;
+
+//x = (y ^ rotate32(x, 7) + z);
+//y = (x + rotate32(y, 27));
+//
+//x = (y ^ rotate32(x, 19) + z);
+//y = (x + rotate32(y, 11));
+
+// Passes 64TB with no anomalies.
+x ^= rotate32(z, 3) + rotate32(y, 24);
+y ^= rotate32(x, 5) + rotate32(z, 15);
+z ^= rotate32(y, 9) + rotate32(x, 29);
+y = (z ^ rotate32(y, 19) + x);
+z = (y + rotate32(z, 11));
+
+//x ^= (z * y | 1);
+//y ^= (x * z | 1);
+//z ^= (y * x | 1);
+
+return z;
+
+
+
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
