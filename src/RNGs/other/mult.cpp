@@ -3323,13 +3323,13 @@ namespace PractRand {
 //w = (w ^ rotate32(z, 19) + (y ^ rotate32(x, 7) + w) + rotate32(y, 27)) + rotate32(w, 11);
 //return w;
 
-uint32_t x = stateA, y = stateB, z = stateC;
 //stateA += 0x6C8E9CF5U;
 //stateB += 0x7FEB352DU + (__lzcnt(x));
 //stateC += 0x91E10DA5U + (__lzcnt(x & y));
-stateA = x + 0x9E3779B9;
-stateB += x + (__lzcnt(x));
-stateC += y + (__lzcnt(x & y));
+uint32_t x = stateA, y = stateB, z = stateC;
+stateA = 10 ^ x + 0x9E3779BD;
+stateB = x ^ y + (__lzcnt(x));
+stateC = y ^ z + (__lzcnt(x & y));
 //x = (y ^ rotate32(x, 7) + z);
 //y = x + rotate32(y, 27);
 //x = rotate32(x, 29) ^ (z * y | 1);
@@ -3345,18 +3345,27 @@ stateC += y + (__lzcnt(x & y));
 //y = (x + rotate32(y, 11));
 
 // Passes 64TB with no anomalies.
-x ^= rotate32(z, 3) + rotate32(y, 24);
-y ^= rotate32(x, 5) + rotate32(z, 15);
-z ^= rotate32(y, 9) + rotate32(x, 29);
-y = (z ^ rotate32(y, 19) + x);
-z = (y + rotate32(z, 11));
+//x ^= rotate32(z, 3) + rotate32(y, 24);
+//y ^= rotate32(x, 5) + rotate32(z, 15);
+//z ^= rotate32(y, 9) + rotate32(x, 29);
+//y = (z ^ rotate32(y, 19) + x);
+//z = (y + rotate32(z, 11));
 
 //x ^= (z * y | 1);
 //y ^= (x * z | 1);
 //z ^= (y * x | 1);
 
-return z;
+//// This block seems to have bad problems starting at 64TB, which is really annoying to test.
+//x ^= rotate32(z, 11) + rotate32(y, 19);
+//y ^= rotate32(x, 7) + rotate32(z, 23);
+//z ^= rotate32(y, 15) + rotate32(x, 21);
+//return x^y^z;
 
+
+x ^= rotate32(z, 13) + rotate32(y, 23);
+y ^= rotate32(x, 7) + rotate32(z, 19);
+z ^= rotate32(y, 5) + rotate32(x, 29);
+return z;
 
 
 				}
