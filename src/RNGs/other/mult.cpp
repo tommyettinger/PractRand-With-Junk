@@ -812,7 +812,7 @@ namespace PractRand {
 				void mo_Cmres64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(state2);
-					printf("Seed is 0x%X, seed2 is 0x%X\r\n", state, state2);
+					printf("Seed is 0x%016llX, seed2 is 0x%016llX\r\n", state, state2);
 				}
 
 				Uint64 tiptoe64::raw64() {
@@ -1597,15 +1597,39 @@ namespace PractRand {
 //					y += z ^ rotate64(z, 31) ^ rotate64(z, 37);
 //					return y;
 
-					// Passes 64TB with no anomalies.
-					uint64_t z = (state += 0xC13FA9A902A6328FUL);
-					uint64_t y = (stream += 0x91E10DA5C79E7B1DUL + ((z | 0xAEF17502108EF2DAU - z) >> 63));//0xF1357AEA2E62A9C6U
-					y ^= y >> 32;
-					y *= z | 1U;
-					y ^= y >> 33;
-					y *= rotate64(z, 29) | 1U;
-					y ^= y >> 31;
-					return y;
+//					// Passes 64TB with no anomalies.
+//					uint64_t z = (state += 0xC13FA9A902A6328FUL);
+//					uint64_t y = (stream += 0x91E10DA5C79E7B1DUL + ((z | 0xAEF17502108EF2DAU - z) >> 63));//0xF1357AEA2E62A9C6U
+//					y ^= y >> 32;
+//					y *= z | 1U;
+//					y ^= y >> 33;
+//					y *= rotate64(z, 29) | 1U;
+//					y ^= y >> 31;
+//					return y;
+					//state += 0xC13FA9A902A6328FUL;
+					//state ^= state << 7;
+					//state ^= state >> 9;
+
+					// we know this one is at least fairly good; adding the rotation is stronger than XORing it.
+					//state = -(state ^ (state * state | 7ULL));
+					//stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;
+					//return state + rotate64(stream, 7);
+
+					// TruxRandom
+					// Passes 64TB with no anomalies, seed 0.
+					// Period is guaranteed to be at least 2 to the 64, but only because state has that guarantee.
+					// The stream is independent, and could have a much lower period.
+					// The names are not very accurate here; this generator doesn't have a known amount of streams because:
+					// `stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;` has an unknown period.
+					// If stream is confirmed to have the maximum period, which it does for 8-bit variables, then this generator
+					// will have a period of 2 to the 64 and 2 to the 64 possible streams.
+					state = state * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL;
+					stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;
+					return stream + rotate64(state, 20);
+
+					//state = -(state ^ (state * state | 7ULL));
+					//stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;
+					//return state + rotate64(stream, 17);
 
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
@@ -1636,7 +1660,7 @@ namespace PractRand {
 					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
-					printf("Seed is 0x%X, Stream is 0x%X\r\n", state, stream);
+					printf("Seed is 0x%016llX, Stream is 0x%016llX\r\n", state, stream);
 					//printf("Seed is 0x%I64X\r\n", state);
 				}
 
@@ -1846,7 +1870,7 @@ namespace PractRand {
 				std::string linnormA::get_name() const { return "linnormA"; }
 				void linnormA::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
-					printf("Seed is 0x%016X\r\n", state);// stream);
+					printf("Seed is 0x%016llX\r\n", state);// stream);
 				}
 
 
@@ -2179,7 +2203,7 @@ namespace PractRand {
 				void linnormB::walk_state(StateWalkingObject *walker) {
 					//walker->handle(state);
 					state = 0UL;
-					printf("Seed is 0x%llX\r\n", state);// stream);
+					printf("Seed is 0x%016llX\r\n", state);// stream);
 				}
 				linnorm32::linnorm32(int rotation, int x)
 				{
@@ -2370,7 +2394,7 @@ namespace PractRand {
 				std::string linnormBounded::get_name() const { return "linnormBounded"; }
 				void linnormBounded::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
-					printf("Seed is 0x%016X\r\n", state);
+					printf("Seed is 0x%016llX\r\n", state);
 				}
 
 				Uint64 mingler::raw64() {
@@ -3327,7 +3351,8 @@ namespace PractRand {
 //stateB += 0x7FEB352DU + (__lzcnt(x));
 //stateC += 0x91E10DA5U + (__lzcnt(x & y));
 uint32_t x = stateA, y = stateB, z = stateC;
-stateA = 10 ^ x + 0x9E3779BD;
+//0xD1B54A32
+stateA = 4 ^ x + 0x9E3779BD;
 stateB = x ^ y + (__lzcnt(x));
 stateC = y ^ z + (__lzcnt(x & y));
 //x = (y ^ rotate32(x, 7) + z);
@@ -3362,11 +3387,27 @@ stateC = y ^ z + (__lzcnt(x & y));
 //return x^y^z;
 
 
-x ^= rotate32(z, 13) + rotate32(y, 23);
-y ^= rotate32(x, 7) + rotate32(z, 19);
-z ^= rotate32(y, 5) + rotate32(x, 29);
-return z;
+//x ^= rotate32(z, 13) + rotate32(y, 23);
+//y ^= rotate32(x, 7) + rotate32(z, 19);
+//z ^= rotate32(y, 5) + rotate32(x, 29);
+//return z;
 
+//z = ((y = (z ^ rotate32(y, 3) + (x ^ 0x6C8E9CF5))) + rotate32(z, 24));
+//z = ((y = (z ^ rotate32(y, 3) + (x ^ 0x7FEB352D))) + rotate32(z, 24));
+//z = ((y = (z ^ rotate32(y, 3) + (x ^ 0x91E10DA5))) + rotate32(z, 24));
+
+//z = ((y = (z ^ rotate32(y,  7) + x)) + rotate32(z, 24));
+//z = ((y = (z ^ rotate32(y,  5) + x)) + rotate32(z, 24));
+//z = ((y = (z ^ rotate32(y, 12) + x)) + rotate32(z, 24));
+
+//x ^= rotate32(z, 13) + rotate32(y, 23);
+//y ^= rotate32(x, 17) + rotate32(z, 19);
+//z ^= rotate32(y,  5) + rotate32(x, 29);
+
+z = ((y = (z ^ rotate32(y, 3) + (x ^ 0x6C8E9CF5))) + rotate32(z, 24));
+z = ((y = (z ^ rotate32(y, 29) + (x ^ 0x7FEB352D))) + rotate32(z, 8));
+
+return z;
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
@@ -3739,7 +3780,7 @@ return z;
 					walker->handle(a);
 					walker->handle(b);
 					//b |= UINT64_C(1);
-					printf("Seed is 0x%016X, 0x%016X\r\n", a, b);
+					printf("Seed is 0x%016016llX, 0x%016016llX\r\n", a, b);
 					//b = b << 3 | UINT64_C(5);
 
 					//uint64_t r = a;
