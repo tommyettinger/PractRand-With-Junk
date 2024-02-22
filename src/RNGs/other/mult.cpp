@@ -1623,14 +1623,31 @@ namespace PractRand {
 					// `stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;` has an unknown period.
 					// If stream is confirmed to have the maximum period, which it does for 8-bit variables, then this generator
 					// will have a period of 2 to the 64 and 2 to the 64 possible streams.
-					state = state * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL;
-					stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;
-					return stream + rotate64(state, 20);
+					//state = state * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL;
+					//stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;
+					//return stream + rotate64(state, 20);
 
 					//state = -(state ^ (state * state | 7ULL));
 					//stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;
 					//return state + rotate64(stream, 17);
 
+					//stream = _lzcnt_u64(state = state * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL) - (stream ^ (stream * stream | 0x17ULL));
+					//stream = _lzcnt_u64(state = state * 0xD1342543DE82EF95ULL - 0xC6BC279692B5CC83ULL) - (stream ^ (stream * stream | 37ULL));
+//uint64_t x = state;
+//state = -(x ^ (x * x | 5ULL));
+//stream = -(_lzcnt_u64(x) - (stream ^ (stream * stream | 23ULL)));
+//return stream - rotate64(x, 20);
+
+// CongaRandom
+// Passes 64TB with no anomalies, seed 0.
+// Period is guaranteed to be 2 to the 128, with 128 bits of state and 64-bit output.
+// 1D-equidistributed over its period.
+// Uses an XLCG for one state, and an LCG-like second state that updates dependent on the XLCG (using count-leading-zeros).
+// The number of rotations this does may be able to be cut down.
+uint64_t x = state;
+state = x * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL;
+x = rotate64(x, 20) + (stream = stream * 0xD1342543DE82EF95ULL + _lzcnt_u64(x));
+return x ^ rotate64(x, 29) ^ rotate64(x, 47);
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 
