@@ -1644,10 +1644,24 @@ namespace PractRand {
 // 1D-equidistributed over its period.
 // Uses an XLCG for one state, and an LCG-like second state that updates dependent on the XLCG (using count-leading-zeros).
 // The number of rotations this does may be able to be cut down.
-uint64_t x = state;
-state = x * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL;
-x = rotate64(x, 20) + (stream = stream * 0xD1342543DE82EF95ULL + _lzcnt_u64(x));
-return x ^ rotate64(x, 29) ^ rotate64(x, 47);
+//uint64_t x = state;
+//state = x * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL;
+//x = rotate64(x, 20) + (stream = stream * 0xD1342543DE82EF95ULL + _lzcnt_u64(x));
+//return x ^ rotate64(x, 29) ^ rotate64(x, 47);
+
+// SpinyRandom
+// Passes 64TB with no anomalies, seed 0.
+// Period is guaranteed to be 2 to the 128, with 128 bits of state and 64-bit output.
+// 1D-equidistributed over its period.
+// Uses an LCG for state, and an LCG-like stream that depends on the first LCG's value (using count-leading-zeros).
+// Also uses a construction like the round function for the Speck cipher (without XORing in a key) for output.
+// Only requires two rotates, an add, and a XOR for output, none of which depend on mutating state.
+// Surprisingly fast in PractRand.
+uint64_t x = state, y = stream;
+state = x * 0x369DEA0F31A53F85ULL + 0xC6BC279692B5CC83ULL;
+stream = y * 0xD1342543DE82EF95ULL + _lzcnt_u64(x);
+return (rotate64(x, 20) + y) ^ rotate64(y, 47);
+
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 
