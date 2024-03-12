@@ -1682,11 +1682,10 @@ namespace PractRand {
 // Runs a round of the Speck cipher round function (with key 0),
 // multiplies by an LCG constant (see Vigna and Steele), then xor-rotate-xor-rotate and return.
 // Only one multiply means this should be pretty fast.
-uint64_t x = state, y = stream;
+uint64_t x = state, y = stream, z = (rotate64(x, 3) + y ^ rotate64(y, 56)) * 0xD1342543DE82EF95ULL;
 state = x + 0xC6BC279692B5CC83ULL;
 stream = y + (x ^ _lzcnt_u64(x));
-x = (rotate64(x, 3) + y ^ rotate64(y, 56)) * 0xD1342543DE82EF95ULL;
-return x ^ rotate64(x, 29) ^ rotate64(x, 40);
+return z ^ rotate64(z, 29) ^ rotate64(z, 40);
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 
