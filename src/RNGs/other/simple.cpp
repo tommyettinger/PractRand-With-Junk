@@ -1354,6 +1354,23 @@ namespace PractRand {
 //		[Low1 / 64]TMFn(2 + 1) :wl              R = +23.2  p~= 2e-7    mildly suspicious
 //		[Low1 / 64]TMFn(2 + 3) : wl             R = +22.5  p~= 5e-7    mildly suspicious
 //		[Low1 / 64]TMFn(2 + 4) : wl             R = +22.8  p~= 4e-7    mildly suspiciou
+//	uint64_t a = state0 += 0xD1B54A32D192ED03L;
+//	uint64_t b = state1 += 0xABC98388FB8FAC03L;
+//	uint64_t c = state2 += 0x8CB92BA72F3D8DD7L;
+//	b = rotate64(b, 56) + a ^ c;
+//	a = (rotate64(a, 3) ^ b);
+//	b = rotate64(b, 56) + a ^ c;
+//	a = (rotate64(a, 3) ^ b);
+//	b = rotate64(b, 56) + a ^ c;
+//	a = (rotate64(a, 3) ^ b);
+//	b = rotate64(b, 56) + a ^ c;
+//	a = (rotate64(a, 3) ^ b);
+//	return a;
+
+	// ThripRandom
+	// Passes 64TB with no anomalies.
+	// Period is 2 to the 64, with 2 to the 128 possible streams; 64-bit output.
+	// Uses just three iterations of the Speck cipher round function, followed by a XOR-Rotate-XOR-Rotate step.
 	uint64_t a = state0 += 0xD1B54A32D192ED03L;
 	uint64_t b = state1 += 0xABC98388FB8FAC03L;
 	uint64_t c = state2 += 0x8CB92BA72F3D8DD7L;
@@ -1363,9 +1380,7 @@ namespace PractRand {
 	a = (rotate64(a, 3) ^ b);
 	b = rotate64(b, 56) + a ^ c;
 	a = (rotate64(a, 3) ^ b);
-	b = rotate64(b, 56) + a ^ c;
-	a = (rotate64(a, 3) ^ b);
-	return a;
+	return a ^ rotate64(a, 59) ^ rotate64(a, 20);
 
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
