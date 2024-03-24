@@ -1371,16 +1371,32 @@ namespace PractRand {
 	// Passes 64TB with no anomalies.
 	// Period is 2 to the 64, with 2 to the 128 possible streams; 64-bit output.
 	// Uses just three iterations of the Speck cipher round function, followed by a XOR-Rotate-XOR-Rotate step.
+	//uint64_t a = state0 += 0xD1B54A32D192ED03L;
+	//uint64_t b = state1 += 0xABC98388FB8FAC03L;
+	//uint64_t c = state2 += 0x8CB92BA72F3D8DD7L;
+	//b = rotate64(b, 56) + a ^ c;
+	//a = (rotate64(a, 3) ^ b);
+	//b = rotate64(b, 56) + a ^ c;
+	//a = (rotate64(a, 3) ^ b);
+	//b = rotate64(b, 56) + a ^ c;
+	//a = (rotate64(a, 3) ^ b);
+	//return a ^ rotate64(a, 59) ^ rotate64(a, 20);
+
+// This gets no anomalies until 64TB, but then...
+// rng=oriole64, seed=0x0
+// length= 64 terabytes (2^46 bytes), time= 258066 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]BCFN(2+5,13-0,T)         R= +12.1  p =  5.5e-6   unusual
+//   [Low1/64]BCFN(2+6,13-0,T)         R= +18.7  p =  1.5e-9   very suspicious
+//   [Low1/64]BCFN(2+7,13-0,T)         R= +13.7  p =  7.1e-7   mildly suspicious
+//   ...and 1156 test result(s) without anomalies
 	uint64_t a = state0 += 0xD1B54A32D192ED03L;
 	uint64_t b = state1 += 0xABC98388FB8FAC03L;
 	uint64_t c = state2 += 0x8CB92BA72F3D8DD7L;
 	b = rotate64(b, 56) + a ^ c;
-	a = (rotate64(a, 3) ^ b);
-	b = rotate64(b, 56) + a ^ c;
-	a = (rotate64(a, 3) ^ b);
-	b = rotate64(b, 56) + a ^ c;
-	a = (rotate64(a, 3) ^ b);
-	return a ^ rotate64(a, 59) ^ rotate64(a, 20);
+	a = rotate64(a, 3) ^ b;
+	a = rotate64(a, 3) ^ rotate64(b, 56) + a ^ c;
+	return a ^ rotate64(a, 31) ^ rotate64(a, 44);
 
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
