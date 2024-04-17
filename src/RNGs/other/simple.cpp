@@ -1403,15 +1403,29 @@ namespace PractRand {
 	// Period is 2 to the 64, with 2 to the 128 possible streams; 64-bit output.
 	// Uses two iterations of the Speck cipher round function, each followed by a different XOR-Rotate-XOR-Rotate step.
 	// Entirely uses ARX operations; not even a shift.
+	//uint64_t a = state0 += 0xD1B54A32D192ED03L;
+	//uint64_t b = state1 += 0xABC98388FB8FAC03L;
+	//uint64_t c = state2 += 0x8CB92BA72F3D8DD7L;
+	//b = rotate64(b, 56) + a ^ c;
+	//a = rotate64(a, 3) ^ b;
+	//a ^= rotate64(a, 22) ^ rotate64(a, 47);
+	//a = rotate64(a, 3) ^ rotate64(b, 56) + a ^ c;
+	//return a ^ rotate64(a, 25) ^ rotate64(a, 44);
+
+	//uint64_t a = (state0 = 0xD1B54A32D192ED02L - (state0 ^ (state0 * state0 | 7)));
+	//uint64_t b = (state1 = 0xABC98388FB8FAC06L - (state1 ^ (state1 * state1 | 13)));
+	//uint64_t c = (state2 = 0x8CB92BA72F3D8DDAL - (state2 ^ (state2 * state2 | 21)));
 	uint64_t a = state0 += 0xD1B54A32D192ED03L;
 	uint64_t b = state1 += 0xABC98388FB8FAC03L;
 	uint64_t c = state2 += 0x8CB92BA72F3D8DD7L;
-	b = rotate64(b, 56) + a ^ c;
-	a = rotate64(a, 3) ^ b;
-	a ^= rotate64(a, 22) ^ rotate64(a, 47);
-	a = rotate64(a, 3) ^ rotate64(b, 56) + a ^ c;
-	return a ^ rotate64(a, 25) ^ rotate64(a, 44);
+	//return a ^ rotate64(b, 22) ^ rotate64(c, 41);
 
+	b = rotate64(b, 56) + a ^ c;
+	a = (rotate64(a, 3) ^ b);
+	b = rotate64(b, 56) + a ^ c;
+	a = (rotate64(a, 3) ^ b);
+	a = rotate64(a, 3) ^ rotate64(b, 56) + a ^ c;
+	return a ^ rotate64(a, 59) ^ rotate64(a, 20);
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
@@ -1703,13 +1717,26 @@ namespace PractRand {
 						//b = rotate32(b, 17);
 					}
 				}
+				Uint64 roundFunction(Uint64 x) {
+					x = (x ^ rotate64(x, 29) ^ rotate64(x, 47)) + 0xD1342543DE82EF95L;
+					//x += rotate64(x, 44) + 0xD1342543DE82EF95L;
+					return x ^ rotate64(x, 25) ^ rotate64(x, 50);
+					//return rotate64(x, 23) + (x ^ 0xD3833E804F4C574BL);
+					//return rotate64(x, 29) + (rotate64(x, 20) ^ 0x3C79AC492BA7B653L) + 0x1C69B3F74AC4AE35L + rotate64(x, 47);
+
+					//// Moremur
+					//x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
+					//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35L;
+					//return (x ^ x >> 27);
+
+				}
 				Uint64 mover64::raw64() {
-					// this is Romu Duo
-					uint64_t ap = a;
-					//0xD3833E804F4C574Bu == 15241094284759029579u
-					a = 0xD3833E804F4C574Bu * b;
-					b = rotate64(b,36) + rotate64(b,15) - ap;
-					return ap;
+					//// this is Romu Duo
+					//uint64_t ap = a;
+					//// NOTE: 0xD3833E804F4C574Bu == 15241094284759029579u
+					//a = 0xD3833E804F4C574Bu * b;
+					//b = rotate64(b,36) + rotate64(b,15) - ap;
+					//return ap;
 					
 					//return (a = rotate64(a, 28) * UINT64_C(0x41C64E6B)) + (b = rotate64(b, 37) + UINT64_C(0x9E3779B97F4A7C15)); //0x9E3779B97F4A7C15 //  * UINT64_C(0x9E3779B9)
 					
@@ -1719,13 +1746,30 @@ namespace PractRand {
 					
 					// works, passes 32TB with 2 anomalies
 					//return (a = rotate64(a, 26) * UINT64_C(0x41C64E6B)) ^ (b = rotate64(b, 37) + UINT64_C(0x9E3779B97F4A7C15));
+
+					// Feistel
+
+					// TortieRandom
+					// Passes 64TB with no anomalies.
+					// Period is 2 to the 64, and has 2 to the 64 streams.
+					// Would be 1D equidistributed if all streams were concatenated.
+					// Uses two rounds of a Feistel cipher.
+					// Each round uses xor-rotate-rotate, add a constant, and another xor-rotate-rotate.
+					// The generator as a whole uses only ARX operations.
+					uint64_t aa = a += 0x9E3779B97F4A7C15L;
+					uint64_t bb = b += 0xD3833E804F4C574BL;
+					//bb = (aa) ^ roundFunction(aa = bb);
+					//bb = (aa) ^ roundFunction(aa = bb);
+					bb = (aa) ^ roundFunction(aa = bb);
+					return (aa) ^ roundFunction(bb);
 				}
 
 				std::string mover64::get_name() const { return "mover64"; }
 				void mover64::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
 					walker->handle(b);
-					if((a | b) == 0u) a = 1u;
+					//if((a | b) == 0u) a = 1u;
+
 					//walker->handle(a);
 					//uint64_t r = a;
 					//a = 1;

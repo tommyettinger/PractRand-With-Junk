@@ -4258,6 +4258,7 @@ return z;
 				    const uint64_t s = (state ^ 0x9E3779B97F4A7C15u) * 0xC6BC279692B5C323u;
 					//return state += s ^ s >> 41 ^ s >> 23; 0xD1342543DE82EF23
 					return state += (s ^ rotate64(s, 23) ^ rotate64(s, 41));
+
 					//Uint64 x = (state++);
 					//x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
 					//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
