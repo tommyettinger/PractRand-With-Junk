@@ -1726,8 +1726,13 @@ namespace PractRand {
 					//x = (x ^ rotate64(x, 13) ^ rotate64(x, 40)) + 0xD1342543DE82EF95L;
 					//return x ^ rotate64(x, 25) ^ rotate64(x, 50);
 
-					x = (x ^ rotate64(x, 29) ^ rotate64(x, 47)) + 0xD1342543DE82EF95L;
-					return x ^ rotate64(x, 25) ^ rotate64(x, 50);
+					//// working version!
+					//x = (x ^ rotate64(x, 29) ^ rotate64(x, 47)) + 0xD1342543DE82EF95L;
+					//return x ^ rotate64(x, 25) ^ rotate64(x, 50);
+
+					//// also a working version!
+					x *= 0xD1342543DE82EF95L;
+					return (x ^ rotate64(x, 25) ^ rotate64(x, 50));
 
 					//return rotate64(x, 23) + (x ^ 0xD3833E804F4C574BL);
 					//return rotate64(x, 29) + (rotate64(x, 20) ^ 0x3C79AC492BA7B653L) + 0x1C69B3F74AC4AE35L + rotate64(x, 47);
@@ -1778,7 +1783,8 @@ namespace PractRand {
 					// Uses two rounds of a Feistel cipher.
 					// Each round uses xor-rotate-rotate, add a constant, and another xor-rotate-rotate.
 					// The generator as a whole uses only ARX operations.
-					// Uses different Weyl sequences than TortieRandom, but the same round function.
+					// Also passes 64TB of testing using a multiply, then xor-rotate-rotate, which is not ARX.
+					// Uses different Weyl sequences than TortieRandom, but can use the same round function.
 					uint64_t aa = a += 0xD1B54A32D192ED03L;
 					uint64_t bb = b += 0x8CB92BA72F3D8DD7L + __lzcnt64(a);
 					bb = (aa) ^ roundFunction(aa = bb);
