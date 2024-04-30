@@ -1731,9 +1731,12 @@ namespace PractRand {
 					//return x ^ rotate64(x, 25) ^ rotate64(x, 50);
 
 					//// also a working version!
-					x *= 0xD1342543DE82EF95L;
-					return (x ^ rotate64(x, 25) ^ rotate64(x, 50));
+					//x *= 0xD1342543DE82EF95L;
+					//return (x ^ rotate64(x, 25) ^ rotate64(x, 50));
 
+					// not especially surprising, but this also works!
+					x *= 0xD1342543DE82EF95L;
+					return x ^ x >> 23 ^ x >> 42;
 					//return rotate64(x, 23) + (x ^ 0xD3833E804F4C574BL);
 					//return rotate64(x, 29) + (rotate64(x, 20) ^ 0x3C79AC492BA7B653L) + 0x1C69B3F74AC4AE35L + rotate64(x, 47);
 
