@@ -1735,8 +1735,13 @@ namespace PractRand {
 					//return (x ^ rotate64(x, 25) ^ rotate64(x, 50));
 
 					// not especially surprising, but this also works!
-					x *= 0xD1342543DE82EF95L;
-					return x ^ x >> 23 ^ x >> 42;
+					//x *= 0xD1342543DE82EF95L;
+					//return x ^ x >> 23 ^ x >> 42;
+
+					x = (x ^ rotate64(x, 29) ^ rotate64(x, 47));
+					return (x ^ rotate64(x, 25) ^ rotate64(x, 50));
+
+
 					//return rotate64(x, 23) + (x ^ 0xD3833E804F4C574BL);
 					//return rotate64(x, 29) + (rotate64(x, 20) ^ 0x3C79AC492BA7B653L) + 0x1C69B3F74AC4AE35L + rotate64(x, 47);
 
@@ -1788,10 +1793,31 @@ namespace PractRand {
 					// The generator as a whole uses only ARX operations.
 					// Also passes 64TB of testing using a multiply, then xor-rotate-rotate, which is not ARX.
 					// Uses different Weyl sequences than TortieRandom, but can use the same round function.
-					uint64_t aa = a += 0xD1B54A32D192ED03L;
-					uint64_t bb = b += 0x8CB92BA72F3D8DD7L + __lzcnt64(a);
-					bb = (aa) ^ roundFunction(aa = bb);
-					return (aa) ^ roundFunction(bb);
+					//uint64_t aa = a += 0xD1B54A32D192ED03L;
+					//uint64_t bb = b += 0x8CB92BA72F3D8DD7L + __lzcnt64(a);
+					//bb = (aa) ^ roundFunction(aa = bb);
+					//return (aa) ^ roundFunction(bb);
+
+					// Shocker! This gets very close to total failure at 64TB, but had no anomalies before that!
+					// This uses a simpler roundFunction(), without adding a constant between XRR phases.
+					// 
+					// rng=mover64, seed=0x0
+					// length = 64 terabytes(2 ^ 46 bytes), time = 279969 seconds
+					// Test Name                         Raw       Processed     Evaluation
+					// [Low1 / 64]BCFN(2 + 2, 13 - 0, T)         R = +10.9  p = 2.2e-5   mildly suspicious
+					// [Low1 / 64]BCFN(2 + 5, 13 - 0, T)         R = +13.1  p = 1.6e-6   mildly suspicious
+					// [Low1 / 64]BCFN(2 + 6, 13 - 0, T)         R = +13.5  p = 9.1e-7   mildly suspicious
+					// [Low1 / 64]BCFN(2 + 9, 13 - 0, T)         R = +12.9  p = 1.8e-6   unusual
+					// [Low1 / 64]BCFN(2 + 10, 13 - 0, T)        R = +14.4  p = 3.3e-7   mildly suspicious
+					// [Low1 / 64]BCFN(2 + 11, 13 - 0, T)        R = +13.2  p = 1.4e-6   unusual
+					// [Low1 / 64]BCFN(2 + 14, 13 - 2, T)        R = +18.1  p = 7.7e-9   suspicious
+					// [Low1 / 64]BCFN(2 + 15, 13 - 3, T)        R = +20.8  p = 1.2e-9   very suspicious
+					// [Low8 / 32]Gap - 16:B                 R = +7.0  p = 6.2e-6   mildly suspicious
+					// ...and 1150 test result(s) without anomalies
+					uint64_t aa = a += 0x9E3779B97F4A7C15L;
+					uint64_t bb = b += 0xD3833E804F4C574BL;
+					bb = (aa) ^ roundFunction(aa += bb);
+					return (aa) ^ roundFunction(aa + bb);
 				}
 
 				std::string mover64::get_name() const { return "mover64"; }
