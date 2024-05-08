@@ -1730,6 +1730,9 @@ namespace PractRand {
 					//x = (x ^ rotate64(x, 29) ^ rotate64(x, 47)) + 0xD1342543DE82EF95L;
 					//return x ^ rotate64(x, 25) ^ rotate64(x, 50);
 
+					x = (x ^ rotate64(x, 54) ^ rotate64(x, 47)) + 0xD3833E804F4C574BL;
+					return x ^ rotate64(x, 25) ^ rotate64(x, 50);
+
 					//// also a working version!
 					//x *= 0xD1342543DE82EF95L;
 					//return (x ^ rotate64(x, 25) ^ rotate64(x, 50));
@@ -1738,8 +1741,8 @@ namespace PractRand {
 					//x *= 0xD1342543DE82EF95L;
 					//return x ^ x >> 23 ^ x >> 42;
 
-					x = (x ^ rotate64(x, 29) ^ rotate64(x, 47));
-					return (x ^ rotate64(x, 25) ^ rotate64(x, 50));
+					//x = (x ^ rotate64(x, 29) ^ rotate64(x, 47));
+					//return (x ^ rotate64(x, 25) ^ rotate64(x, 50));
 
 
 					//return rotate64(x, 23) + (x ^ 0xD3833E804F4C574BL);
@@ -1751,6 +1754,8 @@ namespace PractRand {
 					//x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
 					//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35L;
 					//return (x ^ x >> 27);
+
+					//return (x ^ rotate64(x, 29) ^ rotate64(x, 47)) + 0xD3833E804F4C574BL;
 
 				}
 				Uint64 mover64::raw64() {
@@ -1784,6 +1789,13 @@ namespace PractRand {
 					//bb = (aa) ^ roundFunction(aa = bb);
 					//return (aa) ^ roundFunction(bb);
 					
+					//uint64_t aa = a += 0xD1B54A32D192ED03L;
+					//uint64_t bb = b += 0x8CB92BA72F3D8DD7L;
+
+					//uint64_t aa = a += 0x9E3779B97F4A7C15L;
+					//uint64_t bb = b += 0xD3833E804F4C574BL;
+					//return bb ^ roundFunction(aa ^ roundFunction(bb));
+					
 					// ElasticRandom
 					// Passes 64TB with no anomalies.
 					// Period is 2 to the 128; no streams.
@@ -1814,10 +1826,34 @@ namespace PractRand {
 					// [Low1 / 64]BCFN(2 + 15, 13 - 3, T)        R = +20.8  p = 1.2e-9   very suspicious
 					// [Low8 / 32]Gap - 16:B                 R = +7.0  p = 6.2e-6   mildly suspicious
 					// ...and 1150 test result(s) without anomalies
-					uint64_t aa = a += 0x9E3779B97F4A7C15L;
-					uint64_t bb = b += 0xD3833E804F4C574BL;
-					bb = (aa) ^ roundFunction(aa += bb);
-					return (aa) ^ roundFunction(aa + bb);
+					//uint64_t aa = a += 0x9E3779B97F4A7C15L;
+					//uint64_t bb = b += 0xD3833E804F4C574BL;
+					//bb = (aa) ^ roundFunction(aa += bb);
+					//return (aa) ^ roundFunction(aa + bb);
+
+					//uint64_t aa = a += 0x9E3779B97F4A7C15L;
+					//uint64_t bb = b += 0xD3833E804F4C574BL;
+
+					//uint64_t x = a += 0xD1B54A32D192ED03L;
+					//uint64_t y = x + (b += 0x8CB92BA72F3D8DD7L);
+					//return y ^ roundFunction(y ^ x ^ roundFunction(y));
+
+					// FrostyRandom
+					// Passes 64TB with no anomalies.
+					// Period is 2 to the 64. 2 to the 64 possible streams.
+					// When all streams are concatenated, the resulting sequence of 2 to the 128 numbers is 1D equidistributed.
+					// Uses 3 rounds of a Feistel cipher with a very simple round function compared to others here.
+					// Each round uses a xor-rotate-rotate, add a constant, and add-and-assign that instead of just assigning.
+					// The generator only uses ARX operations.
+					uint64_t x = a += 0xD1B54A32D192ED03L;
+					uint64_t y = b += 0x8CB92BA72F3D8DD7L;
+					x = (y) ^ (y += (x ^ rotate64(x, 25) ^ rotate64(x, 50)) + 0x9E3779B97F4A7C15L);
+					y = (x) ^ (x += (y ^ rotate64(y, 19) ^ rotate64(y, 41)) + 0x9E3779B97F4A7C15L);
+					return (y) ^ (y + (x ^ rotate64(x, 43) ^ rotate64(x, 54)) + 0x9E3779B97F4A7C15L);
+
+					//(x += (y ^ rotate64(y, 54) ^ rotate64(y, 47)) + 0x9E3779B97F4A7C15L)
+					//return y + ((x += ((y += (x ^ rotate64(x, 25) ^ rotate64(x, 50)) + 0x9E3779B97F4A7C15L) ^ rotate64(y, 54) ^ rotate64(y, 47)) + 0xF1357AEA2E62A9C5UL)
+					//	^ rotate64(x, 25) ^ rotate64(x, 50)) + 0xD3833E804F4C574BL;
 				}
 
 				std::string mover64::get_name() const { return "mover64"; }
