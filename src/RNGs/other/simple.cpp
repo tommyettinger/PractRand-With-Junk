@@ -1845,11 +1845,36 @@ namespace PractRand {
 					// Uses 3 rounds of a Feistel cipher with a very simple round function compared to others here.
 					// Each round uses a xor-rotate-rotate, add a constant, and add-and-assign that instead of just assigning.
 					// The generator only uses ARX operations.
+					// Has correlation issues.
+					//uint64_t x = a += 0xD1B54A32D192ED03L;
+					//uint64_t y = b += 0x8CB92BA72F3D8DD7L;
+					//x = (y) ^ (y += (x ^ rotate64(x, 25) ^ rotate64(x, 50)) + 0x9E3779B97F4A7C15L);
+					//y = (x) ^ (x += (y ^ rotate64(y, 19) ^ rotate64(y, 41)) + 0x9E3779B97F4A7C15L);
+					//return (y) ^ (y + (x ^ rotate64(x, 43) ^ rotate64(x, 54)) + 0x9E3779B97F4A7C15L);
+
+					// Passes 4TB, but like above has correlation issues.
+					//uint64_t x = a += 0xD1B54A32D192ED03L;
+					//uint64_t y = b += 0x8CB92BA72F3D8DD7L;
+					//x = (y) ^ (y = (x ^ rotate64(x, 25) ^ rotate64(x, 50)) + 0x9E3779B97F4A7C15L);
+					//y = (x) ^ (x = (y ^ rotate64(y, 19) ^ rotate64(y, 41)) + 0x9E3779B97F4A7C15L);
+					//return (y) ^ ((x ^ rotate64(x, 43) ^ rotate64(x, 54)) + 0x9E3779B97F4A7C15L);
+					
+					// FrostierRandom
+					// Passees 64TB without anomalies, as well as passing the ICE test in juniper.
+					// Period is 2 to the 64. 2 to the 64 possible streams.
+					// When all streams are concatenated, the resulting sequence of 2 to the 128 numbers is 1D equidistributed.
+					// Uses 3 rounds of a Feistel cipher with a very simple round function compared to others here.
+					// Each round uses a xor-rotate-rotate, add a constant, and add-and-assign that instead of just assigning.
+					// The generator only uses ARX operations.
+					// When using all streams concatenated, all pairs of x and y will be produced.
+					// This could be used to help smaller-word generators, like 32-bit a and b that need to produce a 64-bit value.
 					uint64_t x = a += 0xD1B54A32D192ED03L;
 					uint64_t y = b += 0x8CB92BA72F3D8DD7L;
-					x = (y) ^ (y += (x ^ rotate64(x, 25) ^ rotate64(x, 50)) + 0x9E3779B97F4A7C15L);
-					y = (x) ^ (x += (y ^ rotate64(y, 19) ^ rotate64(y, 41)) + 0x9E3779B97F4A7C15L);
-					return (y) ^ (y + (x ^ rotate64(x, 43) ^ rotate64(x, 54)) + 0x9E3779B97F4A7C15L);
+					y = ((y << 3 | y >> 61) ^ (x = ((x << 56 | x >> 8) + y ^ 0xBEA225F9EB34556DL))) + (x << 34 | x >> 30);
+					x = ((x << 53 | x >> 11) ^ (y = ((y << 26 | y >> 38) + x ^ 0xD3833E804F4C574BL))) + (y << 17 | y >> 47);
+					y = ((y << 23 | y >> 41) ^ (x = ((x << 46 | x >> 18) + y ^ 0x9E3779B97F4A7C15L))) + (x << 20 | x >> 44);
+					x = ((x << 13 | x >> 51) ^ (y = ((y << 6 | y >> 58) + x ^ 0xF1357AEA2E62A9C5L))) + (y << 57 | y >> 7);
+					return x;
 
 					//(x += (y ^ rotate64(y, 54) ^ rotate64(y, 47)) + 0x9E3779B97F4A7C15L)
 					//return y + ((x += ((y += (x ^ rotate64(x, 25) ^ rotate64(x, 50)) + 0x9E3779B97F4A7C15L) ^ rotate64(y, 54) ^ rotate64(y, 47)) + 0xF1357AEA2E62A9C5UL)
