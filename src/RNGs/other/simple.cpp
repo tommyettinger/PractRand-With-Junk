@@ -1868,13 +1868,40 @@ namespace PractRand {
 					// The generator only uses ARX operations.
 					// When using all streams concatenated, all pairs of x and y will be produced.
 					// This could be used to help smaller-word generators, like 32-bit a and b that need to produce a 64-bit value.
+					//uint64_t x = a += 0xD1B54A32D192ED03L;
+					//uint64_t y = b += 0x8CB92BA72F3D8DD7L;
+					//y = ((y << 3 | y >> 61) ^ (x = ((x << 56 | x >> 8) + y ^ 0xBEA225F9EB34556DL))) + (x << 34 | x >> 30);
+					//x = ((x << 53 | x >> 11) ^ (y = ((y << 26 | y >> 38) + x ^ 0xD3833E804F4C574BL))) + (y << 17 | y >> 47);
+					//y = ((y << 23 | y >> 41) ^ (x = ((x << 46 | x >> 18) + y ^ 0x9E3779B97F4A7C15L))) + (x << 20 | x >> 44);
+					//x = ((x << 13 | x >> 51) ^ (y = ((y << 6 | y >> 58) + x ^ 0xF1357AEA2E62A9C5L))) + (y << 57 | y >> 7);
+					//return x;
+					
+					// HungryRandom
+					// Passes 64TB without anomalies, as well as passing the ICE test in juniper.
+					// Period is 2 to the 64. 2 to the 64 possible streams.
+					// When all streams are concatenated, the resulting sequence of 2 to the 128 numbers is 1D equidistributed.
+					// Uses 4 rounds of the Speck cipher, assuming the key is all 0, then does variable XOR-rotate-rotate ops.
+					// Those XOR y with (y rotated by x) and (y rotated by ~x), then do the same with x XOR (x rotated by y) and (x rotated by ~y).
+					// All x,y pairs are produced equally often if all streams are concatenated.
+					// This is meant mainly as a prototype for some 32-bit (JS) generator that would return x when 32 bits are needed, but use y as well when 64 bits are needed.
 					uint64_t x = a += 0xD1B54A32D192ED03L;
 					uint64_t y = b += 0x8CB92BA72F3D8DD7L;
-					y = ((y << 3 | y >> 61) ^ (x = ((x << 56 | x >> 8) + y ^ 0xBEA225F9EB34556DL))) + (x << 34 | x >> 30);
-					x = ((x << 53 | x >> 11) ^ (y = ((y << 26 | y >> 38) + x ^ 0xD3833E804F4C574BL))) + (y << 17 | y >> 47);
-					y = ((y << 23 | y >> 41) ^ (x = ((x << 46 | x >> 18) + y ^ 0x9E3779B97F4A7C15L))) + (x << 20 | x >> 44);
-					x = ((x << 13 | x >> 51) ^ (y = ((y << 6 | y >> 58) + x ^ 0xF1357AEA2E62A9C5L))) + (y << 57 | y >> 7);
+					y = ((y <<  3 | y >> 61) ^ (x = ((x << 56 | x >>  8) + y))); // ^ 0xBEA225F9EB34556DL
+					x = ((x << 53 | x >> 11) ^ (y = ((y << 26 | y >> 38) + x))); // ^ 0xA62B82F58DB8A985L
+					y = ((y << 23 | y >> 41) ^ (x = ((x << 46 | x >> 18) + y))); // ^ 0x9E3779B97F4A7C15L
+					x = ((x << 13 | x >> 51) ^ (y = ((y <<  6 | y >> 58) + x))); // ^ 0xF1357AEA2E62A9C5L
+					int s, t, q, r;
+					q = (int)x;
+					r = q ^ 63;
+					y ^= rotate64(y, q) ^ rotate64(y, r);
+					s = (int)y;
+					t = s ^ 63;
+					x ^= rotate64(x, s) ^ rotate64(x, t);
 					return x;
+
+					//int r = (int)x & 63
+					//x ^= rotate64(y, r);
+
 
 					//(x += (y ^ rotate64(y, 54) ^ rotate64(y, 47)) + 0x9E3779B97F4A7C15L)
 					//return y + ((x += ((y += (x ^ rotate64(x, 25) ^ rotate64(x, 50)) + 0x9E3779B97F4A7C15L) ^ rotate64(y, 54) ^ rotate64(y, 47)) + 0xF1357AEA2E62A9C5UL)
