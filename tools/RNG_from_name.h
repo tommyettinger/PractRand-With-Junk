@@ -103,6 +103,7 @@ namespace PractRand {
 				"xoshiro256scramjet",
 				"xorshift128plus",
 				"acorn64_10",
+				"chill96",
 				NULL
 			};
 			const int num_nonrecommended_simple = sizeof(nonrecommended_simple) / sizeof(nonrecommended_simple[0]) - 1;
@@ -561,6 +562,8 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(acorn64_10)
 			REGISTER_RNG_0(chonk8x32)
 			REGISTER_RNG_1(spangled_varqual)
+			REGISTER_RNG_0(chill96)
+
 
 		// include/PractRand/RNGs/other/mult.h
 		RNG_Factories::RNG_factory_index["lcg"] = lcg_factory;

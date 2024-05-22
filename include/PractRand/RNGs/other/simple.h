@@ -577,7 +577,15 @@ namespace PractRand {
 					spangled_varqual(int rounds_) : rounds(rounds_) {}
 					Uint64 raw64();
 					std::string get_name() const;
-					void walk_state(StateWalkingObject *);
+					void walk_state(StateWalkingObject*);
+				};
+
+				class chill96 : public vRNG64 {
+					Uint32 stateA, stateB, stateC;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject*);
 				};
 
 			}

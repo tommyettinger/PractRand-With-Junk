@@ -4557,7 +4557,7 @@ return z;
 //					const uint64_t fb = stateB;
 //					const uint64_t fc = stateC;
 //					const uint64_t fd = stateD;
-//					stateA = fa + 0xC13FA9A902A6328EUL;
+//					stateA = fa + 0xC13FA9A902A6328EL;
 //					stateB = fa * fc;
 //					stateC = fb + fd;
 //					stateD = rotate64(fb, 41);
