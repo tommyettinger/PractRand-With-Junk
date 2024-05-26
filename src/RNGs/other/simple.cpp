@@ -2362,23 +2362,48 @@ return x;
 					//stateC = 1UL;//stateA ^ stateB + 0xA62B82F58DB8A985UL;
 					walker->handle(stateC);
 				}
-//Chill96_0
-//Passes 64TB with one anomaly at 64TB:
-// length= 64 terabytes (2^46 bytes), time= 291570 seconds               
-//   Test Name                         Raw       Processed     Evaluation
-//   FPF-14+6/16:all                   R=  +5.8  p =  6.8e-5   unusual   
-//   ...and 1158 test result(s) without anomalies                        
-//
-// Period is 2 to the 96 exactly; no streams.
 				Uint64 chill96::raw64() {
-					uint32_t x = (stateA += 0xD192ED03);
-					uint32_t y = (stateB += 0x8F3D8DD7 + __lzcnt(x));
-					uint32_t z = (stateC += 0xC13FA9A9 + __lzcnt(x&y));
-					y = rotate32(y,  3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x,  5);// (z + 0xBEA225F9)
-					x = rotate32(x, 14) ^ (y = rotate32(y, 27) + x ^ z) + rotate32(y, 11);// (z + 0xA62B82F5)
-					y = rotate32(y, 19) ^ (x = rotate32(x,  7) + y ^ z) + rotate32(x, 29);// (z + 0x9E3779B9)
-					x = rotate32(x, 17) ^ (y = rotate32(y, 13) + x ^ z) + rotate32(y, 23);// (z + 0xF1357AEA)
+					//Chill96_0
+					//Passes 64TB with one anomaly at 64TB:
+					// length= 64 terabytes (2^46 bytes), time= 291570 seconds               
+					//   Test Name                         Raw       Processed     Evaluation
+					//   FPF-14+6/16:all                   R=  +5.8  p =  6.8e-5   unusual   
+					//   ...and 1158 test result(s) without anomalies                        
+					//
+					// Period is 2 to the 96 exactly; no streams.
+					//uint32_t x = (stateA += 0xD192ED03);
+					//uint32_t y = (stateB += 0x8F3D8DD7 + __lzcnt(x));
+					//uint32_t z = (stateC += 0xC13FA9A9 + __lzcnt(x & y));
+					//y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 5);// (z + 0xBEA225F9)
+					//x = rotate32(x, 14) ^ (y = rotate32(y, 27) + x ^ z) + rotate32(y, 11);// (z + 0xA62B82F5)
+					//y = rotate32(y, 19) ^ (x = rotate32(x, 7) + y ^ z) + rotate32(x, 29);// (z + 0x9E3779B9)
+					//x = rotate32(x, 17) ^ (y = rotate32(y, 13) + x ^ z) + rotate32(y, 23);// (z + 0xF1357AEA)
+					//return (uint64_t)y << 32 | x;
+
+					//uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
+					//uint32_t t = x & -x;
+					//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0x8F3D8DD6);
+					//uint32_t z = (stateC = stateC + rotate32(t | y | -y, 1) ^ 0xC13FA9AA);
+
+					//Chill96
+					//Passes 64TB with no anomalies.
+					//Period is 2 to the 96, with no streams.
+					//Natively works with 32-bit math, and can output 64-bit values in just slightly more time than a 32-bit one.
+					//Should produce each 64-bit result exactly 2 to the 32 times over the course of a period.
+					//Other than the count-leading-zeros instruction and the optional combination of results into one 64-bit result, this uses only ARX operations.
+					uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
+					uint32_t y = (stateB = stateB + __lzcnt(x) ^ 0xA62B82F6);
+					uint32_t z = (stateC = stateC + __lzcnt(x & y) ^ 0x9E3779BA);
+					y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);  
+					x = rotate32(x, 14) ^ (y = rotate32(y, 29) + x ^ z) + rotate32(y, 11);
+					y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29); 
+					x = rotate32(x, 17) ^ (y = rotate32(y, 11) + x ^ z) + rotate32(y, 23);
 					return (uint64_t)y << 32 | x;
+
+					// (z + 0xBEA225F9)
+					// (z + 0xA62B82F5)
+					// (z + 0x9E3779B9)
+					// (z + 0xF1357AEA)
 				}
 				std::string chill96::get_name() const {
 					return "chill96";
