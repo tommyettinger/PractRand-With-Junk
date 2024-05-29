@@ -2391,14 +2391,34 @@ return x;
 					//Natively works with 32-bit math, and can output 64-bit values in just slightly more time than a 32-bit one.
 					//Should produce each 64-bit result exactly 2 to the 32 times over the course of a period.
 					//Other than the count-leading-zeros instruction and the optional combination of results into one 64-bit result, this uses only ARX operations.
+					//This can work on JS well, because any additions are followed by bitwise ops, which keeps each state in the 32-bit range.
+					//uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
+					//uint32_t y = (stateB = stateB + __lzcnt(x) ^ 0xA62B82F6);
+					//uint32_t z = (stateC = stateC + __lzcnt(x & y) ^ 0x9E3779BA);
+					//y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);
+					//x = rotate32(x, 14) ^ (y = rotate32(y, 29) + x ^ z) + rotate32(y, 11);
+					//y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29);
+					//x = rotate32(x, 17) ^ (y = rotate32(y, 11) + x ^ z) + rotate32(y, 23);
+					//return (uint64_t)y << 32 | x;
+
+					//Fever96
+					//Passes 64TB with no anomalies.
+					//Period is 2 to the 96, with no streams.
+					//Natively works with 32-bit math, and can output 64-bit values in just slightly more time than a 32-bit one.
+					//Should produce each 64-bit result exactly 2 to the 32 times over the course of a period.
+					//Other than subtract, bitwise OR, and the optional combination of results into one 64-bit result with left-shift, this uses only ARX operations.
+					//Critically, this means it has the optimal period for its state size without using count-leading-zeros or any other special instructions.
+					//This can work on JS well, because any additions are followed by bitwise ops, which keeps each state in the 32-bit range.
 					uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
-					uint32_t y = (stateB = stateB + __lzcnt(x) ^ 0xA62B82F6);
-					uint32_t z = (stateC = stateC + __lzcnt(x & y) ^ 0x9E3779BA);
-					y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);  
+					uint32_t t = x | -x;
+					uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xA62B82F6);
+					uint32_t z = (stateC = stateC + rotate32(t | y | -y, 1) ^ 0x9E3779BA);
+					y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);
 					x = rotate32(x, 14) ^ (y = rotate32(y, 29) + x ^ z) + rotate32(y, 11);
-					y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29); 
+					y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29);
 					x = rotate32(x, 17) ^ (y = rotate32(y, 11) + x ^ z) + rotate32(y, 23);
 					return (uint64_t)y << 32 | x;
+
 
 					// (z + 0xBEA225F9)
 					// (z + 0xA62B82F5)
