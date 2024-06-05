@@ -588,6 +588,16 @@ namespace PractRand {
 					void walk_state(StateWalkingObject*);
 				};
 
+				class choppy128 : public vRNG64 {
+					Uint32 a;
+					Uint32 b;
+					Uint32 c;
+					Uint32 d;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject*);
+				};
 			}
 		}
 	}

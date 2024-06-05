@@ -1994,7 +1994,7 @@ return x;
 					//return (a = rotate32(a, 23) * 0x402AB) ^ (b = rotate32(b, 28) * 0x01621) ^ (c = rotate32(c, 24) * 0x808E9) ^ (d = rotate32(d, 29) * 0x8012D);
 					const uint32_t s = (a += 0xC1C64E6DU), t = (b += -((s | -s) >> 31) & 0x9E3779BBU),
 					               u = (c += -((s | -s | t | -t) >> 31) & 0xC4DE9951U), v = (d += -((s | -s | t | -t | u | -u) >> 31) & 0x6C8E9CF7U);
-				    uint32_t x = (s ^ s >> 17) * (t >> 12 | 1U) ^ v + u;
+					uint32_t x = (s ^ s >> 17) * (t >> 12 | 1U) ^ v + u;
 					x ^= x >> 16;
 					x *= 0xAC451U;
 					return x ^ x >> 15;
@@ -2392,14 +2392,14 @@ return x;
 					//Should produce each 64-bit result exactly 2 to the 32 times over the course of a period.
 					//Other than the count-leading-zeros instruction and the optional combination of results into one 64-bit result, this uses only ARX operations.
 					//This can work on JS well, because any additions are followed by bitwise ops, which keeps each state in the 32-bit range.
-					//uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
-					//uint32_t y = (stateB = stateB + __lzcnt(x) ^ 0xA62B82F6);
-					//uint32_t z = (stateC = stateC + __lzcnt(x & y) ^ 0x9E3779BA);
-					//y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);
-					//x = rotate32(x, 14) ^ (y = rotate32(y, 29) + x ^ z) + rotate32(y, 11);
-					//y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29);
-					//x = rotate32(x, 17) ^ (y = rotate32(y, 11) + x ^ z) + rotate32(y, 23);
-					//return (uint64_t)y << 32 | x;
+					uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
+					uint32_t y = (stateB = stateB + __lzcnt(x) ^ 0xA62B82F6);
+					uint32_t z = (stateC = stateC + __lzcnt(x & y) ^ 0x9E3779BA);
+					y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);
+					x = rotate32(x, 14) ^ (y = rotate32(y, 29) + x ^ z) + rotate32(y, 11);
+					y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29);
+					x = rotate32(x, 17) ^ (y = rotate32(y, 11) + x ^ z) + rotate32(y, 23);
+					return (uint64_t)y << 32 | x;
 
 					//Fever96
 					//Passes 64TB with no anomalies.
@@ -2409,15 +2409,15 @@ return x;
 					//Other than subtract, bitwise OR, and the optional combination of results into one 64-bit result with left-shift, this uses only ARX operations.
 					//Critically, this means it has the optimal period for its state size without using count-leading-zeros or any other special instructions.
 					//This can work on JS well, because any additions are followed by bitwise ops, which keeps each state in the 32-bit range.
-					uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
-					uint32_t t = x | -x;
-					uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xA62B82F6);
-					uint32_t z = (stateC = stateC + rotate32(t | y | -y, 1) ^ 0x9E3779BA);
-					y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);
-					x = rotate32(x, 14) ^ (y = rotate32(y, 29) + x ^ z) + rotate32(y, 11);
-					y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29);
-					x = rotate32(x, 17) ^ (y = rotate32(y, 11) + x ^ z) + rotate32(y, 23);
-					return (uint64_t)y << 32 | x;
+					//uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
+					//uint32_t t = x | -x;
+					//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xA62B82F6);
+					//uint32_t z = (stateC = stateC + rotate32(t | y | -y, 1) ^ 0x9E3779BA);
+					//y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);
+					//x = rotate32(x, 14) ^ (y = rotate32(y, 29) + x ^ z) + rotate32(y, 11);
+					//y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29);
+					//x = rotate32(x, 17) ^ (y = rotate32(y, 11) + x ^ z) + rotate32(y, 23);
+					//return (uint64_t)y << 32 | x;
 
 
 					// (z + 0xBEA225F9)
@@ -2432,6 +2432,57 @@ return x;
 					walker->handle(stateA);
 					walker->handle(stateB);
 					walker->handle(stateC);
+				}
+				Uint64 choppy128::raw64() {
+					// just like ChopRandom.nextLong().
+					// Passes 64TB of 64-bit generation with one "unusual" anomaly.
+					//	rng = choppy128, seed = 0x1
+					//	length = 256 gigabytes(2 ^ 38 bytes), time = 1119 seconds
+					//	  Test Name                              Raw       Processed    Evaluation
+					//	  [Low4 / 64]BCFN(2 + 0, 13 - 0, T)      R = +9.9  p = 7.8e-5   unusual
+					//	...and 914 test result(s) without anomalies
+					uint32_t fa = a;
+					uint32_t fb = b;
+					uint32_t fc = c;
+					uint32_t fd = d;
+					uint32_t ga = fb ^ fc; ga = (ga << 26 | ga >> 6);
+					uint32_t gb = fc ^ fd; gb = (gb << 11 | gb >> 21);
+					uint32_t gc = fa ^ fb + fc;
+					uint32_t gd = fd + 0xADB5B165 | 0;
+					fa = gb ^ gc; a = (fa << 26 | fa >> 6);
+					fb = gc ^ gd; b = (fb << 11 | fb >> 21);
+					c = ga ^ gb + gc;
+					d = gd + 0xADB5B165 | 0;
+					return (uint64_t)fc << 32 ^ gc;
+
+					//uint32_t fa = c + b;
+					//uint32_t fb = a + c;
+					//uint32_t fc = b + d;
+					//uint32_t fd = d + 0xD192ED03;
+					//a = (fb << 14 | fb >> 18);
+					//b = (fc << 21 | fc >> 11);
+					//c = fa ^ fb;
+					//d = fd ^ 0xBEA225FA;// * 0x915F77F5;
+					//return (uint64_t)(fd + fb ^ fc) << 32 ^ (fa ^ fb + fc);
+
+					//uint32_t fa = a;
+					//uint32_t fb = b;
+					//uint32_t fc = c;
+					//uint32_t fd = d;
+					//uint32_t ga = fb + fc; a = (ga << 12 | ga >> 20);
+					//uint32_t gb = fa ^ fd; b = (gb << 23 | gb >> 9);
+					//c = fd + ga ^ gb;
+					//d = fd + 0x915F77F5 ^ 0xBEA225FA;
+					//return (uint64_t)(fc ^ fd + fb) << 32 ^ (fc + fa ^ fb);
+				}
+				std::string choppy128::get_name() const {
+					return "choppy128";
+				}
+				void choppy128::walk_state(StateWalkingObject* walker) {
+					walker->handle(a);
+					walker->handle(b);
+					walker->handle(c);
+					walker->handle(d);
 				}
 			}
 		}

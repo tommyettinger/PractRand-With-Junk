@@ -563,6 +563,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(chonk8x32)
 			REGISTER_RNG_1(spangled_varqual)
 			REGISTER_RNG_0(chill96)
+			REGISTER_RNG_0(choppy128)
 
 
 		// include/PractRand/RNGs/other/mult.h
