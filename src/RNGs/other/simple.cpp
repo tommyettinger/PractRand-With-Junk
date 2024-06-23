@@ -2441,19 +2441,19 @@ return x;
 					//	  Test Name                              Raw       Processed    Evaluation
 					//	  [Low4 / 64]BCFN(2 + 0, 13 - 0, T)      R = +9.9  p = 7.8e-5   unusual
 					//	...and 914 test result(s) without anomalies
-					uint32_t fa = a;
-					uint32_t fb = b;
-					uint32_t fc = c;
-					uint32_t fd = d;
-					uint32_t ga = fb ^ fc; ga = (ga << 26 | ga >> 6);
-					uint32_t gb = fc ^ fd; gb = (gb << 11 | gb >> 21);
-					uint32_t gc = fa ^ fb + fc;
-					uint32_t gd = fd + 0xADB5B165 | 0;
-					fa = gb ^ gc; a = (fa << 26 | fa >> 6);
-					fb = gc ^ gd; b = (fb << 11 | fb >> 21);
-					c = ga ^ gb + gc;
-					d = gd + 0xADB5B165 | 0;
-					return (uint64_t)fc << 32 ^ gc;
+					//uint32_t fa = a;
+					//uint32_t fb = b;
+					//uint32_t fc = c;
+					//uint32_t fd = d;
+					//uint32_t ga = fb ^ fc; ga = (ga << 26 | ga >> 6);
+					//uint32_t gb = fc ^ fd; gb = (gb << 11 | gb >> 21);
+					//uint32_t gc = fa ^ fb + fc;
+					//uint32_t gd = fd + 0xADB5B165 | 0;
+					//fa = gb ^ gc; a = (fa << 26 | fa >> 6);
+					//fb = gc ^ gd; b = (fb << 11 | fb >> 21);
+					//c = ga ^ gb + gc;
+					//d = gd + 0xADB5B165 | 0;
+					//return (uint64_t)fc << 32 ^ gc;
 
 					//uint32_t fa = c + b;
 					//uint32_t fb = a + c;
@@ -2474,6 +2474,31 @@ return x;
 					//c = fd + ga ^ gb;
 					//d = fd + 0x915F77F5 ^ 0xBEA225FA;
 					//return (uint64_t)(fc ^ fd + fb) << 32 ^ (fc + fa ^ fb);
+
+					//uint32_t fa = b + c;
+					//uint32_t fb = a + d;
+					//uint32_t fc = a + b;
+					//uint32_t fd = d + 0x915F77F5u;
+					//a = (fa << 11 | fa >> 21);
+					//b = (fb << 23 | fb >> 9);
+					//c = fa ^ fb;
+					//d = fd ^ 0xBEA225FAu;
+					//return (uint64_t)(fd + fa ^ fc) << 32 ^ (fb + fc ^ fa);
+
+					// ShoutRandom
+					// Passes 256TB (!) without anomalies. Period is at minimum 2 to the 32, and can be no more than 2 to the 128.
+					// 128 bits of state (four 32-bit ints), with 32-bit or 64-bit output at nearly equal speed.
+					// Optimized for the constraints of math on GWT or JS in general, where this would probably emit 32-bit ints.
+					uint32_t fa = a;
+					uint32_t fb = b;
+					uint32_t fc = c;
+					uint32_t fd = d;
+					a = (fb << 11 | fb >> 21) + fd ^ fc;
+					b = (fc << 23 | fc >>  9) + fa ^ fd;
+					c = (fa <<  5 | fa >> 27) ^ fb + fd;
+					d = fd + 0x915F77F5u ^ 0xBEA225FAu;;
+					return (uint64_t)(fa ^ fb) << 32 ^ (fc ^ fd);
+
 				}
 				std::string choppy128::get_name() const {
 					return "choppy128";
