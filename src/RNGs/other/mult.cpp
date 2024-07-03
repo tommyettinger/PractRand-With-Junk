@@ -7,6 +7,9 @@
 #include "PractRand/rng_internals.h"
 #if defined _MSC_VER && _MSC_VER >= 1800
 #include <intrin.h>
+#if defined(_M_X64) && !defined(_M_ARM64EC)
+#pragma intrinsic(_umul128)
+#endif
 #endif
 
 #include "PractRand/RNGs/other/mult.h"
@@ -4255,9 +4258,9 @@ return z;
 				}
 
 				Uint64 moremur64::raw64() { // named incorrectly, may name later... quarterback64 , due to use of 25 as a rotation?
-				    const uint64_t s = (state ^ 0x9E3779B97F4A7C15u) * 0xC6BC279692B5C323u;
-					//return state += s ^ s >> 41 ^ s >> 23; 0xD1342543DE82EF23
-					return state += (s ^ rotate64(s, 23) ^ rotate64(s, 41));
+//				    const uint64_t s = (state ^ 0x9E3779B97F4A7C15u) * 0xC6BC279692B5C323u;
+//					//return state += s ^ s >> 41 ^ s >> 23; 0xD1342543DE82EF23
+//					return state += (s ^ rotate64(s, 23) ^ rotate64(s, 41));
 
 					//Uint64 x = (state++);
 					//x = (x ^ x >> 27) * 0x3C79AC492BA7B653UL;
@@ -4304,6 +4307,50 @@ return z;
 //					x *= 0x1C69B3F74AC4AE35UL;
 //					x ^= x >> 27;
 //					return x;
+
+					// wyrand
+					// passes at least 16TB, but not even close to equidistributed.
+					//uint64_t x = (state += 0x2D358DCCAA6C78A5ull), y = x ^ 0x8BB84B93962EACC9ull;
+					//x ^= _umul128(x, y, &y);
+					//return x ^ y;
+					
+					// I'm trying various small transformations on either an XQO sequence or an LCG.
+					//uint64_t x = (state = -(state ^ (state * state | 5ull)));
+					//uint64_t x = (state = state * 0x3C79AC492BA7B653ULL ^ 0xF1357AEA2E62A9C5ULL);
+					//uint64_t x = (state += 0x9E3779B97F4A7C15ULL);
+					//x ^= x >> (x >> 59) + 6 ^ x >> 44;
+					//x *= 0xD1342543DE82EF95ULL;
+					//uint64_t x = (state = state * 0xF1357AEA2E62A9C5ULL + 0x9E3779B97F4A7C15ULL);
+					//uint64_t x = (state = state << 1 ^ (0ULL - (state >> 63) & 0xB5E1107E81BC107BULL));
+					//uint64_t x = (state = state >> 1 ^ (0ULL - (state & 1ULL) & 0xB5E1107E81BC107BULL));
+
+					// Passes at least 128TB of PractRand.
+					// Hardware issues stopped the test earlier than expected.
+					// Period is 2 to the 64, state and output sizes are each 64 bits.
+					// One-dimensionally equidistributed.
+					// May work as a unary hash?
+					uint64_t x = ++state;
+					x ^= x << (x & 31) + 5 ^ x << 41;
+					x *= 0xBEA225F9EB34556DULL;
+					x ^= x >> (x >> 59) + 7 ^ x >> 47;
+					x *= 0xD1342543DE82EF95ULL;
+					return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+
+					//x ^= x << 28 ^ 0xD1342543DE82EF95ULL;
+					//x *= 0x3C79AC492BA7B653ULL;
+					//x ^= x >> 34 ^ 0xBEA225F9EB34556DULL;
+					//x *= 0xB5E1107E81BC107BULL;
+					//return x ^ x >> 31;
+					//return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+					//uint64_t x = (state = state * 0xF1357AEA2E62A9C5ULL + 0x9E3779B97F4A7C15ULL);
+					//uint64_t x = (state = state + 0xF1357AEA2E62A9C5ULL ^ 0x9E3779B97F4A7C16ULL);
+
+					//x ^= x << (x & 31) + 5 ^ x << 41;
+					//x *= 0xBEA225F9EB34556DULL;
+					//x ^= x >> (x >> 59) + 7 ^ x >> 47;
+					//x *= 0xD1342543DE82EF95ULL;
+					//return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+
 				}
 				std::string moremur64::get_name() const { return "moremur64"; }
 				void moremur64::walk_state(StateWalkingObject *walker) {
