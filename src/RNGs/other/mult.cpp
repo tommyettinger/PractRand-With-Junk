@@ -4240,16 +4240,26 @@ return z;
 
 
 				Uint64 twinLinear::raw64() {
-					uint64_t r = rotate64(s0, 32) ^ s1;
-					r = rotate64(r, s0 >> 58);
-					//r += 0x2545F4914F6CDD1DULL;
-					s0 = s0 * 0xFF2826ADULL + r;
-					s1 = s1 * 0xFF1CD035ULL + 1ULL;
-//					s0 = s0 * 0xB67A49A5466DULL + r;
-//					s1 = s1 * 0x87338161EF95ULL + 1ULL;
-//					s0 = s0 * 0x2C6FE96EE78B6955ULL + r;
-//					s1 = s1 * 0x369DEA0F31A53F85ULL + 1ULL;
-					return r ^ r >> 32;
+//					uint64_t r = rotate64(s0, 32) ^ s1;
+//					r = rotate64(r, s0 >> 58);
+//					//r += 0x2545F4914F6CDD1DULL;
+//					s0 = s0 * 0xFF2826ADULL + r;
+//					s1 = s1 * 0xFF1CD035ULL + 1ULL;
+////					s0 = s0 * 0xB67A49A5466DULL + r;
+////					s1 = s1 * 0x87338161EF95ULL + 1ULL;
+////					s0 = s0 * 0x2C6FE96EE78B6955ULL + r;
+////					s1 = s1 * 0x369DEA0F31A53F85ULL + 1ULL;
+//					return r ^ r >> 32;
+
+					// TwinsiesRandom
+					// Passes 256TB with no anomalies.
+					// Period is 2 to the 64, with 2 to the 64 streams.
+					// Stepping backwards is equivalent to a subtraction and a multiplication by an inverse, for each state.
+					// Identifying the stream would probably require a variable-length jump through an LCG.
+					uint64_t x = rotate64(s0, 33) + s1;
+					s0 = s0 * 0x369DEA0F31A53F85ULL + 0x2C6FE96EE78B6955ULL;
+					s1 = s1 * 0xD1342543DE82EF95ULL + 0x9E3779B97F4A7C15ULL;
+					return x ^ x >> (x >> 59) + 6 ^ x >> 44;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
 				void twinLinear::walk_state(StateWalkingObject *walker) {
