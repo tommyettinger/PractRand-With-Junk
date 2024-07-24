@@ -4256,10 +4256,42 @@ return z;
 					// Period is 2 to the 64, with 2 to the 64 streams.
 					// Stepping backwards is equivalent to a subtraction and a multiplication by an inverse, for each state.
 					// Identifying the stream would probably require a variable-length jump through an LCG.
-					uint64_t x = rotate64(s0, 33) + s1;
-					s0 = s0 * 0x369DEA0F31A53F85ULL + 0x2C6FE96EE78B6955ULL;
-					s1 = s1 * 0xD1342543DE82EF95ULL + 0x9E3779B97F4A7C15ULL;
-					return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+					//uint64_t x = rotate64(s0, 33) + s1;
+					//s0 = s0 * 0x369DEA0F31A53F85ULL + 0x2C6FE96EE78B6955ULL;
+					//s1 = s1 * 0xD1342543DE82EF95ULL + 0x9E3779B97F4A7C15ULL;
+					//return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+
+
+					// Passes at least 2TB, but a restart was required before it could finish.
+//					uint64_t x = (rotate64(s0, 33) ^ s1) * 0xF1357AEA2E62A9C5ULL;
+//					s0 += 0x369DEA0F31A53F85ULL;
+//					s1 += 0x9E3779B97F4A7C15ULL;
+//					return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+
+					// Passes at least 64TB, but fails InitialCorrelationEvaluator test in Juniper.
+					//uint64_t x = (rotate64(s0, 33) ^ s1) * 0xF1357AEA2E62A9C5ULL;
+					//s0 += 0x369DEA0F31A53F85ULL;
+					//s1 += 0x9E3779B97F4A7C15ULL;
+					//return x ^ x >> 19 ^ x >> 44;
+
+					// Fails many TMFn tests at 512GB.
+					//uint64_t x = rotate64(s0, 33) ^ s1;
+					//s0 = s0 * 0x369DEA0F31A53F85ULL + 0x2C6FE96EE78B6955ULL;
+					//s1 = s1 * 0xD1342543DE82EF95ULL + 0x9E3779B97F4A7C15ULL;
+					//return x ^ x >> 19 ^ x >> 44;
+
+					// Has an anomaly ([Low1/16]Gap-16:A, "unusual") at 64TB...
+					//uint64_t x = (rotate64(s0, 33) ^ s1) * 0xF1357AEA2E62A9C5ULL;
+					//s0 += 0x369DEA0F31A53F85ULL;
+					//s1 += 0x9E3779B97F4A7C15ULL;
+					//x ^= x >> (x >> 59) + 9 ^ x >> 47;
+					//return x ^ x << (x & 31u) + 6 ^ x << 43;
+
+					uint64_t x = (rotate64(s0, 33) ^ s1) * 0xF1357AEA2E62A9C5ULL;
+					s0 += 0x369DEA0F31A53F85ULL;
+					s1 += 0x9E3779B97F4A7C15ULL;
+					x ^= x >> (x >> 59) + 7 ^ x >> 47;
+					return x ^ x << (x & 31u) + 6 ^ x << 41;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
 				void twinLinear::walk_state(StateWalkingObject *walker) {
