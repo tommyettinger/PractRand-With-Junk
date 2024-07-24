@@ -4287,11 +4287,27 @@ return z;
 					//x ^= x >> (x >> 59) + 9 ^ x >> 47;
 					//return x ^ x << (x & 31u) + 6 ^ x << 43;
 
-					uint64_t x = (rotate64(s0, 33) ^ s1) * 0xF1357AEA2E62A9C5ULL;
+					// Passes at least 4TB with no anomalies.
+					//uint64_t x = (rotate64(s0, 33) ^ s1) * 0xF1357AEA2E62A9C5ULL;
+					//s0 += 0x369DEA0F31A53F85ULL;
+					//s1 += 0x9E3779B97F4A7C15ULL;
+					//x ^= x >> (x >> 59) + 7 ^ x >> 47;
+					//return x ^ x << (x & 31u) + 6 ^ x << 41;
+
+					// Passes at least 128GB here, but fails ICE test in Juniper.
+					//uint64_t x = (rotate64(s0, 33) ^ s1);
+					//s0 += 0x369DEA0F31A53F85ULL;
+					//s1 += 0x9E3779B97F4A7C15ULL;
+					//x ^= x >> (x >> 59) + 7;
+					//x *= 0xF1357AEA2E62A9C5ULL;
+					//return x ^ x >> (x >> 59) + 6;
+
+					uint64_t x = (rotate64(s0, 21) ^ s1);
 					s0 += 0x369DEA0F31A53F85ULL;
 					s1 += 0x9E3779B97F4A7C15ULL;
-					x ^= x >> (x >> 59) + 7 ^ x >> 47;
-					return x ^ x << (x & 31u) + 6 ^ x << 41;
+					x ^= x >> (x >> 60) + 14;
+					x *= 0xF1357AEA2E62A9C5ULL;
+					return x ^ x >> (x >> 59) + 6;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
 				void twinLinear::walk_state(StateWalkingObject *walker) {
