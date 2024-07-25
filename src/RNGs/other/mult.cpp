@@ -4302,12 +4302,31 @@ return z;
 					//x *= 0xF1357AEA2E62A9C5ULL;
 					//return x ^ x >> (x >> 59) + 6;
 
-					uint64_t x = (rotate64(s0, 21) ^ s1);
+					// Fails fairly quickly, at 64GB.
+					//uint64_t x = (rotate64(s0, 21) ^ s1);
+					//s0 += 0x369DEA0F31A53F85ULL;
+					//s1 += 0x9E3779B97F4A7C15ULL;
+					//x ^= x >> 25 ^ x >> 50;
+					//x *= 0xF1357AEA2E62A9C5ULL;
+					//return x ^ x >> (x >> 59) + 6;
+
+					//fails [Low8/32]Gap-16:A and B early...
+					//uint64_t x = s0 ^ s0 >> 31;
+					//uint64_t y = s1 ^ s1 >> 29;
+					//s0 += 0x369DEA0F31A53F85ULL;
+					//s1 += 0x9E3779B97F4A7C15ULL;
+					//x ^= rotate64(y, 30);
+					//x *= 0xF1357AEA2E62A9C5ULL;
+					//return x ^ x >> (x >> 59) + 6;
+
+
+					uint64_t x = (rotate64(s0, 33) ^ s1);
 					s0 += 0x369DEA0F31A53F85ULL;
 					s1 += 0x9E3779B97F4A7C15ULL;
 					x ^= x >> (x >> 60) + 14;
 					x *= 0xF1357AEA2E62A9C5ULL;
-					return x ^ x >> (x >> 59) + 6;
+					return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
 				void twinLinear::walk_state(StateWalkingObject *walker) {
