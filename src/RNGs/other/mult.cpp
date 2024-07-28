@@ -4319,8 +4319,8 @@ return z;
 					//x *= 0xF1357AEA2E62A9C5ULL;
 					//return x ^ x >> (x >> 59) + 6;
 
-
-					uint64_t x = (rotate64(s0, 33) ^ s1);
+					// fails ICE test when using rotate64(s0, 33), but does pass 64TB of PractRand
+					uint64_t x = (rotate64(s0, 21) ^ s1);
 					s0 += 0x369DEA0F31A53F85ULL;
 					s1 += 0x9E3779B97F4A7C15ULL;
 					x ^= x >> (x >> 60) + 14;
