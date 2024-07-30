@@ -6010,7 +6010,19 @@ return stateA;
 					walker->handle(stateB);
 				}
 
-				Uint32 floatHax64::rand() {
+				union int_to_float_bits {
+					int32_t integer_bits;
+					float converted_float_bits;
+				};
+
+				float intBitsToFloat(int32_t int_value)
+				{
+					union int_to_float_bits bits;
+					bits.integer_bits = int_value;
+					return bits.converted_float_bits;
+				}
+
+				Uint64 floatHax64::rand() {
 					uint64_t x = (state += 0x9E3779B97F4A7C15UL);
 					x ^= x >> 32;
 					x *= 0xbea225f9eb34556dUL;
@@ -6019,15 +6031,19 @@ return stateA;
 					x ^= x >> 32;
 					x *= 0xbea225f9eb34556dUL;
 					x ^= x >> 29;
-					return (uint32_t)x;
+					return x;
 				}
 
 				Uint16 floatHax64::raw16() {
-					uint32_t proto_exp_offset = rand();
-					if (proto_exp_offset == 0) {
-						return 0;
-					}
-					float f = ldexpf((float)(rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
+					//uint32_t proto_exp_offset = (uint32_t)rand();
+					//if (proto_exp_offset == 0) {
+					//	return 0;
+					//}
+					//float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
+
+					uint64_t bits = rand();
+					float f = intBitsToFloat(126 - __lzcnt64(bits) << 23 | ((int)bits & 0x7FFFFF));
+
 					// gets the low 16 bits of the random float f's mantissa
 					return (uint16_t)(f * 0x800000);
 				}
