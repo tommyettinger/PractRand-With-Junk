@@ -3408,11 +3408,11 @@ return z ^ rotate64(z, 29) ^ rotate64(z, 40);
 //stateA += 0x6C8E9CF5U;
 //stateB += 0x7FEB352DU + (__lzcnt(x));
 //stateC += 0x91E10DA5U + (__lzcnt(x & y));
-uint32_t x = stateA, y = stateB, z = stateC;
-//0xD1B54A32
-stateA = 4 ^ x + 0x9E3779BD;
-stateB = x ^ y + (__lzcnt(x));
-stateC = y ^ z + (__lzcnt(x & y));
+//uint32_t x = stateA, y = stateB, z = stateC;
+////0xD1B54A32
+//stateA = 4 ^ x + 0x9E3779BD;
+//stateB = x ^ y + (__lzcnt(x));
+//stateC = y ^ z + (__lzcnt(x & y));
 //x = (y ^ rotate32(x, 7) + z);
 //y = x + rotate32(y, 27);
 //x = rotate32(x, 29) ^ (z * y | 1);
@@ -3462,10 +3462,27 @@ stateC = y ^ z + (__lzcnt(x & y));
 //y ^= rotate32(x, 17) + rotate32(z, 19);
 //z ^= rotate32(y,  5) + rotate32(x, 29);
 
-z = ((y = (z ^ rotate32(y, 3) + (x ^ 0x6C8E9CF5))) + rotate32(z, 24));
-z = ((y = (z ^ rotate32(y, 29) + (x ^ 0x7FEB352D))) + rotate32(z, 8));
 
-return z;
+//uint32_t x = stateA, y = stateB, z = stateC;
+////0xD1B54A32
+//stateA = 4 ^ x + 0x9E3779BD;
+//stateB = x ^ y + (__lzcnt(x));
+//stateC = y ^ z + (__lzcnt(x & y));
+//z = ((y = (z ^ rotate32(y, 3) + (x ^ 0x6C8E9CF5))) + rotate32(z, 24));
+//z = ((y = (z ^ rotate32(y, 29) + (x ^ 0x7FEB352D))) + rotate32(z, 8));
+//return z;
+
+
+uint32_t x, y;
+x = (stateA += 0xDB4F0B91);
+y = (stateB += (rotate32(x, 21) + __lzcnt(x)));
+x ^= rotate32(y, 21);
+x ^= x >> 15;
+x *= 0x2c1b3c6d;
+x ^= x >> 12;
+x *= 0x297a2d39;
+x ^= x >> 15;
+return x;
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
@@ -5935,34 +5952,88 @@ return stateA;
 				}
 
 				Uint16 suit80::raw16() {
-	const uint16_t fa = stateA;
-	const uint16_t fb = stateB;
-	const uint16_t fc = stateC;
-	const uint16_t fd = stateD;
-	const uint16_t fe = stateE;
-// Fails at 1TB (due to DC6-9x1Bytes-1) with the command:
-// ./RNG_test suit80 -tf 2 -tlmin 10 -tlmax 50 -multithreaded -seed 0
-    // stateA = fa + 0x9E3DU;
-    // stateB = fa ^ fe;
-    // stateC = fb + fd;
-    // stateD = rotate16(fc, 5);
-    // return stateE = fb - fc;
-// Shockingly, passes 64TB with just one anomaly (a very-low-significance DC6-9x1Bytes-1 at 2 KB).
-// This was run with the same command as above.
-    stateA = fa + 0x9E3DU;
-    stateB = fa ^ fe;
-    stateC = fb + fd;
-    stateD = rotate16(fc, 11);
-	stateE = fb + fc;
-	return fb;
+					const uint16_t fa = stateA;
+					const uint16_t fb = stateB;
+					const uint16_t fc = stateC;
+					const uint16_t fd = stateD;
+					const uint16_t fe = stateE;
+					// Fails at 1TB (due to DC6-9x1Bytes-1) with the command:
+					// ./RNG_test suit80 -tf 2 -tlmin 10 -tlmax 50 -multithreaded -seed 0
+						// stateA = fa + 0x9E3DU;
+						// stateB = fa ^ fe;
+						// stateC = fb + fd;
+						// stateD = rotate16(fc, 5);
+						// return stateE = fb - fc;
+					// Shockingly, passes 64TB with just one anomaly (a very-low-significance DC6-9x1Bytes-1 at 2 KB).
+					// This was run with the same command as above.
+					stateA = fa + 0x9E3DU;
+					stateB = fa ^ fe;
+					stateC = fb + fd;
+					stateD = rotate16(fc, 11);
+					stateE = fb + fc;
+					return fb;
 				}
 				std::string suit80::get_name() const { return "suit80"; }
-				void suit80::walk_state(StateWalkingObject *walker) {
+				void suit80::walk_state(StateWalkingObject* walker) {
 					walker->handle(stateA);
 					walker->handle(stateB);
 					walker->handle(stateC);
 					walker->handle(stateD);
 					walker->handle(stateE);
+				}
+
+				Uint32 floatHax32::rand() {
+					uint32_t x, y;
+					x = (stateA += 0xDB4F0B91);
+					y = (stateB += (rotate32(x, 21) + __lzcnt(x)));
+					x ^= rotate32(y, 21);
+					x ^= x >> 15;
+					x *= 0x2c1b3c6d;
+					x ^= x >> 12;
+					x *= 0x297a2d39;
+					x ^= x >> 15;
+					return x;
+				}
+
+				Uint16 floatHax32::raw16() {
+					uint32_t proto_exp_offset = rand();
+					if (proto_exp_offset == 0) {
+						return 0;
+					}
+					float f = ldexpf((float)(rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
+					// gets the low 16 bits of the random float f's mantissa
+					return (uint16_t)(f * 0x800000);
+				}
+				std::string floatHax32::get_name() const { return "floatHax32"; }
+				void floatHax32::walk_state(StateWalkingObject* walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+				}
+
+				Uint32 floatHax64::rand() {
+					uint64_t x = (state += 0x9E3779B97F4A7C15UL);
+					x ^= x >> 32;
+					x *= 0xbea225f9eb34556dUL;
+					x ^= x >> 29;				
+					x *= 0xbea225f9eb34556dUL;
+					x ^= x >> 32;
+					x *= 0xbea225f9eb34556dUL;
+					x ^= x >> 29;
+					return (uint32_t)x;
+				}
+
+				Uint16 floatHax64::raw16() {
+					uint32_t proto_exp_offset = rand();
+					if (proto_exp_offset == 0) {
+						return 0;
+					}
+					float f = ldexpf((float)(rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
+					// gets the low 16 bits of the random float f's mantissa
+					return (uint16_t)(f * 0x800000);
+				}
+				std::string floatHax64::get_name() const { return "floatHax64"; }
+				void floatHax64::walk_state(StateWalkingObject* walker) {
+					walker->handle(state);
 				}
 
 			}
