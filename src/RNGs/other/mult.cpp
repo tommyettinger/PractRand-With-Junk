@@ -6014,7 +6014,7 @@ return stateA;
 					//}
 					//float f = ldexpf((float)(rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
 					uint32_t bits = rand();
-					float f = intBitsToFloat((126u - __lzcnt(rand()) << 23 & (bits | 0u - bits)) | (bits & 0x7FFFFF));
+					float f = intBitsToFloat((126u - __lzcnt(rand()) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFF));
 
 					// gets the low 16 bits of the random float f's mantissa
 					return (uint16_t)(f * 0x800000);
@@ -6045,7 +6045,7 @@ return stateA;
 					//float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
 
 					uint64_t bits = rand();
-					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(bits) << 23 & (uint32_t)(bits | 0u - bits)) | ((uint32_t)bits & 0x7FFFFF));
+					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(bits) << 23 & 0u - (uint32_t)((bits | 0ULL - bits) >> 63)) | ((uint32_t)bits & 0x7FFFFF));
 
 					// gets the low 16 bits of the random float f's mantissa
 					return (uint16_t)(f * 0x800000);
@@ -6074,8 +6074,11 @@ return stateA;
 					//float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
 
 					// fails at 2TB: FPF-14+6/16:(16,14-0)
+					//uint32_t bits = rand();
+					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state) << 23 & (bits | 0u - bits)) | (bits & 0x7FFFFFu));
+
 					uint32_t bits = rand();
-					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state) << 23 & (bits | 0u - bits)) | (bits & 0x7FFFFFu));
+					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFFu));
 
 					// gets the low 16 bits of the random float f's mantissa
 					return (uint16_t)(f * 0x800000);
