@@ -6073,6 +6073,7 @@ return stateA;
 					//}
 					//float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
 
+					// fails at 2TB: FPF-14+6/16:(16,14-0)
 					uint32_t bits = rand();
 					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state) << 23 & (bits | 0u - bits)) | (bits & 0x7FFFFFu));
 
