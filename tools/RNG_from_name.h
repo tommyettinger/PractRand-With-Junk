@@ -638,6 +638,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(suit80)
 			REGISTER_RNG_0(floatHax32)
 			REGISTER_RNG_0(floatHax64)
+			REGISTER_RNG_0(floatHaxPCG)
 
 		// include/PractRand/RNGs/other/fibonacci.h
 		RNG_Factories::RNG_factory_index["bigbadlcg"] = bigbadlcg_factory;

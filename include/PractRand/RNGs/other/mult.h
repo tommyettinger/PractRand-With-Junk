@@ -714,6 +714,15 @@ namespace PractRand {
 					void walk_state(StateWalkingObject*);
 				};
 
+				class floatHaxPCG : public vRNG16 {
+					Uint64 state;
+				public:
+					Uint32 rand();
+					Uint16 raw16();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject*);
+				};
+
 			}
 		}
 	}
