@@ -6016,7 +6016,7 @@ return stateA;
 					uint32_t bits = rand();
 					float f = intBitsToFloat((126u - __lzcnt(rand()) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFF));
 
-					// gets the low 16 bits of the random float f's mantissa
+					// gets the low 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x800000);
 				}
 				std::string floatHax32::get_name() const { return "floatHax32"; }
@@ -6047,7 +6047,7 @@ return stateA;
 					uint64_t bits = rand();
 					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(bits) << 23 & 0u - (uint32_t)((bits | 0ULL - bits) >> 63)) | ((uint32_t)bits & 0x7FFFFF));
 
-					// gets the low 16 bits of the random float f's mantissa
+					// gets the low 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x800000);
 				}
 				std::string floatHax64::get_name() const { return "floatHax64"; }
@@ -6073,14 +6073,20 @@ return stateA;
 					//}
 					//float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
 
-					// fails at 2TB: FPF-14+6/16:(16,14-0)
+					//// fails at 2TB: FPF-14+6/16:(16,14-0)
 					//uint32_t bits = rand();
 					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state) << 23 & (bits | 0u - bits)) | (bits & 0x7FFFFFu));
 
+					//// passes at least 64TB with no anomalies (!), on seed 0x0.
+					//// This is dependent on the structure of PCG-Random for how well it works.
+					//// This only has to generate one random uint32_t to function, but it also uses PCG's uint64_t state.
+					//// floatHaxPCG::rand() should scramble the output enough that that the state after that output won't be correlated much.
+					//// There is detectable correlation after about 2TB, though.
+					//// An extra 64-bit multiplication (here, by 0xD1342543DE82EF95ULL) allows it to avoid correlation for our purposes.
 					uint32_t bits = rand();
 					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFFu));
 
-					// gets the low 16 bits of the random float f's mantissa
+					// gets the low 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x800000);
 				}
 				std::string floatHaxPCG::get_name() const { return "floatHaxPCG"; }
