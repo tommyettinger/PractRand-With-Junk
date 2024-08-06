@@ -5987,11 +5987,23 @@ return stateA;
 					float converted_float_bits;
 				};
 
-				float intBitsToFloat(uint32_t int_value)
+				static float intBitsToFloat(uint32_t int_value)
 				{
 					union int_to_float_bits bits;
 					bits.integer_bits = int_value;
 					return bits.converted_float_bits;
+				}
+
+				union long_to_double_bits {
+					uint64_t long_bits;
+					double converted_double_bits;
+				};
+
+				static double longBitsToDouble(uint64_t long_value)
+				{
+					union long_to_double_bits bits;
+					bits.long_bits = long_value;
+					return bits.converted_double_bits;
 				}
 
 				Uint32 floatHax32::rand() {
@@ -6084,7 +6096,8 @@ return stateA;
 					//// There is detectable correlation after about 2TB, though.
 					//// An extra 64-bit multiplication (here, by 0xD1342543DE82EF95ULL) allows it to avoid correlation for our purposes.
 					uint32_t bits = rand();
-					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFFu));
+					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFFu));
 
 					// gets the low 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x800000);
@@ -6092,6 +6105,34 @@ return stateA;
 				std::string floatHaxPCG::get_name() const { return "floatHaxPCG"; }
 				void floatHaxPCG::walk_state(StateWalkingObject* walker) {
 					walker->handle(state);
+				}
+
+
+				Uint64 doubleHaxFlow::rand() {
+					uint64_t x = (stateA += 0xD1B54A32D192ED03ULL);
+					uint64_t y = (stateB += 0x8CB92BA72F3D8DD7ULL);
+					x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653ULL;
+					y = (x ^ x >> 33) * 0x1C69B3F74AC4AE35ULL;
+					return y ^ y >> 27;
+				}
+
+				Uint32 doubleHaxFlow::raw32() {
+					// Passes 64TB of testing with no anomalies.
+					// Tested on the low 32 bits of each returned double, after scaling the double by (1ULL << 52).
+					uint64_t x = (stateA += 0xD1B54A32D192ED03ULL);
+					uint64_t y = (stateB += 0x8CB92BA72F3D8DD7ULL);
+					x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653ULL;
+					y = (x ^ x >> 33) * 0x1C69B3F74AC4AE35ULL;
+					uint64_t bits = y ^ y >> 27;
+					double d = longBitsToDouble((1022ULL - __lzcnt64(x) << 52 & 0u - ((bits | 0u - bits) >> 63)) | (bits & 0xFFFFFFFFFFFFFULL));
+
+					// gets the low 32 bits of the random float f after scaling
+					return (uint32_t)(d * (1ULL << 52));
+				}
+				std::string doubleHaxFlow::get_name() const { return "doubleHaxFlow"; }
+				void doubleHaxFlow::walk_state(StateWalkingObject* walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
 				}
 
 			}

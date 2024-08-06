@@ -723,6 +723,15 @@ namespace PractRand {
 					void walk_state(StateWalkingObject*);
 				};
 
+				class doubleHaxFlow : public vRNG32 {
+					Uint64 stateA, stateB;
+				public:
+					Uint64 rand();
+					Uint32 raw32();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject*);
+				};
+
 			}
 		}
 	}
