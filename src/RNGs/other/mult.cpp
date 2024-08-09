@@ -6075,7 +6075,7 @@ return stateA;
 					// Calculate output function (XSH RR), uses old state for max ILP
 					uint32_t xorshifted = ((oldstate >> 18u) ^ oldstate) >> 27u;
 					uint32_t rot = oldstate >> 59u;
-					return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+					return (xorshifted >> rot) | (xorshifted << ((32u - rot) & 31u));
 				}
 
 				Uint16 floatHaxPCG::raw16() {
@@ -6117,17 +6117,21 @@ return stateA;
 				}
 
 				Uint32 doubleHaxFlow::raw32() {
-					// Passes 64TB of testing with no anomalies.
-					// Tested on the low 32 bits of each returned double, after scaling the double by (1ULL << 52).
+					//// Passes 64TB of testing with no anomalies.
+					//// Tested on the low 32 bits of each returned double, after scaling the double by (1ULL << 52).
+					//// Again, passes 64TB of testing with no anomalies.
+					//// Tested on the "high 32 bits" of each returned double, after scaling the double by (1ULL << 32).
 					uint64_t x = (stateA += 0xD1B54A32D192ED03ULL);
 					uint64_t y = (stateB += 0x8CB92BA72F3D8DD7ULL);
 					x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653ULL;
 					y = (x ^ x >> 33) * 0x1C69B3F74AC4AE35ULL;
-					uint64_t bits = y ^ y >> 27;
-					double d = longBitsToDouble((1022ULL - __lzcnt64(x) << 52 & 0u - ((bits | 0u - bits) >> 63)) | (bits & 0xFFFFFFFFFFFFFULL));
+					y ^= y >> 27;
+					double d = longBitsToDouble((1022ULL - __lzcnt64(x) << 52 & 0ULL - (y != 0ULL)) | (y & 0xFFFFFFFFFFFFFULL));
 
-					// gets the low 32 bits of the random float f after scaling
-					return (uint32_t)(d * (1ULL << 52));
+					//// gets the low 32 bits of the random float f after scaling
+					//return (uint32_t)(d * (1ULL << 52));
+					//// gets the high 32 bits of the random float f after scaling
+					return (uint32_t)(d * (1ULL << 32));
 				}
 				std::string doubleHaxFlow::get_name() const { return "doubleHaxFlow"; }
 				void doubleHaxFlow::walk_state(StateWalkingObject* walker) {
