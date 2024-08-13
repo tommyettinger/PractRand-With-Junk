@@ -209,6 +209,15 @@ namespace PractRand {
 					void seed(Uint64 s);
 					void walk_state(StateWalkingObject *);
 				};
+				class pcg64 : public vRNG64 {
+					Uint64 state, inc;
+				public:
+					pcg64() : state(0x853c49e6748fea9bULL), inc(0xda3e39cb94b95bdbULL) {}
+					Uint64 raw64();
+					std::string get_name() const;
+					void seed(Uint64 s);
+					void walk_state(StateWalkingObject *);
+				};
 				class pcg32_norot : public vRNG32 {
 					Uint64 state, inc;
 				public:

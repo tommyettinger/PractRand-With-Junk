@@ -233,6 +233,33 @@ namespace PractRand {
 				void pcg32::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 				}
+
+				void pcg64::seed(Uint64 s) { state = 0; raw64(); state += s; raw64(); }
+				Uint64 pcg64::raw64() {
+					//// Passes at least 32TB with no anomalies.
+					//// This has probably been tested way more thoroughly than I can do; I'm sure it's fine.
+					//Uint64 oldstate = state;
+					//state = state * 0x5851f42d4c957f2dULL + inc;
+					//Uint64 word = ((oldstate >> ((oldstate >> 59u) + 5u)) ^ oldstate) * 12605985483714917081ULL;
+					//return (word >> 43u) ^ word;
+					
+					//// Gets a "suspicious" result at 64TB:
+					//// BCFN(2+0,13-0,T)                  R= +12.9  p =  2.0e-6   suspicious
+					Uint64 i = inc ^ rotate64(state, 23);
+					state += 0x5851F42D4C957F2DULL;
+					inc += 0xDA3E39CB94B95BDBULL;
+					Uint64 word = (i ^ i >> (i >> 59u) + 5u) * 12605985483714917081ULL;
+					return (word >> 43u) ^ word;
+				}
+				std::string pcg64::get_name() const {
+					if (inc == 0xda3e39cb94b95bdbULL) return "pcg64";
+					std::ostringstream str;
+					str << "pcg64(" << std::hex << inc << ")";
+					return str.str();
+				}
+				void pcg64::walk_state(StateWalkingObject *walker) {
+					walker->handle(state);
+				}
 				void pcg32_norot::seed(Uint64 s) { state = 0; raw32(); state += s; raw32(); }
 				Uint32 pcg32_norot::raw32() {
 					Uint64 oldstate = state;
@@ -6073,9 +6100,9 @@ return stateA;
 					// Advance internal state
 					state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
 					// Calculate output function (XSH RR), uses old state for max ILP
-					uint32_t xorshifted = ((oldstate >> 18u) ^ oldstate) >> 27u;
+					uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
 					uint32_t rot = oldstate >> 59u;
-					return (xorshifted >> rot) | (xorshifted << ((32u - rot) & 31u));
+					return (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
 				}
 
 				Uint16 floatHaxPCG::raw16() {

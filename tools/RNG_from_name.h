@@ -574,6 +574,7 @@ namespace RNG_Factories {
 		REGISTER_RNG_0(lcg16of32_extended)
 		REGISTER_RNG_0(lcg32_extended)
 		REGISTER_RNG_0(pcg32)
+		REGISTER_RNG_0(pcg64)
 		REGISTER_RNG_0(pcg32_norot)
 		REGISTER_RNG_0(cmrg32of192)
 		REGISTER_RNG_0(xsh_lcg_bad)
