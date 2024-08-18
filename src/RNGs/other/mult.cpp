@@ -245,11 +245,23 @@ namespace PractRand {
 					
 					//// Gets a "suspicious" result at 64TB:
 					//// BCFN(2+0,13-0,T)                  R= +12.9  p =  2.0e-6   suspicious
+					//Uint64 i = inc ^ rotate64(state, 23);
+					//state += 0x5851F42D4C957F2DULL;
+					//inc += 0xDA3E39CB94B95BDBULL;
+					//Uint64 word = (i ^ i >> (i >> 59u) + 5u) * 12605985483714917081ULL;
+					//return (word >> 43u) ^ word;
+
+					//// Passes at least 64TB with no anomalies, but unusually slow...
+					//// This takes 3738 seconds to test 1TB, where others took much less than 3000 seconds.
 					Uint64 i = inc ^ rotate64(state, 23);
 					state += 0x5851F42D4C957F2DULL;
 					inc += 0xDA3E39CB94B95BDBULL;
-					Uint64 word = (i ^ i >> (i >> 59u) + 5u) * 12605985483714917081ULL;
-					return (word >> 43u) ^ word;
+					i = (i ^ i >> 40) * 12605985483714917081ULL;
+					return (i ^ rotate64(i, 53) ^ rotate64(i, 19));
+
+//					Uint64 word = (i ^ rotate64(i, 53) ^ rotate64(i, 19)) * 12605985483714917081ULL;
+//					Uint64 word = (i ^ i >> 6u ^ i >> 47u) * 12605985483714917081ULL;
+//					return word ^ word >> 44u;
 				}
 				std::string pcg64::get_name() const {
 					if (inc == 0xda3e39cb94b95bdbULL) return "pcg64";
