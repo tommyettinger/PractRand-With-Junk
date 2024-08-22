@@ -238,13 +238,18 @@ namespace PractRand {
 				Uint64 pcg64::raw64() {
 					//// Passes at least 32TB with no anomalies.
 					//// This has probably been tested way more thoroughly than I can do; I'm sure it's fine.
+					//// ... Well, I say that, but if you test this on only odd numbers for inc and only even numbers for state,
+					//// there is a detectable correlation between streams. I'm not sure how bad it is, but it makes this sometimes
+					//// fail Juniper's ICE test.
+					
 					//Uint64 oldstate = state;
 					//state = state * 0x5851f42d4c957f2dULL + inc;
-					//Uint64 word = ((oldstate >> ((oldstate >> 59u) + 5u)) ^ oldstate) * 12605985483714917081ULL;
-					//return (word >> 43u) ^ word;
+					//Uint64 word = (oldstate ^ (oldstate >> ((oldstate >> 59u) + 5u))) * 12605985483714917081ULL;
+					//return word ^ word >> 43u;
 					
 					//// Gets a "suspicious" result at 64TB:
 					//// BCFN(2+0,13-0,T)                  R= +12.9  p =  2.0e-6   suspicious
+					
 					//Uint64 i = inc ^ rotate64(state, 23);
 					//state += 0x5851F42D4C957F2DULL;
 					//inc += 0xDA3E39CB94B95BDBULL;
@@ -253,11 +258,27 @@ namespace PractRand {
 
 					//// Passes at least 64TB with no anomalies, but unusually slow...
 					//// This takes 3738 seconds to test 1TB, where others took much less than 3000 seconds.
-					Uint64 i = inc ^ rotate64(state, 23);
-					state += 0x5851F42D4C957F2DULL;
+					
+					//Uint64 i = inc ^ rotate64(state, 23);
+					//state += 0x5851F42D4C957F2DULL;
+					//inc += 0xDA3E39CB94B95BDBULL;
+					//i = (i ^ i >> 40) * 12605985483714917081ULL;
+					//return (i ^ rotate64(i, 53) ^ rotate64(i, 19));
+
+					//// Passes at least 64TB with no anomalies, but fails Juniper's ICE test badly.
+
+					Uint64 i = inc ^ state;
 					inc += 0xDA3E39CB94B95BDBULL;
-					i = (i ^ i >> 40) * 12605985483714917081ULL;
-					return (i ^ rotate64(i, 53) ^ rotate64(i, 19));
+					state += __lzcnt64(inc);
+					Uint64 r = (i ^ i >> (i >> 59u) + 5u) * 0xF1357AEA2E62A9C5ULL;
+					return (r >> 43u) ^ r;
+
+					//i = (i ^ rotate64(i, 34) ^ rotate64(i, 19)) * 12605985483714917081ULL;
+					//i = (i ^ i >> 23 ^ i >> 31) * 12605985483714917081ULL;
+					//return (i ^ i >> 43);
+
+					// 0xF1357AEA2E62A9C5ULL
+
 
 //					Uint64 word = (i ^ rotate64(i, 53) ^ rotate64(i, 19)) * 12605985483714917081ULL;
 //					Uint64 word = (i ^ i >> 6u ^ i >> 47u) * 12605985483714917081ULL;
@@ -271,6 +292,7 @@ namespace PractRand {
 				}
 				void pcg64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
+					walker->handle(inc);
 				}
 				void pcg32_norot::seed(Uint64 s) { state = 0; raw32(); state += s; raw32(); }
 				Uint32 pcg32_norot::raw32() {
