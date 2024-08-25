@@ -267,11 +267,19 @@ namespace PractRand {
 
 					//// Passes at least 64TB with no anomalies, but fails Juniper's ICE test badly.
 
-					Uint64 i = inc ^ state;
-					inc += 0xDA3E39CB94B95BDBULL;
-					state += __lzcnt64(inc);
-					Uint64 r = (i ^ i >> (i >> 59u) + 5u) * 0xF1357AEA2E62A9C5ULL;
-					return (r >> 43u) ^ r;
+					//Uint64 i = inc ^ state;
+					//inc += 0xDA3E39CB94B95BDBULL;
+					//state += __lzcnt64(inc);
+					//Uint64 r = (i ^ i >> (i >> 59u) + 5u) * 0xF1357AEA2E62A9C5ULL;
+					//return (r >> 43u) ^ r;
+
+					//// PactRandom
+					//// Passes at least 64TB with no anomalies. It also passes Juniper's ICE test.
+					Uint64 z = (rotate64(state, 13) ^ rotate64(inc, 41) + state) * 0xF1357AEA2E62A9C5ULL;
+					inc += __lzcnt64(state);
+					state += 0xDA3E39CB94B95BDBULL;
+					z = (z ^ rotate64(z, 23) ^ rotate64(z, 47)) * 0xF1357AEA2E62A9C5L;
+					return z ^ z >> 43;
 
 					//i = (i ^ rotate64(i, 34) ^ rotate64(i, 19)) * 12605985483714917081ULL;
 					//i = (i ^ i >> 23 ^ i >> 31) * 12605985483714917081ULL;
