@@ -3169,21 +3169,32 @@ return z ^ rotate64(z, 29) ^ rotate64(z, 40);
 
 					//0xC6BC279692B5C323UL //0xCB9C59B3F9F87D4DUL
 
-// FleetRandom
-// Passes 64TB of PractRand with no anomalies.
-// Period is exactly 2 to the 128, all on one stream.
-// This is one-dimensionally equidistributed, returning every uint64_t exactly as often.
-// Requires access to the count leading zeroes function, which may vary based on compiler.
-// This assumes behavior is the same as Java's Long.numberOfLeadingZeros() method, that is,
-// an input of 0 produces an output of 64. The same period length is guaranteed if the
-// count leading zeroes function here returns any even constant, but if it doesn't return
-// 64 when given 0, the output will eventually be different for the same seed.
-					uint64_t q = (stateA += 0x9E3779B97F4A7C15ULL);
-					uint64_t r = (stateB += 0xC6BC279692B5C323ULL ^ __lzcnt64(q));
-					r ^= r >> 28;
-					r *= q | 1ULL;
-					r ^= r >> 30 ^ r >> 6;
-					return r;
+//// FleetRandom
+//// Passes 64TB of PractRand with no anomalies.
+//// Period is exactly 2 to the 128, all on one stream.
+//// This is one-dimensionally equidistributed, returning every uint64_t exactly as often.
+//// Requires access to the count leading zeroes function, which may vary based on compiler.
+//// This assumes behavior is the same as Java's Long.numberOfLeadingZeros() method, that is,
+//// an input of 0 produces an output of 64. The same period length is guaranteed if the
+//// count leading zeroes function here returns any even constant, but if it doesn't return
+//// 64 when given 0, the output will eventually be different for the same seed.
+
+//					uint64_t q = (stateA += 0x9E3779B97F4A7C15ULL);
+//					uint64_t r = (stateB += 0xC6BC279692B5C323ULL ^ __lzcnt64(q));
+//					r ^= r >> 28;
+//					r *= q | 1ULL;
+//					r ^= r >> 30 ^ r >> 6;
+//					return r;
+
+//// FowlRandom
+//// Passes at least 64TB with no anomalies. Passes Juniper's ICE test, typically.
+//// Period is exactly 2 to the 128; one stream.
+uint64_t x = (stateA += __lzcnt64(stateB));
+uint64_t y = (stateB += 0xD1B54A32D192ED03ULL);
+x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653ULL;
+x = (x ^ x >> 33) * 0xF1357AEA2E62A9C5ULL;
+x ^= x >> 27;
+return x;
 
 				}
 				std::string mingler::get_name() const { return "mingler"; }
