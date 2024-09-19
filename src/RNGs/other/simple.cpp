@@ -1466,6 +1466,9 @@ namespace PractRand {
 // It passes 64TB of PractRand without any anomalies. It passes ReMort testing through 2 to the 57.32 bytes. The ReMort results aren't especially
 // strong, but were never considered suspect over the course of testing.
 					const uint64_t result = (uint64_t)(rotate32(state0 + state3, 7) + state0) << 32 ^ (rotate32(state2 - state1, 13) + state2);
+					//Uint64 word = (oldstate ^ (oldstate >> ((oldstate >> 59u) + 5u))) * 12605985483714917081ULL;
+					//return word ^ word >> 43u;
+
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1597,9 +1600,18 @@ namespace PractRand {
 //					return (result << 7) - rotate32(result, 3);
 
 
-					const uint32_t result = state1 + 0x41C64E6Du;// + 0x9E3779B9u;
+
+					//const uint32_t result = state1 + 0x41C64E6Du;// + 0x9E3779B9u;
 				    //const uint64_t result = (uint64_t)(rol32(s->s[0] + s->s[3], 7) + s->s[0]) << 32 ^ (rol32(s->s[2] - s->s[1], 13) + s->s[2]);
 					// const uint64_t result = (uint64_t)(rotate32(state0 + state3, 7) + state0) << 32 ^ (rotate32(state2 - state1, 13) + state2);
+					
+					// Permushiro-A, the much-feared Vigna/O'Neill mutant hybrid.
+					// The A is present because this is the first variant to pass (and the first tested).
+					// Passes (at least) 64TB without anomalies.
+					// 4-dimensionally equidistributed, with the exception of four 0 results in a row.
+					// Like xoshiro128** and PCG-RXS-M-XS, both of which this is based on, this is "trivially invertible",
+					// and you can get state1 given only a returned uint32_t.
+					const uint32_t result = (state1 ^ (state1 >> ((state1 >> 28u) + 4u))) * 0x39E2DU;
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1610,7 +1622,7 @@ namespace PractRand {
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-					return result;
+					return result ^ result >> 21u;
 					//return rotate32(state3, 23) + (state0 ^ 0x41C64E6Du) * 0x9E3779BBu;
 					//return (result << 7) - rotate32(result, 3);
 					// return rotate32(result, 17) + 0x9E3779B9u;
