@@ -1611,7 +1611,55 @@ namespace PractRand {
 					// 4-dimensionally equidistributed, with the exception of four 0 results in a row.
 					// Like xoshiro128** and PCG-RXS-M-XS, both of which this is based on, this is "trivially invertible",
 					// and you can get state1 given only a returned uint32_t.
-					const uint32_t result = (state1 ^ (state1 >> ((state1 >> 28u) + 4u))) * 0x39E2DU;
+					//const uint32_t result = (state1 ^ (state1 >> ((state1 >> 28u) + 4u))) * 0x39E2DU;
+					//const uint32_t t = state1 << 9;
+
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+
+					//state2 ^= t;
+
+					//state3 = rotate32(state3, 11);
+					//return result ^ result >> 21u;
+
+					// not totally sure on this one; it sometimes passes 64GB with no anomalies, and sometimes has a very minor anomaly at 1GB.
+					//const uint32_t result = state1 * 0x39E2DU;
+					//const uint32_t t = state1 << 9;
+
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+
+					//state2 ^= t;
+
+					//state3 = rotate32(state3, 11);
+					//return (result ^ (result >> ((result >> 28u) + 4u)));
+
+
+					// Too simple! Fails at 8GB.
+					//rng = xoshiro4x32, seed = 0x0
+					//	length = 8 gigabytes(2 ^ 33 bytes), time = 22.4 seconds
+					//	Test Name                         Raw       Processed     Evaluation
+					//	BRank(12) :6K(1)                   R = +1272  p~= 5.4e-384   FAIL !!!!!!!
+					//	...and 729 test result(s) without anomalies
+					//const uint32_t result = rotate32(state1, state0 & 31);
+					//const uint32_t t = state1 << 9;
+
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+
+					//state2 ^= t;
+
+					//state3 = rotate32(state3, 11);
+					//return result;
+
+
+					const uint32_t result = rotate32(state1, state0 & 31) * 0x39E2DU;
 					const uint32_t t = state1 << 9;
 
 					state2 ^= state0;
@@ -1622,7 +1670,10 @@ namespace PractRand {
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-					return result ^ result >> 21u;
+					return result ^ result >> 15;
+
+
+
 					//return rotate32(state3, 23) + (state0 ^ 0x41C64E6Du) * 0x9E3779BBu;
 					//return (result << 7) - rotate32(result, 3);
 					// return rotate32(result, 17) + 0x9E3779B9u;
