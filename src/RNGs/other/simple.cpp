@@ -996,8 +996,6 @@ namespace PractRand {
 
 				Uint32 xoroshiro32_32::raw32() {
 					// rotate32(state1 + 0x41C64E6D, 17) + 0x9E3779B9
-					const uint32_t s0 = state0;
-					const uint32_t s1 = s0 ^ state1;
 					//<< 5 , rotl 3
 					//<< 6 , rotl 4
 					//<< 9 , rotl 5
@@ -1011,29 +1009,39 @@ namespace PractRand {
 					//<< 12, rotl 10
 					//<< 15, rotl 11
 					//<< 17, rotl 13
+					//const uint32_t s0 = state0;
+					//const uint32_t s1 = s0 ^ state1;
 					//const Uint32 result = ((s0 << 6) - rotate32(s0, 4));// +0xE32BE5AB;// * 31;// +0x41C64E6D;// (s0 ^ 0xAEF1F2D9) + 0x41C64E6D;
 
 					//Uint32 s2 = (state2 += UINT32_C(0x9E3779BD));
 					//Uint32 s2 = (state2 = rotate32(state2 + 0xC68E9CB7U ^ 0xB5402ED7U, 1));
 
 					// +UINT32_C(0x41C64E6D);// + (state2 += UINT32_C(0x9E3779BD));// +0xE32BE5AB;// * 31;// +0x41C64E6D;// (s0 ^ 0xAEF1F2D9) + 0x41C64E6D;
+					//const uint32_t s0 = state0;
+					//const uint32_t s1 = s0 ^ state1;
 					//const Uint32 result = (s0 << 5) - rotate32(s0, 3) + UINT32_C(0x9E3779BD);
 					//state0 = rotate32(s0, 13) ^ s1 ^ (s1 << 5); // a=13, b=5
 					//state1 = rotate32(s1, 28); // c=28
 					//return ((result << 10) - rotate32(result, 7));
 
 					////// starfish32
-					const uint32_t result = s0 * 31;
-					state0 = rotate32(s0, 26) ^ s1 ^ (s1 << 9);
-					state1 = rotate32(s1, 13);
-					return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
+					//const uint32_t s0 = state0;
+					//const uint32_t s1 = s0 ^ state1;
+					//const uint32_t result = s0 * 31;
+					//state0 = rotate32(s0, 26) ^ s1 ^ (s1 << 9);
+					//state1 = rotate32(s1, 13);
+					//return (rotate32(result, 28)) + UINT32_C(0x9E3779BD);
 
+					//const uint32_t s0 = state0;
+					//const uint32_t s1 = s0 ^ state1;
 					//const uint32_t result = (s0 << 5) - s0;
 					//state0 = rotate32(s0, 26) ^ s1 ^ (s1 << 9);
 					//state1 = rotate32(s1, 13);
 					//return (result << 11) - rotate32(result, 4);
 
 
+					//const uint32_t s0 = state0;
+					//const uint32_t s1 = s0 ^ state1;
 					//const uint32_t result = s0 * (s1 | 0xA529u);
 					//state0 = rotate32(s0, 26) ^ s1 ^ (s1 << 9);
 					//state1 = rotate32(s1, 13);
@@ -1101,6 +1109,17 @@ namespace PractRand {
 					//tmp += (tmp << 18) | (tmp >> 14);//barrel shift and add
 					//tmp += ((tmp << 7) | (tmp >> 25)) ^ ((tmp << 11) | (tmp >> 21));//two barrel shifts, an xor, and an add
 					//return tmp ^ state;
+
+					// Permuroshiro-A
+					// Passes 2 TB (at least) with no anomalies.
+					// One-dimensionally equidistributed.
+					const uint32_t s0 = state0;
+					const uint32_t s1 = s0 ^ state1;
+					const uint32_t result = s1 * 0xB45EDu;
+					state0 = rotate32(s0, 26) ^ s1 ^ (s1 << 9);
+					state1 = rotate32(s1, 13);
+					return (rotate32(result, s0 >> 27));
+
 				}
 				std::string xoroshiro32_32::get_name() const { return "xoroshiro32_32"; }
 				void xoroshiro32_32::walk_state(StateWalkingObject *walker) {
@@ -1108,7 +1127,7 @@ namespace PractRand {
 					walker->handle(state1);
 					if (state0 == 0 && state1 == 0)
 						state0 = 1;
-					walker->handle(state2);
+					//walker->handle(state2);
 					//state2 |= 1;
 				}
 				Uint16 xoroshiro16_16plus::raw16() {
@@ -1659,6 +1678,7 @@ namespace PractRand {
 					//return result;
 
 
+					// Passes at least 2TB without anomalies; I want to re-evaluate this later!
 					const uint32_t result = rotate32(state1, state0 & 31) * 0x39E2DU;
 					const uint32_t t = state1 << 9;
 

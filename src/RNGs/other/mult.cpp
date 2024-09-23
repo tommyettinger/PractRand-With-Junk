@@ -3553,16 +3553,49 @@ return x;
 //return z;
 
 
-uint32_t x, y;
-x = (stateA += 0xDB4F0B91);
-y = (stateB += (rotate32(x, 21) + __lzcnt(x)));
-x ^= rotate32(y, 21);
-x ^= x >> 15;
-x *= 0x2c1b3c6d;
-x ^= x >> 12;
-x *= 0x297a2d39;
-x ^= x >> 15;
-return x;
+//uint32_t x, y;
+//x = (stateA += 0xDB4F0B91);
+//y = (stateB += (rotate32(x, 21) + __lzcnt(x)));
+//x ^= rotate32(y, 21);
+//x ^= x >> 15;
+//x *= 0x2c1b3c6d;
+//x ^= x >> 12;
+//x *= 0x297a2d39;
+//x ^= x >> 15;
+//return x;
+
+// 0x39E2D
+
+// Passes at least 4TB with no anomalies.
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
+////uint32_t y = (stateB = stateB + 0x91E10DA5 ^ (x & 0xDB4F0B92 - x) >> 31);
+//y = rotate32(y, x >> 27);
+//y = (y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED;
+//return y ^ y >> 21;
+
+// Passes at least 16TB with no anomalies (ongoing).
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
+//y ^= rotate32(x, 17);
+//y = (y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED;
+//return y ^ y >> 21;
+
+// Gets "mildly suspicious" at 32TB
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
+//y += x;
+//y = (y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED;
+//return y ^ y >> 22;
+
+uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+uint32_t t = x & 0xDB4F0B96 - x;
+uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
+y = (y ^ y >> 13 ^ x ^ x >> 19) * 0xB45ED;
+return y ^ y >> 21;
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
@@ -4326,6 +4359,19 @@ return x;
 					////b = b * 0xD09Du + 1u;
 					//return r;
 
+
+					//uint32_t x, y, z, w;
+//x = (stateA += 0xDB4F0B91);
+//y = (stateB += (rotate32(x, 21) + __lzcnt(x)));
+//z = (stateC += (rotate32(y, 21) + __lzcnt(x &= y)));
+//w = (stateD += (rotate32(z, 21) + __lzcnt(x &= z)));
+//x += rotate32(w, 21);
+//x ^= x >> 15;
+//x *= 0x2c1b3c6d;
+//x ^= x >> 12;
+//x *= 0x297a2d39;
+//x ^= x >> 15;
+//return x;
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
