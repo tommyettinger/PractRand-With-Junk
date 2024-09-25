@@ -3591,10 +3591,33 @@ return x;
 //y = (y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED;
 //return y ^ y >> 22;
 
+/*
+rng=ta32, seed=0x0
+length= 128 gigabytes (2^37 bytes), time= 412 seconds
+  Test Name                         Raw       Processed     Evaluation
+  DC6-9x1Bytes-1                    R= +43.2  p =  8.1e-16    FAIL !
+  ...and 879 test result(s) without anomalies
+*/
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
+//y = (y ^ y >> 13 ^ x ^ x >> 19) * 0xB45ED;
+//return y ^ y >> 21;
+
+// TaxonRandom
+// Completes 64TB with no anomalies; 64 bits of state over two 32-bit words.
+// Every pair of states appears once per cycle, which has length 2 to the 64.
+// Uses at most 32-bit math. Does use one integer multiply, but follows JS rules for it.
+// Uses only operations that are safe on JS Number types, and won't lose precision.
+// The state transition is hard to classify, but has a full period.
+// Interestingly, (x^y) is guaranteed to take every possible value equally often, but
+// it "clumps" into irregularly-sized groups of even and odd values. The other steps
+// performed help erase any pattern from the "clumping."
+// Uses an operation from PCG-Random to randomly shift right.
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
 uint32_t t = x & 0xDB4F0B96 - x;
 uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
-y = (y ^ y >> 13 ^ x ^ x >> 19) * 0xB45ED;
+y = (x ^ y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED;
 return y ^ y >> 21;
 
 				}
