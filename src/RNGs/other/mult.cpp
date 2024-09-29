@@ -3614,10 +3614,27 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // it "clumps" into irregularly-sized groups of even and odd values. The other steps
 // performed help erase any pattern from the "clumping."
 // Uses an operation from PCG-Random to randomly shift right.
+// However, this fails juniper's ICE test for correlation of similar initial states.
+
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
+//y = (x ^ y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED;
+//return y ^ y >> 21;
+
+// TaxonRandom, take 2
+// This unusual variant on the previous TaxonRandom also passes 64TB with no anomalies.
+// It has the same state size (64 bits) and cycle length (2 to the 64).
+// This doesn't use anything from PCG-Random anymore; it does a random rotation of x using the
+// lower 5 bits of y, and adds that to y, which doesn't interfere with being 1D equidistributed.
+// There's a mixed left/right shift pair, which uses data found by Pelle Evensen:
+// https://github.com/pellevensen/bijections
+// This "take 2" was needed because "take 1" failed juniper's ICE test. This passes it.
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
 uint32_t t = x & 0xDB4F0B96 - x;
 uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
-y = (x ^ y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED;
+y += rotate32(x, y);
+y = (y ^ y >> 22 ^ y << 5) * 0xB45ED;
 return y ^ y >> 21;
 
 				}
