@@ -3580,7 +3580,7 @@ return x;
 //uint32_t t = x & 0xDB4F0B96 - x;
 //uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
 //y ^= rotate32(x, 17);
-//y = (y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED;
+//y = (y ^ (y >> ((y >> 28u) + 4u))) * 0xB45ED; //0x39E2D;
 //return y ^ y >> 21;
 
 // Gets "mildly suspicious" at 32TB
@@ -3630,12 +3630,32 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // There's a mixed left/right shift pair, which uses data found by Pelle Evensen:
 // https://github.com/pellevensen/bijections
 // This "take 2" was needed because "take 1" failed juniper's ICE test. This passes it.
-uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
-uint32_t t = x & 0xDB4F0B96 - x;
-uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
-y += rotate32(x, y);
-y = (y ^ y >> 22 ^ y << 5) * 0xB45ED;
-return y ^ y >> 21;
+
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723597);
+//y += rotate32(x, y);
+//y = (y ^ y >> 22 ^ y << 5) * 0xB45ED;
+//return y ^ y >> 21;
+
+// Choo32Random
+// Passes 64TB with no anomalies.
+// Period is at minimum 2 to the 32. State size is 128 bits over four 32-bit variables.
+// This is an adapted version of ChopRandom to be used essentially as a hash of four inputs that
+// can be run for longer to get more hashed bits.
+const uint32_t fa = stateA;
+const uint32_t fb = stateB;
+const uint32_t fc = stateC;
+const uint32_t fd = stateD;
+stateA = fb - fc;
+stateB = fa ^ fd;
+stateC = rotate32(fb, fa);
+stateD = fd + 0xADB5B165;
+uint32_t res = stateA + stateB + stateC + stateD;
+res = (res ^ res >> 15) * 0x735a2d97;
+return res ^ res >> 16;
+
+
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
