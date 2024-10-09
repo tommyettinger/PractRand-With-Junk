@@ -3643,20 +3643,45 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // Period is at minimum 2 to the 32. State size is 128 bits over four 32-bit variables.
 // This is an adapted version of ChopRandom to be used essentially as a hash of four inputs that
 // can be run for longer to get more hashed bits.
-const uint32_t fa = stateA;
-const uint32_t fb = stateB;
-const uint32_t fc = stateC;
-const uint32_t fd = stateD;
-stateA = fb - fc;
-stateB = fa ^ fd;
-stateC = rotate32(fb, fa);
-stateD = fd + 0xADB5B165;
-uint32_t res = stateA + stateB + stateC + stateD;
-res = (res ^ res >> 15) * 0x735a2d97;
-return res ^ res >> 16;
+//const uint32_t fa = stateA;
+//const uint32_t fb = stateB;
+//const uint32_t fc = stateC;
+//const uint32_t fd = stateD;
+//stateA = fb - fc;
+//stateB = fa ^ fd;
+//stateC = rotate32(fb, fa);
+//stateD = fd + 0xADB5B165;
+//uint32_t res = stateA + stateB + stateC + stateD;
+//res = (res ^ res >> 15) * 0x735a2d97;
+//return res ^ res >> 16;
 
+// rng=ta32, seed=0x1
+// length = 256 gigabytes(2 ^ 38 bytes), time = 838 seconds
+// Test Name                         Raw       Processed     Evaluation
+// [Low1 / 16]FPF - 14 + 6 / 16:(0, 14 - 0)     R = +16.7  p = 4.6e-15    FAIL
+// [Low1 / 16]FPF - 14 + 6 / 16 : (1, 14 - 0)     R = +8.0  p = 5.1e-7   mildly suspicious
+// [Low1 / 16]FPF - 14 + 6 / 16 : all          R = +9.3  p = 3.6e-8   very suspicious
+// [Low4 / 16]FPF - 14 + 6 / 16 : (0, 14 - 0)     R = +7.6  p = 1.1e-6   unusual
+// [Low4 / 16]FPF - 14 + 6 / 16 : all          R = +6.2  p = 2.7e-5   unusual
+// ...and 910 test result(s) without anomalies
 
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t y = (stateB = stateB + __lzcnt(x) ^ x);
+//y += rotate32(x, y);
+//y = (y ^ rotate32(y, 21) ^ rotate32(y, 9)) * 0x91E10DA5;
+//return y ^ y >> 16;
 
+// Passes 32TB with no anomalies, but gets an "unusual" at 64TB:
+// rng=ta32, seed=0x0
+// length= 64 terabytes (2^46 bytes), time= 179223 seconds
+// Test Name                         Raw       Processed     Evaluation
+// [Low1/16]FPF-14+6/16:(0,14-0)     R=  +7.5  p =  1.3e-6   unusual
+// ...and 1158 test result(s) without anomalies
+uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+uint32_t y = (stateB = stateB + __lzcnt(x) ^ x * 0x91E10DA5);
+y += rotate32(x, y);
+y = (y ^ rotate32(y, 10) ^ rotate32(y, 23)) * 0xC5F768E7;
+return y ^ y >> 16;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
