@@ -3677,11 +3677,23 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // Test Name                         Raw       Processed     Evaluation
 // [Low1/16]FPF-14+6/16:(0,14-0)     R=  +7.5  p =  1.3e-6   unusual
 // ...and 1158 test result(s) without anomalies
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t y = (stateB = stateB + __lzcnt(x) ^ x * 0x91E10DA5);
+//y += rotate32(x, y);
+//y = (y ^ rotate32(y, 10) ^ rotate32(y, 23)) * 0xC5F768E7;
+//return y ^ y >> 16;
+
+
+// Taupe32Random
+// Passes 64TB with no anomalies.
+// State size is just 64 bits in two 32-bit variables.
+// Period is exactly 2 to the 64. No streams.
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
-uint32_t y = (stateB = stateB + __lzcnt(x) ^ x * 0x91E10DA5);
+uint32_t y = (stateB = stateB + __lzcnt(x) * 0x91E10DA5 ^ x);
 y += rotate32(x, y);
-y = (y ^ rotate32(y, 10) ^ rotate32(y, 23)) * 0xC5F768E7;
-return y ^ y >> 16;
+y = (y ^ y >> 15) * 0xD168AAAD;
+return y ^ rotate32(y, 11) ^ rotate32(y, 23);
+
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
