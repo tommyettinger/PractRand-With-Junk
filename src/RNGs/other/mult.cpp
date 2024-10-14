@@ -3688,11 +3688,23 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // Passes 64TB with no anomalies.
 // State size is just 64 bits in two 32-bit variables.
 // Period is exactly 2 to the 64. No streams.
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t y = (stateB = stateB + __lzcnt(x) * 0x91E10DA5 ^ x);
+//y += rotate32(x, y);
+//y = (y ^ y >> 15) * 0xD168AAAD;
+//return y ^ rotate32(y, 11) ^ rotate32(y, 23);
+
+// Nu32Random
+// Passees 64TB of PractRand, but fails ICE tests badly.
+// Uses no multiplication!
+// GWT-safe!
+// Period is 2 to the 64. No streams.
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
-uint32_t y = (stateB = stateB + __lzcnt(x) * 0x91E10DA5 ^ x);
-y += rotate32(x, y);
-y = (y ^ y >> 15) * 0xD168AAAD;
-return y ^ rotate32(y, 11) ^ rotate32(y, 23);
+uint32_t t = x & 0xDB4F0B96 - x;
+uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
+x += y = rotate32(y, x);
+y +=     rotate32(x, y);
+return (y ^ rotate32(y, 3) ^ rotate32(y, 24));
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
