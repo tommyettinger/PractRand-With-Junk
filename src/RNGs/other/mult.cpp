@@ -3699,13 +3699,34 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // Uses no multiplication!
 // GWT-safe!
 // Period is 2 to the 64. No streams.
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
+//x += y = rotate32(y, x);
+//y +=     rotate32(x, y);
+//return (y ^ rotate32(y, 3) ^ rotate32(y, 24));
+
+// Should be more robust, but is not at all!
+// rng=ta32, seed=0x0
+// length= 4 terabytes (2^42 bytes), time= 10580 seconds
+//   Test Name                         Raw       Processed       Evaluation
+//   [Low1/8]FPF-14+6/16:(0,14-0)      R= +10.8  p =  1.3e-9     very suspicious
+//   [Low1/8]FPF-14+6/16:all           R=  +5.5  p =  1.1e-4     unusual
+//   [Low1/16]FPF-14+6/16:(0,14-0)     R= +25.2  p =  5.8e-23    FAIL !!
+//   [Low1/16]FPF-14+6/16:(1,14-0)     R= +16.0  p =  1.9e-14    FAIL
+//   [Low1/16]FPF-14+6/16:all          R= +14.4  p =  4.9e-13    FAIL
+//   [Low1/32]FPF-14+6/16:cross        R=  +7.2  p =  2.0e-6     mildly suspicious
+//   [Low1/32]TMFn(2+5):wl             R= +21.4  p~=    1e-6     unusual
+//   [Low4/16]FPF-14+6/16:(0,14-0)     R= +17.1  p =  1.8e-15    FAIL
+//   [Low4/16]FPF-14+6/16:(1,14-0)     R= +10.8  p =  1.4e-9     very suspicious
+//   [Low4/16]FPF-14+6/16:all          R=  +9.7  p =  1.2e-8     very suspicious
+//   ...and 1042 test result(s) without anomalies
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
 uint32_t t = x & 0xDB4F0B96 - x;
 uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
-x += y = rotate32(y, x);
-y +=     rotate32(x, y);
-return (y ^ rotate32(y, 3) ^ rotate32(y, 24));
-
+x += y ^= rotate32(y, x) ^ rotate32(y, 31-x);
+y += x ^= rotate32(x, y) ^ rotate32(x, 31-y);
+return x ^ rotate32(y, 13);
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
