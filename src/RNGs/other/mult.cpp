@@ -3721,12 +3721,30 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 //   [Low4/16]FPF-14+6/16:(1,14-0)     R= +10.8  p =  1.4e-9     very suspicious
 //   [Low4/16]FPF-14+6/16:all          R=  +9.7  p =  1.2e-8     very suspicious
 //   ...and 1042 test result(s) without anomalies
+
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
+//x += y ^= rotate32(y, x) ^ rotate32(y, 31-x);
+//y += x ^= rotate32(x, y) ^ rotate32(x, 31-y);
+//return x ^ rotate32(y, 13);
+
+// Gnome32Random
+// Uses no multiplication, and still manages to look hash-like immediately.
+// Actually uses only ARX operations plus subtraction, though the variable-distance rotations may have a different cost than fixed ones.
+// Passes 64TB of PractRand with no anomalies, and passes both ICE tests in juniper.
+// Period is 2 to the 64, no streams. 1D-equidistributed.
+// The XRR construction is interesting, using two dependent random rotations that are always different.
+// Among other things, XORing y with two different rotations of y means the result is never effectively rotated by 0.
+// This doesn't mean it can't return y ever; if y is 0 or 0xFFFFFFFF, then any rotation will be the same.
+// The state transition is the same as Taxon32Random except 0xAF723597 was changed to 0xAF723596, out of an abundance of caution.
+
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
 uint32_t t = x & 0xDB4F0B96 - x;
 uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
 x += y ^= rotate32(y, x) ^ rotate32(y, 31-x);
-y += x ^= rotate32(x, y) ^ rotate32(x, 31-y);
-return x ^ rotate32(y, 13);
+y += x ^  rotate32(x, y) ^ rotate32(x, 31-y);
+return (y ^ rotate32(y, 3) ^ rotate32(y, 24));
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
