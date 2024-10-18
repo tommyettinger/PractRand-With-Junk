@@ -3739,12 +3739,29 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // This doesn't mean it can't return y ever; if y is 0 or 0xFFFFFFFF, then any rotation will be the same.
 // The state transition is the same as Taxon32Random except 0xAF723597 was changed to 0xAF723596, out of an abundance of caution.
 
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
+//x += y ^= rotate32(y, x) ^ rotate32(y, 31-x);
+//y += x ^  rotate32(x, y) ^ rotate32(x, 31-y);
+//return (y ^ rotate32(y, 3) ^ rotate32(y, 24));
+
+// This version gets a serious anomaly at 4TB, and most similar generators fail by then or earlier.
+// rng=ta32, seed=0x0
+// length= 4 terabytes (2^42 bytes), time= 10724 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]FPF-14+6/16:(0,14-0)     R=  +9.4  p =  2.8e-8   suspicious
+//   ...and 1051 test result(s) without anomalies
+//
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
 uint32_t t = x & 0xDB4F0B96 - x;
 uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
-x += y ^= rotate32(y, x) ^ rotate32(y, 31-x);
-y += x ^  rotate32(x, y) ^ rotate32(x, 31-y);
-return (y ^ rotate32(y, 3) ^ rotate32(y, 24));
+x ^= x >> 15 ^ y;
+x *= 0x2c1b3c6d;
+x ^= x >> 12;
+x *= 0x297a2d39;
+x ^= x >> 15;
+return x;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
