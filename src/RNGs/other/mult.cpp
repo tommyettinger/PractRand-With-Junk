@@ -3753,10 +3753,23 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 //   [Low4/16]FPF-14+6/16:(0,14-0)     R=  +9.4  p =  2.8e-8   suspicious
 //   ...and 1051 test result(s) without anomalies
 //
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
+//x ^= x >> 15 ^ y;
+//x *= 0x2c1b3c6d;
+//x ^= x >> 12;
+//x *= 0x297a2d39;
+//x ^= x >> 15;
+//return x;
+
+// Fluff32Random
+// Passes 64TB with no anomalies.
+// Has a period of 2 to the 64, no streams. Two 32-bit states.
+// Very similar to FlowRandom, but with 32-bit states and an extended period.
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
-uint32_t t = x & 0xDB4F0B96 - x;
-uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
-x ^= x >> 15 ^ y;
+uint32_t y = (stateB = stateB + __lzcnt(x) + 0x91E10DA5 ^ x);
+x ^= rotate32(y, 14);
 x *= 0x2c1b3c6d;
 x ^= x >> 12;
 x *= 0x297a2d39;
