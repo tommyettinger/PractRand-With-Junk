@@ -3782,14 +3782,30 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 //  Test Name                         Raw       Processed     Evaluation
 //  FPF-14+6/16:cross                 R=  -2.5  p =1-1.6e-4   unusual
 //  ...and 1158 test result(s) without anomalies
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t y = (stateB = stateB + __lzcnt(x) + 0xC5F768E7 ^ x);
+//x ^= rotate32(y, 17);
+//x *= 0x2c1b3c6d;
+//x ^= x >> 12;
+//x *= 0x297a2d39;
+//x ^= x >> 15;
+//return x;
+
+// ADDITIONAL NOOOOOOOO
+//rng=ta32, seed=0x0
+//length= 64 terabytes (2^46 bytes), time= 177964 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]FPF-14+6/16:(0,14-0)     R=  +8.2  p =  3.5e-7   mildly suspicious
+//  ...and 1158 test result(s) without anomalies
+// This one only had a problem at the very end... 64TB...
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
-uint32_t y = (stateB = stateB + __lzcnt(x) + 0xC5F768E7 ^ x);
-x ^= rotate32(y, 17);
-x *= 0x2c1b3c6d;
-x ^= x >> 12;
-x *= 0x297a2d39;
-x ^= x >> 15;
-return x;
+uint32_t t = x & 0xDB4F0B96 - x;
+uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
+x += (y ^= rotate32(x, 22));
+x ^= rotate32(x, 3) ^ rotate32(x, 24);
+y += (x ^= rotate32(y, 10));
+y ^= rotate32(y, 11) ^ rotate32(y, 26);
+return x ^ y;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
