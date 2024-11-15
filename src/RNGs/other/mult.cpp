@@ -3798,14 +3798,21 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 //  [Low4/16]FPF-14+6/16:(0,14-0)     R=  +8.2  p =  3.5e-7   mildly suspicious
 //  ...and 1158 test result(s) without anomalies
 // This one only had a problem at the very end... 64TB...
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
+//x += (y ^= rotate32(x, 22));
+//x ^= rotate32(x, 3) ^ rotate32(x, 24);
+//y += (x ^= rotate32(y, 10));
+//y ^= rotate32(y, 11) ^ rotate32(y, 26);
+//return x ^ y;
 uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
 uint32_t t = x & 0xDB4F0B96 - x;
 uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
-x += (y ^= rotate32(x, 22));
-x ^= rotate32(x, 3) ^ rotate32(x, 24);
-y += (x ^= rotate32(y, 10));
-y ^= rotate32(y, 11) ^ rotate32(y, 26);
-return x ^ y;
+x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x2C1B3C6D);
+x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x297A2D39);
+x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x91E10DA5);
+return x;
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {
@@ -4164,20 +4171,33 @@ return x ^ y;
 					//return (a = rotate64(a0, 19) ^ (b += UINT64_C(0xDB4F0B9175AE2165))) * UINT64_C(0x8A35);
 					
 					//return (a = (rotate64(a0, 47) ^ (b += 0x9E3779B97F4A7AF5ULL)));
-					b += a;
-					return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * (b | 1);
+					
+					//b += a;
+					//return (a = rotate64(a, 29) * UINT64_C(0xAC564B05)) * (b | 1);
+					
 					//return (b += (a = rotate64(a, 47) * UINT64_C(0x818102004182A025)) ^ UINT64_C(0x9E3779B97F4A7AF5));
 					///return (b += (a = rotate64(a, 29) * UINT64_C(0xAC564B05)));
 					
 					//final long ab = a + b; return (a = (ab << 19 | ab >>> 45) ^ (b += 0xDB4F0B9175AE2165L)) * 0x8A35L;
 
+					//0xAC564B05UL 0x818102004182A025UL
+					//return (a = rotate64(a, 28) ^ (b += 0xD1B54A32D192ED03ULL)) * 0x818102004182A025UL;
+
+					//PartyRandom
+					//Passes 64TB with no anomalies.
+					//Period is a non-zero multiple of (2 to the 64), minimum guarantee of (2 to the 64).
+					//Given all possible subcycles, all results are equally frequent, but any given subcycle may have a different frequency for some results.
+					//Uses only ARX operations. The output step is based on 2 rounds of the Speck cipher with key 0,0, and different rotations.
+					uint64_t t = rotate64(a, 37) ^ (b += 0xD1B54A32D192ED03ULL), s = rotate64(t, 47) + b;
+					a = s ^ rotate64(b, 23);
+					return (rotate64(s, 47) + a) ^ rotate64(a, 23);
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
 					walker->handle(b);
 					//b |= UINT64_C(1);
-					printf("Seed is 0x%016016llX, 0x%016016llX\r\n", a, b);
+					printf("Seed is 0x%016llX, 0x%016llX\r\n", a, b);
 					//b = b << 3 | UINT64_C(5);
 
 					//uint64_t r = a;
