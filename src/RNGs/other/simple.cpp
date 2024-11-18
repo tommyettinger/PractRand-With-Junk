@@ -1338,9 +1338,11 @@ namespace PractRand {
 //	state1 = rotate64(fa, 44);
 //	state2 = fa + fb;
 //	return fc;
-	const uint64_t fa = state0;
-	const uint64_t fb = state1;
-	const uint64_t fc = state2;
+
+	//const uint64_t fa = state0;
+	//const uint64_t fb = state1;
+	//const uint64_t fc = state2;
+
 	//// works well, passes 64TB with one anomaly at 32TB ("unusual")
 //	state0 = fc * 0xF1357AEA2E62A9C5UL;
 //	state1 = rotate64(fa, 44);
@@ -1434,17 +1436,28 @@ namespace PractRand {
 	//uint64_t a = (state0 = 0xD1B54A32D192ED02L - (state0 ^ (state0 * state0 | 7)));
 	//uint64_t b = (state1 = 0xABC98388FB8FAC06L - (state1 ^ (state1 * state1 | 13)));
 	//uint64_t c = (state2 = 0x8CB92BA72F3D8DDAL - (state2 ^ (state2 * state2 | 21)));
-	uint64_t a = state0 += 0xD1B54A32D192ED03L;
-	uint64_t b = state1 += 0xABC98388FB8FAC03L;
-	uint64_t c = state2 += 0x8CB92BA72F3D8DD7L;
-	//return a ^ rotate64(b, 22) ^ rotate64(c, 41);
+	//uint64_t a = state0 += 0xD1B54A32D192ED03L;
+	//uint64_t b = state1 += 0xABC98388FB8FAC03L;
+	//uint64_t c = state2 += 0x8CB92BA72F3D8DD7L;
+	////return a ^ rotate64(b, 22) ^ rotate64(c, 41);
 
-	b = rotate64(b, 56) + a ^ c;
-	a = (rotate64(a, 3) ^ b);
-	b = rotate64(b, 56) + a ^ c;
-	a = (rotate64(a, 3) ^ b);
-	a = rotate64(a, 3) ^ rotate64(b, 56) + a ^ c;
-	return a ^ rotate64(a, 59) ^ rotate64(a, 20);
+	//b = rotate64(b, 56) + a ^ c;
+	//a = (rotate64(a, 3) ^ b);
+	//b = rotate64(b, 56) + a ^ c;
+	//a = (rotate64(a, 3) ^ b);
+	//a = rotate64(a, 3) ^ rotate64(b, 56) + a ^ c;
+	//return a ^ rotate64(a, 59) ^ rotate64(a, 20);
+// YippeeRandom
+// Passes 64TB with no anomalies. Minimum guaranteed period is 2 to the 64.
+// state1 is a counter/Weyl sequence, so that's period 2 to the 64.
+// state2 is effectively guaranteed to have a period less than 2 to the 64, but it doesn't interact with state1, so combined they may have a longer period.
+// state3 combines itself, state1, and state2 using a rotation of state0 and the sum of the other two; its combined period must be at least 2 to the 64.
+// The output uses the Speck cipher, just with different rotation amounts; the block is effectively state0 and state1, and the key is state2.
+state1 += 0xD1B54A32D192ED03ULL;
+state2 = rotate64(state2, 11) + 0x8CB92BA72F3D8DD7L;
+state0 = rotate64(state0, 37) ^ state1 + state2;
+return rotate64(state0, 47) + state1 ^ rotate64(state1, 23) ^ state2;
+
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
