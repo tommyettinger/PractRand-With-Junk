@@ -1447,16 +1447,23 @@ namespace PractRand {
 	//a = (rotate64(a, 3) ^ b);
 	//a = rotate64(a, 3) ^ rotate64(b, 56) + a ^ c;
 	//return a ^ rotate64(a, 59) ^ rotate64(a, 20);
-// YippeeRandom
+//// YippeeRandom
+//// Passes 64TB with no anomalies. Minimum guaranteed period is 2 to the 64.
+//// state1 is a counter/Weyl sequence, so that's period 2 to the 64.
+//// state2 is effectively guaranteed to have a period less than 2 to the 64, but it doesn't interact with state1, so combined they may have a longer period.
+//// state3 combines itself, state1, and state2 using a rotation of state0 and the sum of the other two; its combined period must be at least 2 to the 64.
+//// The output uses the Speck cipher, just with different rotation amounts; the block is effectively state0 and state1, and the key is state2.
+//state1 += 0xD1B54A32D192ED03ULL;
+//state2 = rotate64(state2, 11) + 0x8CB92BA72F3D8DD7L;
+//state0 = rotate64(state0, 37) ^ state1 + state2;
+//return rotate64(state0, 47) + state1 ^ rotate64(state1, 23) ^ state2;
+
+// SoloRandom
 // Passes 64TB with no anomalies. Minimum guaranteed period is 2 to the 64.
-// state1 is a counter/Weyl sequence, so that's period 2 to the 64.
-// state2 is effectively guaranteed to have a period less than 2 to the 64, but it doesn't interact with state1, so combined they may have a longer period.
-// state3 combines itself, state1, and state2 using a rotation of state0 and the sum of the other two; its combined period must be at least 2 to the 64.
-// The output uses the Speck cipher, just with different rotation amounts; the block is effectively state0 and state1, and the key is state2.
-state1 += 0xD1B54A32D192ED03ULL;
-state2 = rotate64(state2, 11) + 0x8CB92BA72F3D8DD7L;
-state0 = rotate64(state0, 37) ^ state1 + state2;
-return rotate64(state0, 47) + state1 ^ rotate64(state1, 23) ^ state2;
+// 3 statements that all fit on one (long) line!
+// Three 64-bit states, changed using only ARX operations.
+// Never tell me the odds!
+return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03ULL)) ^ rotate64(state0, 26) + state1 ^ rotate64(state1, 23);
 
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
