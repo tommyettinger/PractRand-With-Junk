@@ -5860,9 +5860,23 @@ return x;
 					// Passes 64TB of PractRand with no anomalies.
 					// Uses one more numerical operation than DistinctRandom/SplitMix64.
 					// Based on Moremur for its constants.
+					//uint64_t x = (stateA += 0xD1B54A32D192ED03L);
+					//uint64_t y = (stateB += 0x8CB92BA72F3D8DD7L);
+					//x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653UL;
+					//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					//x ^= x >> 27;
+					//return x;
+
+// OrbitalRandom
+// Period is 2 to the 128, no streams.
+// Passes 64TB of PractRand with no anomalies.
+// Uses __lzcnt64 in C++, and would use some other technique to count leading zeros elsewhere.
+// In most ways, very similar to FlowRandom, but stateB uses a different increment and adds __lzcnt64(stateA).
+// Because stateA and stateB are different in where entropy occurs, this doesn't do (x ^ rotate64(y, 37)), and
+// instead does (y ^ rotate64(x, 37)) .
 					uint64_t x = (stateA += 0xD1B54A32D192ED03L);
-					uint64_t y = (stateB += 0x8CB92BA72F3D8DD7L);
-					x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653UL;
+					uint64_t y = (stateB += 0x9E3779B97F4A7C15L + __lzcnt64(x));
+					x = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
 					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
 					x ^= x >> 27;
 					return x;
