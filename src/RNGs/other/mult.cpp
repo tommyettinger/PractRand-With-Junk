@@ -3806,13 +3806,18 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 //y += (x ^= rotate32(y, 10));
 //y ^= rotate32(y, 11) ^ rotate32(y, 26);
 //return x ^ y;
-uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
-uint32_t t = x & 0xDB4F0B96 - x;
-uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
-x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x2C1B3C6D);
-x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x297A2D39);
-x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x91E10DA5);
-return x;
+
+//uint32_t x = (stateA = stateA + 0x9E3779BD ^ 0xD1B54A32);
+//uint32_t t = x & 0xDB4F0B96 - x;
+//uint32_t y = (stateB = stateB + rotate32(t, 1) ^ 0xAF723596);
+//x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x2C1B3C6D);
+//x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x297A2D39);
+//x = rotate32(x, 3) ^ (y = rotate32(y, 24) + x ^ 0x91E10DA5);
+//return x;
+
+// Passes at least 4TB with no anomalies
+return stateA = (stateB = rotate32(stateB, 23) + (stateC = stateC + 0xD192ED03U | 0U) | 0U) ^ rotate32(stateC, 19) + stateA ^ rotate32(stateA, 22);
+
 				}
 				std::string ta32::get_name() const { return "ta32"; }
 				void ta32::walk_state(StateWalkingObject *walker) {

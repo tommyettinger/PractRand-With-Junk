@@ -1463,7 +1463,11 @@ namespace PractRand {
 // 3 statements that all fit on one (long) line!
 // Three 64-bit states, changed using only ARX operations.
 // Never tell me the odds!
-return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03ULL)) ^ rotate64(state0, 26) + state1 ^ rotate64(state1, 23);
+//return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03ULL)) ^ rotate64(state0, 26) + state1 ^ rotate64(state1, 23);
+
+// SoloRandom with one less rotation and some states moved around.
+// Passes 64TB with no anomalies. Minimum guaranteed period is 2 to the 64.
+return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03ULL)) ^ state0 + state1 ^ rotate64(state0, 23);
 
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
