@@ -5879,13 +5879,21 @@ return stateA = (stateB = rotate32(stateB, 23) + (stateC = stateC + 0xD192ED03U 
 // In most ways, very similar to FlowRandom, but stateB uses a different increment and adds __lzcnt64(stateA).
 // Because stateA and stateB are different in where entropy occurs, this doesn't do (x ^ rotate64(y, 37)), and
 // instead does (y ^ rotate64(x, 37)) .
-					uint64_t x = (stateA += 0xD1B54A32D192ED03L);
-					uint64_t y = (stateB += 0x9E3779B97F4A7C15L + __lzcnt64(x));
-					x = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
-					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
-					x ^= x >> 27;
-					return x;
+					//uint64_t x = (stateA += 0xD1B54A32D192ED03L);
+					//uint64_t y = (stateB += 0x9E3779B97F4A7C15L + __lzcnt64(x));
+					//x = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
+					//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+					//x ^= x >> 27;
+					//return x;
 
+// Passes 32TB, but has real trouble with ICE tests.
+					uint64_t x = (stateA += 0xD1B54A32D192ED03UL);
+					uint64_t y = (stateB += 0x9E3779B97F4A7C15UL + __lzcnt64(x));
+					x = (x ^ x >> 32) * 0xBEA225F9EB34556DUL;
+					y = (y ^ y >> 29) * 0xF1357AEA2E62A9C5UL;
+					x ^= x >> 29;
+					y ^= y >> 32;
+					return (y ^ rotate64(x, (int)y & 63));
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
 				void lizard256::walk_state(StateWalkingObject *walker) {
