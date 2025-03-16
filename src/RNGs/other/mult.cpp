@@ -3816,7 +3816,32 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 //return x;
 
 // Passes at least 4TB with no anomalies
-return stateA = (stateB = rotate32(stateB, 23) + (stateC = stateC + 0xD192ED03U | 0U) | 0U) ^ rotate32(stateC, 19) + stateA ^ rotate32(stateA, 22);
+//return stateA = (stateB = rotate32(stateB, 23) + (stateC = stateC + 0xD192ED03U | 0U) | 0U) ^ rotate32(stateC, 19) + stateA ^ rotate32(stateA, 22);
+
+//// Chock32Random
+//// Passes 64TB with no anomalies.
+//const uint32_t fa = stateA;
+//const uint32_t fb = stateB;
+//const uint32_t fc = stateC;
+//const uint32_t fd = stateD;
+//stateA = fb - fc;
+//stateB = fa ^ fd;
+//stateC = rotate32(fb, 11);
+//stateD = fd + 0xADB5B165;
+//uint32_t res = stateA + stateB;
+//return res ^ rotate32(res, 14) ^ rotate32(res, 23);
+
+// Chip32Random
+// Passes 64TB with no anomalies.
+const uint32_t fa = stateA;
+const uint32_t fb = stateB;
+const uint32_t fc = stateC;
+const uint32_t fd = stateD;
+stateA = fb + fc;
+stateB = fd ^ fa;
+stateC = rotate32(fb, 11);
+stateD = fd + 0x9E3779B9;
+return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
