@@ -1648,9 +1648,9 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 
 
 					//const uint32_t result = state1 + 0x41C64E6Du;// + 0x9E3779B9u;
-				    //const uint64_t result = (uint64_t)(rol32(s->s[0] + s->s[3], 7) + s->s[0]) << 32 ^ (rol32(s->s[2] - s->s[1], 13) + s->s[2]);
+					//const uint64_t result = (uint64_t)(rol32(s->s[0] + s->s[3], 7) + s->s[0]) << 32 ^ (rol32(s->s[2] - s->s[1], 13) + s->s[2]);
 					// const uint64_t result = (uint64_t)(rotate32(state0 + state3, 7) + state0) << 32 ^ (rotate32(state2 - state1, 13) + state2);
-					
+
 					// Permushiro-A, the much-feared Vigna/O'Neill mutant hybrid.
 					// The A is present because this is the first variant to pass (and the first tested).
 					// Passes (at least) 64TB without anomalies.
@@ -1739,13 +1739,43 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					//					return result ^ result >> 28;
 				}
 				std::string xoshiro4x32::get_name() const { return "xoshiro4x32"; }
-				void xoshiro4x32::walk_state(StateWalkingObject *walker) {
+				void xoshiro4x32::walk_state(StateWalkingObject* walker) {
 					walker->handle(state0);
 					walker->handle(state1);
 					walker->handle(state2);
 					walker->handle(state3);
 					state0 |= ((state0 | state1 | state2 | state3) == 0);
 				}
+
+				Uint32 xoshiro5x32::raw32() {
+					// Xoshiro160RoadroxoRandom
+					// Passes 64TB PractRand with no anomalies, passes ICE test, IICE test requires 10 steps to decorrelate.
+					// Period is 2 to the 160 minus 2 to the 32.
+					// This is precisely 1D equidistributed.
+					// That includes 0; it is not any less common than other uint32_t results!
+					// The only disallowed states have state0 == state1 == state2 == state3 == 0 . state4 can be any uint32_t .
+					const uint32_t t = state1 << 9;
+					state4 += 0xC3564E95 ^ state3;
+					state2 ^= state0;
+					state3 ^= state1;
+					state1 ^= state2;
+					state0 ^= state3;
+
+					state2 ^= t;
+
+					state3 = rotate32(state3, 11);
+					return rotate32(state4, 23) ^ rotate32(state0, 14) + state1;
+				}
+				std::string xoshiro5x32::get_name() const { return "xoshiro5x32"; }
+				void xoshiro5x32::walk_state(StateWalkingObject* walker) {
+					walker->handle(state0);
+					walker->handle(state1);
+					walker->handle(state2);
+					walker->handle(state3);
+					walker->handle(state4);
+					state0 |= ((state0 | state1 | state2 | state3) == 0);
+				}
+
 				Uint32 mover32::raw32() {
 					//a = rotate32(a * 0x9E377, 10);
 					//b = rotate32(b * 0x64E6D, 22);
