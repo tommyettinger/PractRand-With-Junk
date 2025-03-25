@@ -1776,6 +1776,31 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					state0 |= ((state0 | state1 | state2 | state3) == 0);
 				}
 
+				Uint64 xoshiro5x32long::raw64() {
+					const Uint64 a = state0, b = state1, c = state2, d = state3, e = state4,
+						res = rotate64(a, 11) + b + rotate64(c, 39) + rotate64(d, 25) + rotate64(e, 52);
+					const Uint32 t = state1 << 9;
+					state4 += 0xC3564E95 ^ state3;
+					state2 ^= state0;
+					state3 ^= state1;
+					state1 ^= state2;
+					state0 ^= state3;
+
+					state2 ^= t;
+
+					state3 = rotate32(state3, 11);
+					return res;
+				}
+				std::string xoshiro5x32long::get_name() const { return "xoshiro5x32long"; }
+				void xoshiro5x32long::walk_state(StateWalkingObject* walker) {
+					walker->handle(state0);
+					walker->handle(state1);
+					walker->handle(state2);
+					walker->handle(state3);
+					walker->handle(state4);
+					state0 |= ((state0 | state1 | state2 | state3) == 0);
+				}
+
 				Uint32 mover32::raw32() {
 					//a = rotate32(a * 0x9E377, 10);
 					//b = rotate32(b * 0x64E6D, 22);

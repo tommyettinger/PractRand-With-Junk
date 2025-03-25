@@ -494,6 +494,15 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 				};
 
+				class xoshiro5x32long : public vRNG64 {
+					// from David Blackman and Sebastiano Vigna (vigna@acm.org), see http://vigna.di.unimi.it/xorshift/
+					Uint32 state0, state1, state2, state3, state4;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
+
 				class mover32 : public vRNG32 {
 					Uint32 a;
 					Uint32 b;

@@ -99,6 +99,7 @@ namespace PractRand {
 				"xoroshiro16_16plus",
 				"xoshiro4x32",
 				"xoshiro5x32",
+				"xoshiro5x32long",
 				"oriole64",
 				"xoshiro256starstar",
 				"xoshiro256scramjet",
@@ -557,6 +558,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(xoroshiro16_16plus)
 			REGISTER_RNG_0(xoshiro4x32)
 			REGISTER_RNG_0(xoshiro5x32)
+			REGISTER_RNG_0(xoshiro5x32long)
 			REGISTER_RNG_0(oriole64)
 			REGISTER_RNG_0(xoshiro256starstar)
 			REGISTER_RNG_0(xoshiro256scramjet)
