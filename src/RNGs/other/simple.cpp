@@ -1777,8 +1777,16 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 				}
 
 				Uint64 xoshiro5x32long::raw64() {
-					const Uint64 a = state0, b = state1, c = state2, d = state3, e = state4,
-						res = rotate64(a, 11) + b + rotate64(c, 39) + rotate64(d, 25) + rotate64(e, 52);
+					//// Passes 64TB with no anomalies!
+					//const Uint64 a = state0, b = state1, c = state2, d = state3, e = state4,
+					//	res = rotate64(a, 11) + b + rotate64(c, 39) + rotate64(d, 25) + rotate64(e, 52);
+
+					//// Passes at least 4TB with no anomalies, but is Extremely Slow on GWT and TeaVM...
+					//const int64_t a = (int32_t)state0, b = (int32_t)state1, c = (int32_t)state2, d = (int32_t)state3, e = (int32_t)state4;
+					//const Uint64 res = rotate64(a, 11) + b + rotate64(c, 39) + rotate64(d, 25) + rotate64(e, 52);
+
+					Uint64 hi = rotate32(state4, 23) ^ rotate32(state0, 14) + state1;
+					int32_t lo = rotate32(state2, 19) ^ rotate32(state4, 7) + state3;
 					const Uint32 t = state1 << 9;
 					state4 += 0xC3564E95 ^ state3;
 					state2 ^= state0;
@@ -1789,7 +1797,7 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-					return res;
+					return hi << 32 ^ lo;
 				}
 				std::string xoshiro5x32long::get_name() const { return "xoshiro5x32long"; }
 				void xoshiro5x32long::walk_state(StateWalkingObject* walker) {
