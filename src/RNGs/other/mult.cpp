@@ -275,11 +275,11 @@ namespace PractRand {
 
 					//// PactRandom
 					//// Passes at least 64TB with no anomalies. It also passes Juniper's ICE test.
-					Uint64 z = (rotate64(state, 13) ^ rotate64(inc, 41) + state) * 0xF1357AEA2E62A9C5ULL;
-					inc += __lzcnt64(state);
-					state += 0xDA3E39CB94B95BDBULL;
-					z = (z ^ rotate64(z, 23) ^ rotate64(z, 47)) * 0xF1357AEA2E62A9C5L;
-					return z ^ z >> 43;
+					//Uint64 z = (rotate64(state, 13) ^ rotate64(inc, 41) + state) * 0xF1357AEA2E62A9C5ULL;
+					//inc += __lzcnt64(state);
+					//state += 0xDA3E39CB94B95BDBULL;
+					//z = (z ^ rotate64(z, 23) ^ rotate64(z, 47)) * 0xF1357AEA2E62A9C5L;
+					//return z ^ z >> 43;
 
 					//i = (i ^ rotate64(i, 34) ^ rotate64(i, 19)) * 12605985483714917081ULL;
 					//i = (i ^ i >> 23 ^ i >> 31) * 12605985483714917081ULL;
@@ -291,6 +291,12 @@ namespace PractRand {
 //					Uint64 word = (i ^ rotate64(i, 53) ^ rotate64(i, 19)) * 12605985483714917081ULL;
 //					Uint64 word = (i ^ i >> 6u ^ i >> 47u) * 12605985483714917081ULL;
 //					return word ^ word >> 44u;
+
+					Uint64 oldstate = state;
+					state = oldstate * 0x5851f42d4c957f2dULL + inc;
+					Uint64 word = (oldstate ^ rotate64(oldstate, 19) ^ rotate64(oldstate, 41)) * 12605985483714917081ULL;
+					return word ^ word >> 36;
+
 				}
 				std::string pcg64::get_name() const {
 					if (inc == 0xda3e39cb94b95bdbULL) return "pcg64";
