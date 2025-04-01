@@ -292,6 +292,9 @@ namespace PractRand {
 //					Uint64 word = (i ^ i >> 6u ^ i >> 47u) * 12605985483714917081ULL;
 //					return word ^ word >> 44u;
 
+					// Modified PCG64, returns 64 bits, 64 bits state.
+					// An LCG can be permuted without a variable-distance shift needed at all, and still pass 64TB without anomalies.
+					// This one is rather fast, too...
 					Uint64 oldstate = state;
 					state = oldstate * 0x5851f42d4c957f2dULL + inc;
 					Uint64 word = (oldstate ^ rotate64(oldstate, 19) ^ rotate64(oldstate, 41)) * 12605985483714917081ULL;
