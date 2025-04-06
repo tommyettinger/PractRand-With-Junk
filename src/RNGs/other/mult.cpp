@@ -295,10 +295,18 @@ namespace PractRand {
 					// Modified PCG64, returns 64 bits, 64 bits state.
 					// An LCG can be permuted without a variable-distance shift needed at all, and still pass 64TB without anomalies.
 					// This one is rather fast, too...
+					//Uint64 oldstate = state;
+					//state = oldstate * 0x5851f42d4c957f2dULL + inc;
+					//Uint64 word = (oldstate ^ rotate64(oldstate, 19) ^ rotate64(oldstate, 41)) * 12605985483714917081ULL;
+					//return word ^ word >> 36;
+
+					// Weyl Sequence PCG with two XRXR steps and no variable rotations; 64-bit state, no streams, returns 64 bits.
+					// Passes 64TB with no anomalies!
+					// Finishes the first TB in less than 45 minutes. Only one multiplication.
 					Uint64 oldstate = state;
-					state = oldstate * 0x5851f42d4c957f2dULL + inc;
+					state = oldstate + 0x5851f42d4c957f2dULL;
 					Uint64 word = (oldstate ^ rotate64(oldstate, 19) ^ rotate64(oldstate, 41)) * 12605985483714917081ULL;
-					return word ^ word >> 36;
+					return word ^ rotate64(word, 47) ^ rotate64(word, 21);
 
 				}
 				std::string pcg64::get_name() const {
