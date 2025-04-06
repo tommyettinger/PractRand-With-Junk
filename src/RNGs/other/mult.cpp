@@ -241,15 +241,15 @@ namespace PractRand {
 					//// ... Well, I say that, but if you test this on only odd numbers for inc and only even numbers for state,
 					//// there is a detectable correlation between streams. I'm not sure how bad it is, but it makes this sometimes
 					//// fail Juniper's ICE test.
-					
+
 					//Uint64 oldstate = state;
 					//state = state * 0x5851f42d4c957f2dULL + inc;
 					//Uint64 word = (oldstate ^ (oldstate >> ((oldstate >> 59u) + 5u))) * 12605985483714917081ULL;
 					//return word ^ word >> 43u;
-					
+
 					//// Gets a "suspicious" result at 64TB:
 					//// BCFN(2+0,13-0,T)                  R= +12.9  p =  2.0e-6   suspicious
-					
+
 					//Uint64 i = inc ^ rotate64(state, 23);
 					//state += 0x5851F42D4C957F2DULL;
 					//inc += 0xDA3E39CB94B95BDBULL;
@@ -258,7 +258,7 @@ namespace PractRand {
 
 					//// Passes at least 64TB with no anomalies, but unusually slow...
 					//// This takes 3738 seconds to test 1TB, where others took much less than 3000 seconds.
-					
+
 					//Uint64 i = inc ^ rotate64(state, 23);
 					//state += 0x5851F42D4C957F2DULL;
 					//inc += 0xDA3E39CB94B95BDBULL;
@@ -303,9 +303,21 @@ namespace PractRand {
 					// Weyl Sequence PCG with two XRXR steps and no variable rotations; 64-bit state, no streams, returns 64 bits.
 					// Passes 64TB with no anomalies!
 					// Finishes the first TB in less than 45 minutes. Only one multiplication.
-					Uint64 oldstate = state;
-					state = oldstate + 0x5851f42d4c957f2dULL;
-					Uint64 word = (oldstate ^ rotate64(oldstate, 19) ^ rotate64(oldstate, 41)) * 12605985483714917081ULL;
+					//Uint64 oldstate = state;
+					//state = oldstate + 0x5851f42d4c957f2dULL;
+					//Uint64 word = (oldstate ^ rotate64(oldstate, 19) ^ rotate64(oldstate, 41)) * 12605985483714917081ULL;
+					//return word ^ rotate64(word, 47) ^ rotate64(word, 21);
+
+					// Not quite enough!
+					//rng = pcg64(92777c99f3347789), seed = 0x0
+					//	length = 4 terabytes(2 ^ 42 bytes), time = 13866 seconds
+					//	Test Name                         Raw       Processed     Evaluation
+					//	BRank(12) :48K(1)                  R = +6137  p~= 1e-1848    FAIL !!!!!!!!
+					//	...and 1051 test result(s) without anomalies
+					Uint64 oldstate = state ^ rotate64(inc, 29);
+					state += 0xD1B54A32D192ED03ULL;
+					inc += 0x8CB92BA72F3D8DD7ULL;
+					Uint64 word = oldstate * 12605985483714917081ULL;
 					return word ^ rotate64(word, 47) ^ rotate64(word, 21);
 
 				}
