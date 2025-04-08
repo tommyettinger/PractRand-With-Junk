@@ -314,11 +314,32 @@ namespace PractRand {
 					//	Test Name                         Raw       Processed     Evaluation
 					//	BRank(12) :48K(1)                  R = +6137  p~= 1e-1848    FAIL !!!!!!!!
 					//	...and 1051 test result(s) without anomalies
-					Uint64 oldstate = state ^ rotate64(inc, 29);
+					//Uint64 oldstate = state ^ rotate64(inc, 29);
+					//state += 0xD1B54A32D192ED03ULL;
+					//inc += 0x8CB92BA72F3D8DD7ULL;
+					//Uint64 word = oldstate * 12605985483714917081ULL;
+					//return word ^ rotate64(word, 47) ^ rotate64(word, 21);
+
+					//rng = pcg64(c31406d9f3347789), seed = 0x0
+					//	length = 2 terabytes(2 ^ 41 bytes), time = 9649 seconds
+					//	Test Name                         Raw       Processed     Evaluation
+					//	[Low4 / 16]Gap - 16:A                 R = +5.8  p = 3.9e-4   unusual
+					//	[Low4 / 16]Gap - 16 : B                 R = +8.8  p = 1.9e-7   very suspicious
+					//	...and 1018 test result(s) without anomalies
+					//Uint64 oldstate = state ^ rotate64(inc, 37);
+					//state += 0xD1B54A32D192ED03ULL;
+					//inc += 0x8CB92BA72F3D8DD7ULL;
+					//Uint64 word = oldstate * 12605985483714917081ULL;
+					//return word ^ rotate64(word, 47) ^ rotate64(word, 13);
+
+					// Passes 64TB!
+					// Using a xorshift on state and a rotation on inc lets it pass.
+					// 2 to the 64 streams!
+					Uint64 oldstate = state ^ state >> 31 ^ rotate64(inc, 37);
 					state += 0xD1B54A32D192ED03ULL;
 					inc += 0x8CB92BA72F3D8DD7ULL;
 					Uint64 word = oldstate * 12605985483714917081ULL;
-					return word ^ rotate64(word, 47) ^ rotate64(word, 21);
+					return word ^ rotate64(word, 47) ^ rotate64(word, 23);
 
 				}
 				std::string pcg64::get_name() const {
