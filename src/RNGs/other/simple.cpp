@@ -1769,8 +1769,24 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					// Passes 64TB with no anomalies!
 					// 3D equidistributed instead of 2D!
 					// Adding a constant to the rotation and then XORing seems to bypass some test failures!
+					//const uint32_t t = state1 << 9;
+					//state4 += 0xC3564E95 + state3;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+
+					//state2 ^= t;
+
+					//state3 = rotate32(state3, 11);
+					//return rotate32(state4, 20) + 0x9E3779B9 ^ state1;
+
+					// Xoshiro160MixedCounter
+					// Passes 64TB with no anomalies!
+					// Almost exactly 4D equidistributed (a 4-tuple appears either (2 to the 32) times or (2 to the 32) minus 1 times).
 					const uint32_t t = state1 << 9;
-					state4 += 0xC3564E95 + state3;
+					uint32_t result = (state4 += 0xC3564E95u + state3);
+					result = (result ^ rotate32(result, 25) ^ rotate32(result, 19)) * 0x9E37Bu;
 					state2 ^= state0;
 					state3 ^= state1;
 					state1 ^= state2;
@@ -1779,7 +1795,8 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					state2 ^= t;
 
 					state3 = rotate32(state3, 11);
-					return rotate32(state4, 20) + 0x9E3779B9 ^ state1;
+					return result ^ rotate32(result, 20) ^ rotate32(result, 13);
+
 				}
 				std::string xoshiro5x32::get_name() const { return "xoshiro5x32"; }
 				void xoshiro5x32::walk_state(StateWalkingObject* walker) {
