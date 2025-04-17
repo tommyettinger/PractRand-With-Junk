@@ -1784,9 +1784,30 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					// Xoshiro160MixedCounter
 					// Passes 64TB with no anomalies!
 					// Almost exactly 4D equidistributed (a 4-tuple appears either (2 to the 32) times or (2 to the 32) minus 1 times).
+					//const uint32_t t = state1 << 9;
+					//uint32_t result = (state4 += 0xC3564E95u + state3);
+					//result = (result ^ rotate32(result, 25) ^ rotate32(result, 19)) * 0x9E37Bu;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+
+					//state2 ^= t;
+
+					//state3 = rotate32(state3, 11);
+					//return result ^ rotate32(result, 20) ^ rotate32(result, 13);
+
+
+					// NOOOOO
+					// It was fine before 64TB!!!
+					// rng = xoshiro5x32, seed = 0x0
+					// 	length = 64 terabytes(2 ^ 46 bytes), time = 199506 seconds
+					// 	Test Name                         Raw       Processed     Evaluation
+					// 	[Low1 / 32]BCFN(2 + 4, 13 - 0, T)         R = +10.4  p = 4.3e-5   unusual
+					// 	...and 1158 test result(s) without anomalies
 					const uint32_t t = state1 << 9;
-					uint32_t result = (state4 += 0xC3564E95u + state3);
-					result = (result ^ rotate32(result, 25) ^ rotate32(result, 19)) * 0x9E37Bu;
+					uint32_t result = (state4 += 0xC3564E95u + state0);
+					result = (result ^ result >> 15) * 0x9E37Bu;
 					state2 ^= state0;
 					state3 ^= state1;
 					state1 ^= state2;
