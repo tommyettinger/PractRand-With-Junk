@@ -1821,9 +1821,27 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					// Passes 64TB with no anomalies!
 					// This uses right shifts and rotations instead of left, but is otherwise using xoshiro with four 32-bit states verbatim.
 					// Enriching the low-order bits seems to help when we add state3 to state4 with an odd constant.
-					uint32_t result = (state4 ^ state4 >> 15) * 0x19E37Bu; // ^ 0x9E3779B5u
+					//uint32_t result = (state4 ^ state4 >> 15) * 0x19E37Bu; // ^ 0x9E3779B5u
+					//const uint32_t t = state1 >> 9;
+					//state4 += 0xC3564E95u + state3;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+
+					//state2 ^= t;
+
+					//state3 = rotate32(state3, 21);
+					//return result ^ rotate32(result, 17) ^ rotate32(result, 13);
+
+					// rng = xoshiro5x32, seed = 0x0
+					// 	length = 128 gigabytes(2 ^ 37 bytes), time = 320 seconds
+					// 	Test Name                         Raw       Processed     Evaluation
+					// 	BRank(12) :16K(1)                  R = +4394  p~= 1e-1323    FAIL !!!!!!!!
+					// 	...and 879 test result(s) without anomalies
+					uint32_t result = (state3 ^ rotate32(state4, 14)) * 0x19E37Bu; // ^ 0x9E3779B5u
 					const uint32_t t = state1 >> 9;
-					state4 += 0xC3564E95u + state3;
+					state4 += 0xC3564E95u;
 					state2 ^= state0;
 					state3 ^= state1;
 					state1 ^= state2;
