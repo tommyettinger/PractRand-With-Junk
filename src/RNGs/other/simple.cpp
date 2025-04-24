@@ -1706,18 +1706,25 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 
 
 					// Passes at least 2TB without anomalies; I want to re-evaluate this later!
-					const uint32_t result = rotate32(state1, state0 & 31) * 0x39E2DU;
-					const uint32_t t = state1 << 9;
+					//const uint32_t result = rotate32(state1, state0 & 31) * 0x39E2DU;
+					//const uint32_t t = state1 << 9;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+					//state2 ^= t;
+					//state3 = rotate32(state3, 11);
+					//return result ^ result >> 15;
 
+					const uint32_t result = (state1 ^ state1 >> 15) * 0x19E37Bu;
+					const uint32_t t = state1 >> 9;
 					state2 ^= state0;
 					state3 ^= state1;
 					state1 ^= state2;
 					state0 ^= state3;
-
 					state2 ^= t;
-
-					state3 = rotate32(state3, 11);
-					return result ^ result >> 15;
+					state3 = rotate32(state3, 21);
+					return result ^ rotate32(result, 17) ^ rotate32(result, 23);
 
 
 
@@ -1839,18 +1846,45 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					// 	Test Name                         Raw       Processed     Evaluation
 					// 	BRank(12) :16K(1)                  R = +4394  p~= 1e-1323    FAIL !!!!!!!!
 					// 	...and 879 test result(s) without anomalies
-					uint32_t result = (state3 ^ rotate32(state4, 14)) * 0x19E37Bu; // ^ 0x9E3779B5u
+					//uint32_t result = (state3 ^ rotate32(state4, 14)) * 0x19E37Bu; // ^ 0x9E3779B5u
+					//const uint32_t t = state1 >> 9;
+					//state4 += 0xC3564E95u;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+					//state2 ^= t;
+					//state3 = rotate32(state3, 21);
+					//return result ^ rotate32(result, 17) ^ rotate32(result, 13);
+
+					// Adds the result of a xoshiro++ scrambler to state4 as a counter, returns state4. Seems solid early on.
+					//uint32_t result = state0 + state3;
+					//result = state0 + rotate32(result, 7);
+					//const uint32_t t = state1 >> 9;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+					//state2 ^= t;
+					//state3 = rotate32(state3, 21);
+					//return (state4 += 0xC3564E95u + result);
+					
+					// Gets an anomaly at 32TB, "unusual"... but it shouldn't have any with this much state.
+					//rng = xoshiro5x32, seed = 0x0
+					//length = 32 terabytes(2 ^ 45 bytes), time = 80905 seconds
+					//Test Name                         Raw       Processed     Evaluation
+					//[Low1 / 32]FPF - 14 + 6 / 16:cross        R = -2.5  p = 1 - 1.7e-4   unusual
+					//...and 1133 test result(s) without anomalies
 					const uint32_t t = state1 >> 9;
-					state4 += 0xC3564E95u;
+					state4 += 0xC3564E95 + state3;
 					state2 ^= state0;
 					state3 ^= state1;
 					state1 ^= state2;
 					state0 ^= state3;
-
 					state2 ^= t;
-
 					state3 = rotate32(state3, 21);
-					return result ^ rotate32(result, 17) ^ rotate32(result, 13);
+					return rotate32(state4, 23) ^ rotate32(state0, 14) + state4;
+
 
 				}
 				std::string xoshiro5x32::get_name() const { return "xoshiro5x32"; }
