@@ -1875,6 +1875,21 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					//Test Name                         Raw       Processed     Evaluation
 					//[Low1 / 32]FPF - 14 + 6 / 16:cross        R = -2.5  p = 1 - 1.7e-4   unusual
 					//...and 1133 test result(s) without anomalies
+					//const uint32_t t = state1 >> 9;
+					//state4 += 0xC3564E95 + state3;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+					//state2 ^= t;
+					//state3 = rotate32(state3, 21);
+					//return rotate32(state4, 23) ^ rotate32(state0, 14) + state4;
+					
+					//rng=xoshiro5x32, seed=0x0
+					//length = 1 terabyte(2 ^ 40 bytes), time = 4506 seconds
+					//Test Name                         Raw       Processed     Evaluation
+					//[Low8 / 64]BCFN(2 + 5, 13 - 0, T)         R = +10.8  p = 2.4e-5   unusual
+					//...and 987 test result(s) without anomalies
 					const uint32_t t = state1 >> 9;
 					state4 += 0xC3564E95 + state3;
 					state2 ^= state0;
@@ -1883,7 +1898,7 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					state0 ^= state3;
 					state2 ^= t;
 					state3 = rotate32(state3, 21);
-					return rotate32(state4, 23) ^ rotate32(state0, 14) + state4;
+					return rotate32(state4, 23) ^ rotate32(state0, 13) + state4;
 
 
 				}
