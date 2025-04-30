@@ -1890,6 +1890,24 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					//Test Name                         Raw       Processed     Evaluation
 					//[Low8 / 64]BCFN(2 + 5, 13 - 0, T)         R = +10.8  p = 2.4e-5   unusual
 					//...and 987 test result(s) without anomalies
+					//const uint32_t t = state1 >> 9;
+					//state4 += 0xC3564E95 + state3;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+					//state2 ^= t;
+					//state3 = rotate32(state3, 21);
+					//return rotate32(state4, 23) ^ rotate32(state0, 13) + state4;
+					
+					//const uint32_t result = (state4 << 20) - (state4 << 2) + state4;
+					//uint32_t result = (rotate32(state4, 11) ^ rotate32(state4, 19) ^ state4) * 0x19E37Bu;
+
+					// Passes 64TB with no anomalies!
+					// Period is 2 to the 160 minus 2 to the 32.
+					// 4D equidistributed to either 2 to the 32 or 2 to the 32 minus 1 occurrences, and exactly 1D equidistributed.
+					// It looks like I already tested something similar... I suppose now I know this is more robust as a pattern.
+					uint32_t result = (state4 ^ state4 >> 15) * 0x19E37Bu;
 					const uint32_t t = state1 >> 9;
 					state4 += 0xC3564E95 + state3;
 					state2 ^= state0;
@@ -1898,7 +1916,7 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					state0 ^= state3;
 					state2 ^= t;
 					state3 = rotate32(state3, 21);
-					return rotate32(state4, 23) ^ rotate32(state0, 13) + state4;
+					return rotate32(result, 23) ^ rotate32(result, 14) ^ result;
 
 
 				}
