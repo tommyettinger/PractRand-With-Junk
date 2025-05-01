@@ -1942,19 +1942,37 @@ return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03UL
 					//// Xoshiro160RoadroxoRandom
 					//// Passes 64TB with no anomalies!
 					//// Uses 32-bit math and only needs 64-bit math when returning.
-					Uint64 hi = rotate32(state4, 23) ^ rotate32(state0, 14) + state1;
-					int32_t lo = rotate32(state2, 19) ^ rotate32(state4, 7) + state3;
-					const Uint32 t = state1 << 9;
-					state4 += 0xC3564E95 ^ state3;
+					//Uint64 hi = rotate32(state4, 23) ^ rotate32(state0, 14) + state1;
+					//int32_t lo = rotate32(state2, 19) ^ rotate32(state4, 7) + state3;
+					//const Uint32 t = state1 << 9;
+					//state4 += 0xC3564E95 ^ state3;
+					//state2 ^= state0;
+					//state3 ^= state1;
+					//state1 ^= state2;
+					//state0 ^= state3;
+
+					//state2 ^= t;
+
+					//state3 = rotate32(state3, 11);
+					//return hi << 32 ^ lo;
+
+					// This one's not quite working.
+					//rng = xoshiro5x32long, seed = 0x0
+					//	length = 64 gigabytes(2 ^ 36 bytes), time = 197 seconds
+					//	Test Name                         Raw       Processed     Evaluation
+					//	BRank(12) :12K(1)                  R = +1251  p~= 1.6e-377   FAIL !!!!!!!
+					//	...and 842 test result(s) without anomalies
+					uint64_t result = (state4 ^ rotate32(state2, 15)) * 0x19E37Bu;
+					uint32_t lo = (state2 ^ rotate32(state4, 12)) * 0x139E2Du;
+					const uint32_t t = state1 >> 9;
+					state4 += 0xC3564E95 + state3;
 					state2 ^= state0;
 					state3 ^= state1;
 					state1 ^= state2;
 					state0 ^= state3;
-
 					state2 ^= t;
-
-					state3 = rotate32(state3, 11);
-					return hi << 32 ^ lo;
+					state3 = rotate32(state3, 21);
+					return (rotate32(result, 23) ^ rotate32(result, 14) ^ result) << 32 ^ (int32_t)(rotate32(lo, 7) ^ rotate32(lo, 19) ^ lo);
 				}
 				std::string xoshiro5x32long::get_name() const { return "xoshiro5x32long"; }
 				void xoshiro5x32long::walk_state(StateWalkingObject* walker) {
