@@ -6153,6 +6153,7 @@ return stateA;
 	const uint64_t fc = stateC;
 	const uint64_t fd = stateD;
 	const uint64_t fe = stateE;
+
 //	stateA = fd + fc ^ fe;//0xF1357AEA2E62A9C5UL;//0xD1342543DE82EF95UL
 //	stateB = fb + 0xDE916ABCC965815BUL;
 //	stateC = fa + fe;
@@ -6354,12 +6355,20 @@ return stateA;
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- crand320 -- 64 bits: 	ps:   8.174e-01    7.708e-01    4.534e-01  1-8.891e-02*   5.588e-01   => p <   1.94859e-01   2^54.32 calls, 2^57.32 bytes	2^37.47 bytes/second	used:  10::21:40:48.42
 
-    const uint64_t result = (stateA ^ (stateD += stateE)) + stateB;
-    stateA = stateB ^ (stateB >> 11);
-    stateB = stateC + (stateC << 3);
-    stateC = ((stateC << 24) | (stateC >> (64 - 24))) + result;
-    return result;
-
+    //const uint64_t result = (stateA ^ (stateD += stateE)) + stateB;
+    //stateA = stateB ^ (stateB >> 11);
+    //stateB = stateC + (stateC << 3);
+    //stateC = ((stateC << 24) | (stateC >> (64 - 24))) + result;
+    //return result;
+	
+	// Tested with the "worst-case" stream, this still passses 64TB fine!
+	// Period is 2 to the 64 minimum, but likely 2 to the 319 expected. 2 to the 24 possible streams.
+    stateA = fa + stream;
+    stateB = fa ^ fe;
+    stateC = fb + fd;
+    stateD = rotate64(fc, 44);
+    stateE = fb + fc;
+    return fb;
 				}
 				std::string overload320::get_name() const { return "overload320"; }
 				void overload320::walk_state(StateWalkingObject *walker) {
@@ -6368,10 +6377,18 @@ return stateA;
 					walker->handle(stateC);
 					walker->handle(stateD);
 					walker->handle(stateE);
-					stateE |= 1UL;
-					//walker->handle(stream);
-					//stream |= 1UL;
-					stream = 1UL;
+					//stateE |= 1UL;
+					walker->handle(stream);
+					// worst case?
+					stream = 0x9E3779B97F4A7C15UL;
+					stream = (stream & 0x003569CA5369AC00UL) ^ 0x9E3779B97F4A7C15UL;
+					printf("stateA: %016llX\n", stateA);
+					printf("stateB: %016llX\n", stateB);
+					printf("stateC: %016llX\n", stateC);
+					printf("stateD: %016llX\n", stateD);
+					printf("stateE: %016llX\n", stateE);
+					printf("stream: %016llX\n", stream);
+					//stream = 1UL;
 				}
 
 // Joker40, a shrunken-down AceRandom.
