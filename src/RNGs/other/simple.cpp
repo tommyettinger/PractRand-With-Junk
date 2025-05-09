@@ -2857,6 +2857,34 @@ return x;
 					walker->handle(c);
 					walker->handle(d);
 				}
+
+				Uint64 mace::raw64() {
+					const uint64_t fa = stateA;
+					const uint64_t fb = stateB;
+					const uint64_t fc = stateC;
+					const uint64_t fd = stateD;
+					const uint64_t fe = stateE;
+					stateA = fa + stream;
+					stateB = fa ^ fe;
+					stateC = fb + fd;
+					stateD = rotate64(fc, 44);
+					stateE = fb + fc;
+					return fb;
+
+				}
+				std::string mace::get_name() const {
+					std::ostringstream str;
+					str << "mace" << _pext_u64(stream ^ 0x9E3779B97F4A7C15UL, 0x003569CA5369AC00UL);
+					return str.str();
+				}
+				void mace::walk_state(StateWalkingObject* walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
+					walker->handle(stateE);
+				}
+
 			}
 		}
 	}
