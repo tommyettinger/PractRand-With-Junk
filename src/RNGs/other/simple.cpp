@@ -1470,8 +1470,14 @@ namespace PractRand {
 // 3 statements that all fit on one (long) line!
 // Three 64-bit states, changed using only ARX operations.
 // Never tell me the odds!
-return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03ULL)) ^ state1 + rotate64(state0, 23);
+//return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03ULL)) ^ state1 + rotate64(state0, 23);
 
+//Passes 64TB of PractRand. Period is (2 to the 128) - (2 to the 64), maybe higher but probably not.
+uint64_t s0 = state0, s1 = state1, s2 = state2, result = s2 ^ rotate64(s2, 23) ^ rotate64(s2, 47);
+state0 = s0 >> 1 ^ (-(s0 & 1UL) & 0x9C82435DE0D49E35UL);
+state1 += 0x9E3779B97F4A7C15UL + s0;
+state2 += s1 ^ rotate64(s1, 29) ^ rotate64(s1, 53);
+return result;
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
