@@ -1473,10 +1473,22 @@ namespace PractRand {
 //return state0 = (state2 = rotate64(state2, 47) + (state1 += 0xD1B54A32D192ED03ULL)) ^ state1 + rotate64(state0, 23);
 
 //Passes 64TB of PractRand. Period is (2 to the 128) - (2 to the 64), maybe higher but probably not.
+//uint64_t s0 = state0, s1 = state1, s2 = state2, result = s2 ^ rotate64(s2, 23) ^ rotate64(s2, 47);
+//state0 = s0 >> 1 ^ (-(s0 & 1UL) & 0x9C82435DE0D49E35UL);
+//state1 += 0x9E3779B97F4A7C15UL + s0;
+//state2 += s1 ^ rotate64(s1, 29) ^ rotate64(s1, 53);
+//return result;
+
+// Passes 32TB with no anomalies... But... At 64TB (seed = 1):
+//rng=oriole64, seed=0x1
+//length = 64 terabytes(2 ^ 46 bytes), time = 221635 seconds
+//Test Name                         Raw       Processed     Evaluation
+//[Low4 / 64]BCFN(2 + 2, 13 - 0, T)         R = -8.5  p = 1 - 1.7e-4   unusual
+//...and 1158 test result(s) without anomalies
 uint64_t s0 = state0, s1 = state1, s2 = state2, result = s2 ^ rotate64(s2, 23) ^ rotate64(s2, 47);
-state0 = s0 >> 1 ^ (-(s0 & 1UL) & 0x9C82435DE0D49E35UL);
-state1 += 0x9E3779B97F4A7C15UL + s0;
-state2 += s1 ^ rotate64(s1, 29) ^ rotate64(s1, 53);
+state0 += 0xD1B54A32D192ED03UL;
+state1 += 0xABC98388FB8FAC05UL + _lzcnt_u64(s0);
+state2 += result ^ s1;
 return result;
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
