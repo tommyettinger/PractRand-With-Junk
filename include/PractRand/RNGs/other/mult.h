@@ -675,7 +675,7 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 				};
 				class plum256 : public vRNG64 {
-					Uint64 stateA, stateB, stateC, stateD;
+					Uint64 stateA = 0, stateB = 1, stateC = 2, stateD = 3;
 					int rotation;
 				public:
 					plum256(int rot) : rotation(rot) {};

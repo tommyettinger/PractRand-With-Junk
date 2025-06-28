@@ -1804,10 +1804,13 @@ namespace PractRand {
 // Runs a round of the Speck cipher round function (with key 0),
 // multiplies by an LCG constant (see Vigna and Steele), then xor-rotate-xor-rotate and return.
 // Only one multiply means this should be pretty fast.
-uint64_t x = state, y = stream, z = (rotate64(x, 3) + y ^ rotate64(y, 56)) * 0xD1342543DE82EF95ULL;
-state = x + 0xC6BC279692B5CC83ULL;
-stream = y + (x ^ _lzcnt_u64(x));
-return z ^ rotate64(z, 29) ^ rotate64(z, 40);
+//uint64_t x = state, y = stream, z = (rotate64(x, 3) + y ^ rotate64(y, 56)) * 0xD1342543DE82EF95ULL;
+//state = x + 0xC6BC279692B5CC83ULL;
+//stream = y + (x ^ _lzcnt_u64(x));
+//return z ^ rotate64(z, 29) ^ rotate64(z, 40);
+uint64_t z = (state ^ state >> 30) * 0xF1357AEA2E62A9C5UL;
+state += 0x9E3779B97F4A7C15UL + (stream = stream >> 1 ^ (-(stream & 1UL) & 0x9C82435DE0D49E35UL));
+return z ^ z >> 29;
 				}
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
 
@@ -6057,11 +6060,44 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //stateD = fd + 0xC6BC279692B5C323UL;//0x9E3779B97F4A7C15UL;//0xDE916ABCC965815BUL;
 //return stateA;
 
-stateA = fb + rotate64(fc, rotation); // 42, 39, 36, 28, 25, 23, 22, 20, 19, 13, 11
-stateB = fa ^ fc;
-stateC = fa ^ fd;
-stateD = fd + 0xDE916ABCC965815BUL;
-return stateA;
+//stateA = fb + rotate64(fc, rotation); // 42, 39, 36, 28, 25, 23, 22, 20, 19, 13, 11
+//stateB = fa ^ fc;
+//stateC = fa ^ fd;
+//stateD = fd + 0xDE916ABCC965815BUL;
+//return stateA;
+
+//rng=plum256x10, seed=0x0
+//length= 1 terabyte (2^40 bytes), time= 4592 seconds
+//  no anomalies in 988 test result(s)
+//
+//rng=plum256x10, seed=0x0
+//length= 2 terabytes (2^41 bytes), time= 9253 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  BCFN(2+2,13-0,T)                  R=  +9.3  p =  1.6e-4   unusual
+//  ...and 1019 test result(s) without anomalies
+//
+//rng=plum256x10, seed=0x0
+//length= 4 terabytes (2^42 bytes), time= 19046 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  BCFN(2+2,13-0,T)                  R= +22.2  p =  2.1e-11   VERY SUSPICIOUS
+//  ...and 1051 test result(s) without anomalies
+	//stateA = rotate64(fc, rotation);
+	//stateB = fa + fc;
+	//stateC = fb ^ fd;
+	//stateD = fd + 0xDE916ABCC965815BUL;
+	//return fc + fb;
+
+
+//rng=plum256x10, seed=0x0
+//length= 4 terabytes (2^42 bytes), time= 10038 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  BCFN(2+2,13-0,T)                  R= +16.2  p =  3.2e-8   very suspicious
+//  ...and 1051 test result(s) without anomalies
+	stateA = rotate64(fb, rotation);
+	stateB = fd ^ fc;
+	stateC = fb + fa;
+	stateD = fd + 0xDE916ABCC965815BUL;
+	return fc + fb;
 
 				}
 
