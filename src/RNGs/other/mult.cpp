@@ -6089,15 +6089,15 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 
 
 //rng=plum256x10, seed=0x0
-//length= 4 terabytes (2^42 bytes), time= 10038 seconds
+//length= 1 terabyte (2^40 bytes), time= 4671 seconds
 //  Test Name                         Raw       Processed     Evaluation
-//  BCFN(2+2,13-0,T)                  R= +16.2  p =  3.2e-8   very suspicious
-//  ...and 1051 test result(s) without anomalies
-	stateA = rotate64(fb, rotation);
-	stateB = fd ^ fc;
-	stateC = fb + fa;
+//  BCFN(2+0,13-0,T)                  R= +42.6  p =  2.7e-22    FAIL !!
+//  ...and 987 test result(s) without anomalies
+	stateA = rotate64(fc, rotation);
+	stateB = fa + fc;
+	stateC = fb ^ fd;
 	stateD = fd + 0xDE916ABCC965815BUL;
-	return fc + fb;
+	return fa + fb + fc;
 
 				}
 
