@@ -6093,8 +6093,20 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Test Name                         Raw       Processed     Evaluation
 //  BCFN(2+0,13-0,T)                  R= +42.6  p =  2.7e-22    FAIL !!
 //  ...and 987 test result(s) without anomalies
+//	stateA = rotate64(fc, rotation);
+//	stateB = fa + fc;
+//	stateC = fb ^ fd;
+//	stateD = fd + 0xDE916ABCC965815BUL;
+//	return fa + fb + fc;
+
+	// We can't use too many XORs for states...
+//rng=plum256x10, seed=0x0
+//length= 8 gigabytes (2^33 bytes), time= 18.2 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  BCFN(2+0,13-0,T)                  R= +24.3  p =  1.6e-12    FAIL
+//  ...and 729 test result(s) without anomalies
 	stateA = rotate64(fc, rotation);
-	stateB = fa + fc;
+	stateB = fa ^ fc;
 	stateC = fb ^ fd;
 	stateD = fd + 0xDE916ABCC965815BUL;
 	return fa + fb + fc;
