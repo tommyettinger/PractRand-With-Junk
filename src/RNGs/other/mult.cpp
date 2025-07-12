@@ -6105,10 +6105,15 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Test Name                         Raw       Processed     Evaluation
 //  BCFN(2+0,13-0,T)                  R= +24.3  p =  1.6e-12    FAIL
 //  ...and 729 test result(s) without anomalies
+	//stateA = rotate64(fc, rotation);
+	//stateB = fa ^ fc;
+	//stateC = fb ^ fd;
+	//stateD = fd + 0xDE916ABCC965815BUL;
+	//return fa + fb + fc;
+	stateD = fd * 0xDE916ABCC965815BUL + 0x9E3779B97F4A7C15UL;
 	stateA = rotate64(fc, rotation);
-	stateB = fa ^ fc;
+	stateB = fa + fc;
 	stateC = fb ^ fd;
-	stateD = fd + 0xDE916ABCC965815BUL;
 	return fa + fb + fc;
 
 				}
@@ -6601,7 +6606,7 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 				}
 
 				Uint16 floatHaxPCG::raw16() {
-					//uint32_t proto_exp_offset = (uint32_t)rand();
+					//uint32_t proto_exp_offset = rand();
 					//if (proto_exp_offset == 0) {
 					//	return 0;
 					//}
@@ -6617,9 +6622,31 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//// floatHaxPCG::rand() should scramble the output enough that that the state after that output won't be correlated much.
 					//// There is detectable correlation after about 2TB, though.
 					//// An extra 64-bit multiplication (here, by 0xD1342543DE82EF95ULL) allows it to avoid correlation for our purposes.
-					uint32_t bits = rand();
-					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+					// This works!
+					//uint32_t bits = rand();
+					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+					
 					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFFu));
+
+					// passes at least 512 GB with no anomalies, test interrupted.
+					//uint32_t bits = rand();
+					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state ^ state << 16u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+
+					// passes at least 256GB with no anomalies, but seems slower than above xorshifted state version
+					//uint64_t oldstate = state;
+					//state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
+					//uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
+					//uint32_t rot = oldstate >> 59u;
+					//uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
+					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+
+					// passes 4TB without anomalies. Interrupted because I learned Godot's generator is inclusive on both 0f and 1f . (Whaaaa?!)
+					uint64_t oldstate = state;
+					state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
+					uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
+					uint32_t rot = oldstate >> 59u;
+					uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
+					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
 
 					// gets the low 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x800000);
