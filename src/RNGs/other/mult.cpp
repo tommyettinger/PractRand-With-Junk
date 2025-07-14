@@ -6648,8 +6648,24 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
 					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
 
-					// Passes 64TB with no anomalies, took 197985 seconds.
-					// This generator is, like Godot's randf(), inclusive on 0f and 1f.
+					//// Passes 64TB with no anomalies, took 197985 seconds.
+					//// This generator is, like Godot's randf(), inclusive on 0f and 1f.
+					//uint64_t oldstate = state;
+					//state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
+					//uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
+					//uint32_t rot = oldstate >> 59u;
+					//uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
+					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+
+					//// gets the low 16 bits of the random float f after scaling
+					//return (uint16_t)(f * 0x800000);
+
+					// fails at 512GB for the upper 16 bits!
+//rng=floatHaxPCG, seed=0x0
+//length= 512 gigabytes (2^39 bytes), time= 2637 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  FPF-14+6/16:cross                 R= +15.2  p =  3.9e-13    FAIL
+//  ...and 951 test result(s) without anomalies
 					uint64_t oldstate = state;
 					state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
 					uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
@@ -6657,8 +6673,8 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
 					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
 
-					// gets the low 16 bits of the random float f after scaling
-					return (uint16_t)(f * 0x800000);
+					// gets the high 16 bits of the random float f after scaling
+					return (uint16_t)(f * 0x10000);
 				}
 				std::string floatHaxPCG::get_name() const { return "floatHaxPCG"; }
 				void floatHaxPCG::walk_state(StateWalkingObject* walker) {
