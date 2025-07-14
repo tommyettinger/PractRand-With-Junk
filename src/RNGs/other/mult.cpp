@@ -6641,12 +6641,21 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
 
 					// passes 4TB without anomalies. Interrupted because I learned Godot's generator is inclusive on both 0f and 1f . (Whaaaa?!)
+					//uint64_t oldstate = state;
+					//state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
+					//uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
+					//uint32_t rot = oldstate >> 59u;
+					//uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
+					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+
+					// Passes 64TB with no anomalies, took 197985 seconds.
+					// This generator is, like Godot's randf(), inclusive on 0f and 1f.
 					uint64_t oldstate = state;
 					state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
 					uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
 					uint32_t rot = oldstate >> 59u;
 					uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
-					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
 
 					// gets the low 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x800000);
