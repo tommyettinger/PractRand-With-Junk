@@ -6583,11 +6583,18 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//}
 					//float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
 
-					uint64_t bits = rand();
-					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(bits) << 23 & 0u - (uint32_t)((bits | 0ULL - bits) >> 63)) | ((uint32_t)bits & 0x7FFFFF));
+					//uint64_t bits = rand();
+					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(bits) << 23 & 0u - (uint32_t)((bits | 0ULL - bits) >> 63)) | ((uint32_t)bits & 0x7FFFFF));
+					
+					// even with MX3, this is "very suspicious" at only 256GB -- the construction is likely at fault.
+					uint64_t x = rand();
+					float f = intBitsToFloat((126u - ((uint32_t)__lzcnt64(x)) << 23) | ((uint32_t)x & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+
 
 					// gets the low 16 bits of the random float f after scaling
-					return (uint16_t)(f * 0x800000);
+					//return (uint16_t)(f * 0x800000);
+					// high 16 bits
+					return (uint16_t)(f * 0x10000);
 				}
 				std::string floatHax64::get_name() const { return "floatHax64"; }
 				void floatHax64::walk_state(StateWalkingObject* walker) {
