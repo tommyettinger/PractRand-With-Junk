@@ -6660,18 +6660,27 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//// gets the low 16 bits of the random float f after scaling
 					//return (uint16_t)(f * 0x800000);
 
-					// fails at 512GB for the upper 16 bits!
-//rng=floatHaxPCG, seed=0x0
-//length= 512 gigabytes (2^39 bytes), time= 2637 seconds
-//  Test Name                         Raw       Processed     Evaluation
-//  FPF-14+6/16:cross                 R= +15.2  p =  3.9e-13    FAIL
-//  ...and 951 test result(s) without anomalies
+//					// fails at 512GB for the upper 16 bits!
+////rng=floatHaxPCG, seed=0x0
+////length= 512 gigabytes (2^39 bytes), time= 2637 seconds
+////  Test Name                         Raw       Processed     Evaluation
+////  FPF-14+6/16:cross                 R= +15.2  p =  3.9e-13    FAIL
+////  ...and 951 test result(s) without anomalies
+//					uint64_t oldstate = state;
+//					state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
+//					uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
+//					uint32_t rot = oldstate >> 59u;
+//					uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
+//					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+//
+					// No matter what variants I try using 64-bit oldstate for clz, this fails at or by 512GB... FPF-14+6/16:cross every time.
+					// It's the upper 16 bits of the float that fail, and only those.
 					uint64_t oldstate = state;
 					state = oldstate * 6364136223846793005ULL + 1442695040888963407ULL;
 					uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
 					uint32_t rot = oldstate >> 59u;
 					uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
-					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ (oldstate << rot | oldstate >> 64u - rot) ^ (oldstate << 37u | oldstate >> 27u)) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
 
 					// gets the high 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x10000);
