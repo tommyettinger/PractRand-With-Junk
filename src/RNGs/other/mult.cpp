@@ -6585,10 +6585,16 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 
 					//uint64_t bits = rand();
 					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(bits) << 23 & 0u - (uint32_t)((bits | 0ULL - bits) >> 63)) | ((uint32_t)bits & 0x7FFFFF));
-					
+
+					// better, but not immune? gets "unusual" at 256GB, the low bit of the same troublesome test... [Low1/16]FPF-14+6/16:cross
+					uint64_t x = (state += 0x9E3779B97F4A7C15ULL);
+					x = (x ^ x >> 27) * 0x3C79AC492BA7B653ULL;
+					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35ULL;
+					float f = (0x1000001ULL * (x >> 37) >> 27) * 5.9604645E-8f;
+
 					// even with MX3, this is "very suspicious" at only 256GB -- the construction is likely at fault.
-					uint64_t x = rand();
-					float f = intBitsToFloat((126u - ((uint32_t)__lzcnt64(x)) << 23) | ((uint32_t)x & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+					//uint64_t x = rand();
+					//float f = intBitsToFloat((126u - ((uint32_t)__lzcnt64(x)) << 23) | ((uint32_t)x & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
 
 
 					// gets the low 16 bits of the random float f after scaling
