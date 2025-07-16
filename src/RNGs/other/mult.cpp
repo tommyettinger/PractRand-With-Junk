@@ -6565,32 +6565,50 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 				}
 
 				Uint64 floatHax64::rand() {
-					uint64_t x = (state += 0x9E3779B97F4A7C15UL);
-					x ^= x >> 32;
-					x *= 0xbea225f9eb34556dUL;
-					x ^= x >> 29;
-					x *= 0xbea225f9eb34556dUL;
-					x ^= x >> 32;
-					x *= 0xbea225f9eb34556dUL;
-					x ^= x >> 29;
+					//uint64_t x = (state += 0x9E3779B97F4A7C15UL);
+					//x ^= x >> 32;
+					//x *= 0xbea225f9eb34556dUL;
+					//x ^= x >> 29;
+					//x *= 0xbea225f9eb34556dUL;
+					//x ^= x >> 32;
+					//x *= 0xbea225f9eb34556dUL;
+					//x ^= x >> 29;
+					//return x;
+					uint64_t x = (state += 0xD1342543DE82EF95ULL);
+					x = (x ^ x >> 27) * 0x3C79AC492BA7B653ULL;
+					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35ULL;
+					x ^= x >> 27;
 					return x;
 				}
 
 				Uint16 floatHax64::raw16() {
-					//uint32_t proto_exp_offset = (uint32_t)rand();
-					//if (proto_exp_offset == 0) {
+					// uses what Godot does, except that it uses Moremur instead of PCG-Random.
+					// Fails at 4TB, with the same issue every inclusive-on-1 float generator has so far.
+//rng=floatHax64, seed=0x0
+//length= 4 terabytes (2^42 bytes), time= 65724 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  FPF-14+6/16:cross                 R= +19.2  p =  1.7e-16    FAIL !
+//  ...and 1051 test result(s) without anomalies
+					uint32_t proto_exp_offset = (uint32_t)rand();
+					if (proto_exp_offset == 0) {
+						return 0;
+					}
+					float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
+
+					//uint64_t bits = rand();
+					//if ((bits & 0xFFFFFFFF00000000ULL) == 0ULL) {
 					//	return 0;
 					//}
-					//float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
+					//float f = ldexpf((float)((uint32_t)(bits) | 0x80000001), -32 - __lzcnt64(bits));
 
 					//uint64_t bits = rand();
 					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(bits) << 23 & 0u - (uint32_t)((bits | 0ULL - bits) >> 63)) | ((uint32_t)bits & 0x7FFFFF));
 
 					// better, but not immune? gets "unusual" at 256GB, the low bit of the same troublesome test... [Low1/16]FPF-14+6/16:cross
-					uint64_t x = (state += 0x9E3779B97F4A7C15ULL);
-					x = (x ^ x >> 27) * 0x3C79AC492BA7B653ULL;
-					x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35ULL;
-					float f = (0x1000001ULL * (x >> 37) >> 27) * 5.9604645E-8f;
+					//uint64_t x = (state += 0x9E3779B97F4A7C15ULL);
+					//x = (x ^ x >> 27) * 0x3C79AC492BA7B653ULL;
+					//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35ULL;
+					//float f = (0x1000001ULL * (x >> 37) >> 27) * 5.9604645E-8f;
 
 					// even with MX3, this is "very suspicious" at only 256GB -- the construction is likely at fault.
 					//uint64_t x = rand();
