@@ -1497,8 +1497,16 @@ namespace PractRand {
 //  Test Name                         Raw       Processed     Evaluation
 //  BCFN(2+0,13-0,T)                  R= +24.8  p =  8.6e-13    FAIL
 //  ...and 1106 test result(s) without anomalies
+//uint64_t result = state1;
+//state1 = (state0 += 0x9E3779B97F4A7C15UL) ^ (state1 + (state2 = state1 + rotate64(state2, 52)));
+//return result;
+
+// PraseRandom
+// Passes 64TB with no anomalies.
+// Minimum period is 2 to the 64, actual should be higher. 192 bits of state.
+// Can be written as a one-liner if result is ignored and the state1 assignment is returned instead.
 uint64_t result = state1;
-state1 = (state0 += 0x9E3779B97F4A7C15UL) ^ (state1 + (state2 = state1 + rotate64(state2, 52)));
+state1 = (state0 += 0xD1B54A32D192ED03UL) ^ (rotate64(state1, 5) + (state2 = state1 + rotate64(state2, 52)));
 return result;
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
