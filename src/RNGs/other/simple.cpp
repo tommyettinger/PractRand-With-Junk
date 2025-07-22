@@ -1505,9 +1505,18 @@ namespace PractRand {
 // Passes 64TB with no anomalies.
 // Minimum period is 2 to the 64, actual should be higher. 192 bits of state.
 // Can be written as a one-liner if result is ignored and the state1 assignment is returned instead.
-uint64_t result = state1;
-state1 = (state0 += 0xD1B54A32D192ED03UL) ^ (rotate64(state1, 5) + (state2 = state1 + rotate64(state2, 52)));
-return result;
+//uint64_t result = state1;
+//state1 = (state0 += 0xD1B54A32D192ED03UL) ^ (rotate64(state1, 5) + (state2 = state1 + rotate64(state2, 52)));
+//return result;
+
+// ThrashRandom
+// does great until 64TB, when there is one "unusual" anomaly:
+//rng=oriole64, seed=0x0
+//length= 64 terabytes (2^46 bytes), time= 170986 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]DC6-9x1Bytes-1           R=  +8.2  p =  1.0e-3   unusual
+//  ...and 1158 test result(s) without anomalies
+return state0 = (state1 = rotate64(state1, 47) ^ (state2 += 0xD1B54A32D192ED03UL)) + rotate64(state0, 23);
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
