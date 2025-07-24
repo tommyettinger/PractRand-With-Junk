@@ -5965,13 +5965,22 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//return x;
 
 // Passes 32TB, but has real trouble with ICE tests.
-					uint64_t x = (stateA += 0xD1B54A32D192ED03UL);
-					uint64_t y = (stateB += 0x9E3779B97F4A7C15UL + __lzcnt64(x));
-					x = (x ^ x >> 32) * 0xBEA225F9EB34556DUL;
-					y = (y ^ y >> 29) * 0xF1357AEA2E62A9C5UL;
-					x ^= x >> 29;
-					y ^= y >> 32;
-					return (y ^ rotate64(x, (int)y & 63));
+					//uint64_t x = (stateA += 0xD1B54A32D192ED03UL);
+					//uint64_t y = (stateB += 0x9E3779B97F4A7C15UL + __lzcnt64(x));
+					//x = (x ^ x >> 32) * 0xBEA225F9EB34556DUL;
+					//y = (y ^ y >> 29) * 0xF1357AEA2E62A9C5UL;
+					//x ^= x >> 29;
+					//y ^= y >> 32;
+					//return (y ^ rotate64(x, (int)y & 63));
+					
+// ThrushRandom
+// Unlike ThrashRandom, this passes 64TB with no anomalies.
+// It is also faster than SoloRandom, somehow, and has a minimum period of 2 to the 64.
+// No multiplication used, either. Incorporating stateD with XOR helps quality, but not period.
+uint64_t fd = stateD;
+stateD ^= (stateA = (stateB = rotate64(stateB, 41) ^ (stateC += 0xBEA225F9EB34556DUL)) + rotate64(stateA, 26));
+return fd;
+
 				}
 				std::string lizard256::get_name() const { return "lizard256"; }
 				void lizard256::walk_state(StateWalkingObject *walker) {
