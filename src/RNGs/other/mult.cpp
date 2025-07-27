@@ -4775,13 +4775,19 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//return x ^ x >> (x >> 59) + 6;
 
 					// fails ICE test when using rotate64(s0, 33), but does pass 64TB of PractRand
-					uint64_t x = (rotate64(s0, 21) ^ s1);
-					s0 += 0x369DEA0F31A53F85ULL;
-					s1 += 0x9E3779B97F4A7C15ULL;
-					x ^= x >> (x >> 60) + 14;
-					x *= 0xF1357AEA2E62A9C5ULL;
-					return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+					//uint64_t x = (rotate64(s0, 21) ^ s1);
+					//s0 += 0x369DEA0F31A53F85ULL;
+					//s1 += 0x9E3779B97F4A7C15ULL;
+					//x ^= x >> (x >> 60) + 14;
+					//x *= 0xF1357AEA2E62A9C5ULL;
+					//return x ^ x >> (x >> 59) + 6 ^ x >> 44;
 
+					// This passes 64TB with no anomalies!
+					// Period is exactly 2 to the 128, and all states are valid.
+					uint64_t x = rotate64(s0, 33) + s1;
+					s1 = s1 * 0xD1342543DE82EF95ULL + __lzcnt64(s0);
+					s0 = s0 * 0x369DEA0F31A53F85ULL + 0x2C6FE96EE78B6955ULL;
+					return x ^ x >> 26 ^ x >> 37;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
 				void twinLinear::walk_state(StateWalkingObject *walker) {
