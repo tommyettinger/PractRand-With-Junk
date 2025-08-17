@@ -4271,14 +4271,18 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//Period is a non-zero multiple of (2 to the 64), minimum guarantee of (2 to the 64).
 					//Given all possible subcycles, all results are equally frequent, but any given subcycle may have a different frequency for some results.
 					//Uses only ARX operations. The output step is based on 2 rounds of the Speck cipher with key 0,0, and different rotations.
-					uint64_t t = rotate64(a, 37) ^ (b += 0xD1B54A32D192ED03ULL), s = rotate64(t, 47) + b;
-					a = s ^ rotate64(b, 23);
-					return (rotate64(s, 47) + a) ^ rotate64(a, 23);
+					//uint64_t t = rotate64(a, 37) ^ (b += 0xD1B54A32D192ED03ULL), s = rotate64(t, 47) + b;
+					//a = s ^ rotate64(b, 23);
+					//return (rotate64(s, 47) + a) ^ rotate64(a, 23);
+
+					// fails BRank immediately.
+					return (a = a * 0xD1342543DE82EF95ULL + 0xDE916ABCC965815BULL ^ (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL))) ^ a >> 27;
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
 					walker->handle(a);
 					walker->handle(b);
+					b += (b == 0);
 					//b |= UINT64_C(1);
 					printf("Seed is 0x%016llX, 0x%016llX\r\n", a, b);
 					//b = b << 3 | UINT64_C(5);

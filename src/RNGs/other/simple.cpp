@@ -1516,7 +1516,34 @@ namespace PractRand {
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low4/16]DC6-9x1Bytes-1           R=  +8.2  p =  1.0e-3   unusual
 //  ...and 1158 test result(s) without anomalies
-return state0 = (state1 = rotate64(state1, 47) ^ (state2 += 0xD1B54A32D192ED03UL)) + rotate64(state0, 23);
+//return state0 = (state1 = rotate64(state1, 47) ^ (state2 += 0xD1B54A32D192ED03UL)) + rotate64(state0, 23);
+
+
+//uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 0xDE916ABCC965815BULL ^ (state1 = (state1 << 1) ^ (0u - (state1 >> 63) & 0xB35846EEAB94A77EULL)))
+ //^ (state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL));
+ // state1 = (state1 >> 1) ^ (0u - (state1 & 2ULL) & 0xfc63a63138bea3beULL)
+//uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state1)
+
+// Fails BRank at 64 GB.
+//uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state1) + state2;
+//state1 = (state1 >> 1) ^ (0u - (state1 & 2ULL) & 0x826712F3887E6D72ULL);
+//state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL);
+//return z ^ z >> 27;
+
+// Also fails BRank at 64 GB.
+//uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state1) + state2;
+//state1 = (state1 >> 1) ^ (0u - (state1 & 1ULL) & 0xBBA06D112C26862DULL);
+//state2 = (state2 << 1) ^ (0u - (state2 >> 63)  & 0xFEEDBABEDEADBEEFULL);
+//return z ^ rotate64(z, 25) ^ rotate64(z, 50);
+
+// Fails BRank at 8GB.
+const uint64_t s0 = state0;
+const uint64_t s1 = state1;
+const uint64_t s2 = state2 ^ s1;
+state0 = s0 * 0xD1342543DE82EF95ULL + 1ULL ^ s1;
+state1 = rotate64(s1, 24) ^ s2 ^ (s2 << 16);
+state2 = rotate64(s2, 37);
+return s0 ^ s0 >> 29;
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
@@ -1528,6 +1555,7 @@ return state0 = (state1 = rotate64(state1, 47) ^ (state2 += 0xD1B54A32D192ED03UL
 					walker->handle(state1);
 					// state0 |= ((state0 | state1) == 0);
 					walker->handle(state2);
+					state2 += (state2 == 0 && state1 == 0);
 				}
 
 				Uint64 xoshiro256starstar::raw64() {
