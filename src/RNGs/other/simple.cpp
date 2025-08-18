@@ -1558,11 +1558,32 @@ namespace PractRand {
 //return z ^ rotate64(z, 25) ^ rotate64(z, 50);
 
 // Fails at only 8GB...
-uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2) * (state1 ^ 0xF1357AEA2E62A9C5ULL);
-state1 = (state1 << 1) ^ (0u - (state1 >> 63) & 0xB35846EEAB94A77EULL);
+//uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2) * (state1 ^ 0xF1357AEA2E62A9C5ULL);
+//state1 = (state1 << 1) ^ (0u - (state1 >> 63) & 0xB35846EEAB94A77EULL);
+//state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL);
+//return z ^ rotate64(z, 25) ^ rotate64(z, 50);
+
+// Just a minor anomaly at 4TB...
+//rng=oriole64, seed=0x0
+//length= 4 terabytes (2^42 bytes), time= 14581 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/32]BCFN(2+1,13-0,T)         R=  -8.7  p =1-1.4e-4   unusual
+//  ...and 1051 test result(s) without anomalies
+// I'm not going to run it for longer to see if it gets worse.
+// 
+//uint64_t z = (state0 ^ state0 >> 27) * 0x3C79AC492BA7B653ULL;
+//state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2;
+////state1 = (state1 << 1) ^ (0ULL - (state1 >> 63)  & 0xB35846EEAB94A77EULL);
+////state2 = (state2 >> 1) ^ (0ULL - (state2 & 1ULL) & 0x9E80AC1B7473E003ULL);
+//state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL);
+//z = (z ^ z >> 33) * 0x1C69B3F74AC4AE35ULL;
+//return z ^ z >> 27;
+
+const uint64_t z = (state0 ^ state0 >> 27) * (state1 ^ 0x3C79AC492BA7B653ULL);
+state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2;
+state1 = (state1 << 1) ^ (0ULL - (state1 >> 63)  & 0xB35846EEAB94A77EULL);
 state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL);
 return z ^ rotate64(z, 25) ^ rotate64(z, 50);
-
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
