@@ -1537,13 +1537,32 @@ namespace PractRand {
 //return z ^ rotate64(z, 25) ^ rotate64(z, 50);
 
 // Fails BRank at 8GB.
-const uint64_t s0 = state0;
-const uint64_t s1 = state1;
-const uint64_t s2 = state2 ^ s1;
-state0 = s0 * 0xD1342543DE82EF95ULL + 1ULL ^ s1;
-state1 = rotate64(s1, 24) ^ s2 ^ (s2 << 16);
-state2 = rotate64(s2, 37);
-return s0 ^ s0 >> 29;
+//const uint64_t s0 = state0;
+//const uint64_t s1 = state1;
+//const uint64_t s2 = state2 ^ s1;
+//state0 = s0 * 0xD1342543DE82EF95ULL + 1ULL ^ s1;
+//state1 = rotate64(s1, 24) ^ s2 ^ (s2 << 16);
+//state2 = rotate64(s2, 37);
+//return s0 ^ s0 >> 29;
+
+//uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state1) + state2;
+//state1 ^= state1 << 7;
+//state1 ^= state1 >> 9;
+//state2 = (state2 << 1) ^ (0u - (state2 >> 63)  & 0xFEEDBABEDEADBEEFULL);
+//return z ^ rotate64(z, 25) ^ rotate64(z, 50);
+
+// Passes 4TB, but actual period is unknown (minimum is still large, over 2 to the 127, but state1 isn't a full-period LFSR.)
+//uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2) * (state1 + 0xF1357AEA2E62A9C5ULL);
+//state1 = (state1 >> 1) ^ (0u - (state1 & 2ULL) & 0x826712F3887E6D72ULL); // don't use this! it isn't an LFSR!
+//state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL);
+//return z ^ rotate64(z, 25) ^ rotate64(z, 50);
+
+// Fails at only 8GB...
+uint64_t z = (state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2) * (state1 ^ 0xF1357AEA2E62A9C5ULL);
+state1 = (state1 << 1) ^ (0u - (state1 >> 63) & 0xB35846EEAB94A77EULL);
+state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL);
+return z ^ rotate64(z, 25) ^ rotate64(z, 50);
+
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
@@ -1553,9 +1572,10 @@ return s0 ^ s0 >> 29;
 					// walker->handle(state2);
 					walker->handle(state0);
 					walker->handle(state1);
-					// state0 |= ((state0 | state1) == 0);
+					state1 |= (state1 == 0);
+					state1 <<= 1;
 					walker->handle(state2);
-					state2 += (state2 == 0 && state1 == 0);
+					state2 += (state2 == 0);
 				}
 
 				Uint64 xoshiro256starstar::raw64() {
