@@ -1579,6 +1579,10 @@ namespace PractRand {
 //z = (z ^ z >> 33) * 0x1C69B3F74AC4AE35ULL;
 //return z ^ z >> 27;
 
+// WumpusRandom
+// Passes at least 16TB with no anomalies.
+// However, state1 is essentially ignored during 30-63 generations, but not after.
+// This could be a serious flaw.
 const uint64_t z = (state0 ^ state0 >> 27) * (state1 ^ 0x3C79AC492BA7B653ULL);
 state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2;
 state1 = (state1 << 1) ^ (0ULL - (state1 >> 63)  & 0xB35846EEAB94A77EULL);
