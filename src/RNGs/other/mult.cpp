@@ -4788,15 +4788,24 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 
 					// This passes 64TB with no anomalies!
 					// Period is exactly 2 to the 128, and all states are valid.
-					uint64_t x = rotate64(s0, 33) + s1;
-					s1 = s1 * 0xD1342543DE82EF95ULL + __lzcnt64(s0);
-					s0 = s0 * 0x369DEA0F31A53F85ULL + 0x2C6FE96EE78B6955ULL;
-					return x ^ x >> 26 ^ x >> 37;
+					//uint64_t x = rotate64(s0, 33) + s1;
+					//s1 = s1 * 0xD1342543DE82EF95ULL + __lzcnt64(s0);
+					//s0 = s0 * 0x369DEA0F31A53F85ULL + 0x2C6FE96EE78B6955ULL;
+					//return x ^ x >> 26 ^ x >> 37;
+
+					// Finishes 64 TB with no anomalies. Period is (2 to the 128) - (2 to the 64).
+					uint64_t a = s0, b = s1;
+					uint64_t z = (a + b);
+					s0 = a * 0xD1342543DE82EF95ULL + 1ULL;
+					s1 = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFULL);
+					z = (z ^ rotate64(z, 25) ^ rotate64(z, 50));// *0xBEA225F9EB34556DULL;
+					return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
 				void twinLinear::walk_state(StateWalkingObject *walker) {
 					walker->handle(s0);
 					walker->handle(s1);
+					s1 += (s1 == 0ULL);
 				}
 
 				Uint64 moremur64::raw64() { // named incorrectly, may name later... quarterback64 , due to use of 25 as a rotation?
