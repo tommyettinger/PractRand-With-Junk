@@ -4821,12 +4821,26 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low8/32]Gap-16:B                 R=  +7.4  p =  3.3e-6   suspicious
 //  ...and 1019 test result(s) without anomalies
-					uint64_t a = s0, b = s1;
-					uint64_t z = (a ^ b);
-					s0 = a + 0xDE916ABCC965815BULL;
-					s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
-					z = (z ^ rotate64(z, 25) ^ rotate64(z, 50)) + a;
-					return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
+					//uint64_t a = s0, b = s1;
+					//uint64_t z = (a ^ b);
+					//s0 = a + 0xDE916ABCC965815BULL;
+					//s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
+					//z = (z ^ rotate64(z, 25) ^ rotate64(z, 50)) + a;
+					//return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
+
+// Somehow rotating b does worse... We didn't add a here...
+//rng=twinLinear, seed=0x0
+//length= 512 gigabytes (2^39 bytes), time= 1272 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/64]Gap-16:A                 R=  +7.3  p =  4.0e-5   mildly suspicious
+//  [Low1/64]Gap-16:B                 R= +15.9  p =  1.5e-13    FAIL
+//  ...and 950 test result(s) without anomalies
+uint64_t a = s0, b = s1;
+uint64_t z = (a ^ rotate64(b, 29));
+s0 = a + 0xDE916ABCC965815BULL;
+s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
+z = (z ^ rotate64(z, 25) ^ rotate64(z, 50));
+return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
 				void twinLinear::walk_state(StateWalkingObject *walker) {
