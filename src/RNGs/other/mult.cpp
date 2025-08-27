@@ -4794,11 +4794,24 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//return x ^ x >> 26 ^ x >> 37;
 
 					// Finishes 64 TB with no anomalies. Period is (2 to the 128) - (2 to the 64).
+					//uint64_t a = s0, b = s1;
+					//uint64_t z = (a + b);
+					//s0 = a * 0xD1342543DE82EF95ULL + 1ULL;
+					//s1 = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFULL);
+					//z = (z ^ rotate64(z, 25) ^ rotate64(z, 50));// *0xBEA225F9EB34556DULL;
+					//return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
+
+// Has a problem only at the very end, at 64TB!
+//rng=twinLinear, seed=0x0
+//length= 64 terabytes (2^46 bytes), time= 174079 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/64]FPF-14+6/16:(0,14-0)     R=  +9.6  p =  1.7e-8   suspicious
+//  ...and 1158 test result(s) without anomalies
 					uint64_t a = s0, b = s1;
 					uint64_t z = (a + b);
-					s0 = a * 0xD1342543DE82EF95ULL + 1ULL;
+					s0 = a + 0xD1342543DE82EF95ULL;
 					s1 = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFULL);
-					z = (z ^ rotate64(z, 25) ^ rotate64(z, 50));// *0xBEA225F9EB34556DULL;
+					z = (z ^ rotate64(z, 25) ^ rotate64(z, 50));
 					return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
