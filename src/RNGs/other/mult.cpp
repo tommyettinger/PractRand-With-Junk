@@ -4807,18 +4807,31 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low4/64]FPF-14+6/16:(0,14-0)     R=  +9.6  p =  1.7e-8   suspicious
 //  ...and 1158 test result(s) without anomalies
+					//uint64_t a = s0, b = s1;
+					//uint64_t z = (a + b);
+					//s0 = a + 0xD1342543DE82EF95ULL;
+					//s1 = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFULL);
+					//z = (z ^ rotate64(z, 25) ^ rotate64(z, 50));
+					//return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
+
+// Has trouble earlier than the last one...
+// But no problems before 1TB, at least.
+//rng=twinLinear, seed=0x0
+//length= 2 terabytes (2^41 bytes), time= 4906 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low8/32]Gap-16:B                 R=  +7.4  p =  3.3e-6   suspicious
+//  ...and 1019 test result(s) without anomalies
 					uint64_t a = s0, b = s1;
-					uint64_t z = (a + b);
-					s0 = a + 0xD1342543DE82EF95ULL;
-					s1 = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFULL);
-					z = (z ^ rotate64(z, 25) ^ rotate64(z, 50));
+					uint64_t z = (a ^ b);
+					s0 = a + 0xDE916ABCC965815BULL;
+					s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
+					z = (z ^ rotate64(z, 25) ^ rotate64(z, 50)) + a;
 					return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
 				void twinLinear::walk_state(StateWalkingObject *walker) {
 					walker->handle(s0);
 					walker->handle(s1);
-					s1 += (s1 == 0ULL);
 				}
 
 				Uint64 moremur64::raw64() { // named incorrectly, may name later... quarterback64 , due to use of 25 as a rotation?
