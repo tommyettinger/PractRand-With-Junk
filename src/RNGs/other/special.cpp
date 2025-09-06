@@ -28,12 +28,14 @@ namespace PractRand {
                 no anomalies through 64TB of testing. Because the increment must have each 64-bit half be an odd number to ensure the generator is
                 full-period (it seems to not pass testing if one of the increment halves is even, as well), this only allows changing the upper bits,
                 which certainly seems to work well.
+
+                The performance seems... erratic at best. Windows 11 might be slowing down the AES instructions when the command-line window is not
+                in the foreground; I have no other explanation for why this slows down by a large factor when the window is minimized.
                 */
                 Uint64 aesdragontamer::raw64() {
                     if((idx++) == 0){
                         state = _mm_add_epi64(state, increment);
                         __m128i penultimate = _mm_aesenc_si128(state, increment);
-                        //__m256i full = _mm256_insertf128_si256(_mm256_castsi128_si256(penultimate2), penultimate1, 1);
                         _mm256_storeu_si256((__m256i *) buf, _mm256_inserti128_si256(
                             _mm256_castsi128_si256(_mm_aesdec_si128(penultimate, increment)),
                             _mm_aesenc_si128(penultimate, increment), 1));

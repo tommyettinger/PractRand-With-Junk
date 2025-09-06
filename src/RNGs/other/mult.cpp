@@ -4850,10 +4850,28 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  [Low1/8]BCFN(2+20,13-8,T)         R= +58.7  p =  7.8e-16    FAIL
 //  [Low1/8]BCFN(2+21,13-8,T)         R= +68.0  p =  3.4e-18    FAIL
 //  ...and 985 test result(s) without anomalies
-uint64_t a = s0, b = s1, z = (b ^ rotate64(b, 11) ^ rotate64(b, 40)) + (a ^ rotate64(a, 25) ^ rotate64(a, 50));
-s0 = a + 0xDE916ABCC965815BULL;
-s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
-return (z ^ rotate64(z, 19) ^ rotate64(z, 47));
+//uint64_t a = s0, b = s1, z = (b ^ rotate64(b, 11) ^ rotate64(b, 40)) + (a ^ rotate64(a, 25) ^ rotate64(a, 50));
+//s0 = a + 0xDE916ABCC965815BULL;
+//s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
+//return (z ^ rotate64(z, 19) ^ rotate64(z, 47));
+ 
+					//uint64_t a = s0, b = s1, x = rotate64(a, 30) + b;
+					//s0 = a * 0xD1342543DE82EF95ULL + 0x9E3779B97F4A7C15ULL;
+					//s1 = b * 0xF1357AEA2E62A9C5ULL + __lzcnt64(a);
+					//return x ^ x >> 28;
+
+//x = (x ^ x >> 27 ^ y) * 0x3C79AC492BA7B653UL;
+//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
+//x ^= x >> 27 ^ y;
+
+// MorbRandom
+// Passes 64TB with no anomalies. Period is 2 to the 128. 1D equidistributed, exactly.
+uint64_t x = s0, y = s1;
+s0 += 0x9E3779B97F4A7C15u;
+s1 += (x + (x >> 1)) >> 63;
+x = (x ^ rotate64(x, 23) ^ rotate64(x, 47) ^ y) * 0xF1357AEA2E62A9C5ULL;
+x = (x ^ rotate64(x, 25) ^ rotate64(x, 50) ^ y);
+return x;
 
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
