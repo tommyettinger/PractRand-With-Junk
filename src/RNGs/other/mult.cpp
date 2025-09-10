@@ -4866,12 +4866,24 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 
 // MorbRandom
 // Passes 64TB with no anomalies. Period is 2 to the 128. 1D equidistributed, exactly.
-uint64_t x = s0, y = s1;
-s0 += 0x9E3779B97F4A7C15u;
-s1 += (x + (x >> 1)) >> 63;
-x = (x ^ rotate64(x, 23) ^ rotate64(x, 47) ^ y) * 0xF1357AEA2E62A9C5ULL;
-x = (x ^ rotate64(x, 25) ^ rotate64(x, 50) ^ y);
-return x;
+//uint64_t x = s0, y = s1;
+//s0 += 0x9E3779B97F4A7C15u;
+//s1 += (x + (x >> 1)) >> 63;
+//x = (x ^ rotate64(x, 23) ^ rotate64(x, 47) ^ y) * 0xF1357AEA2E62A9C5ULL;
+//x = (x ^ rotate64(x, 25) ^ rotate64(x, 50) ^ y);
+//return x;
+
+// MorbitalRandom
+// Optimization on OrbitalRandom, with a different second multiplier.
+// Passes 64TB with no anomalies. Passes ICE and IICE tests.
+// Period is 2 to the 128. 1D equidistributed.
+uint64_t x = s0;
+uint64_t y = s1;
+s0 += 0xD1B54A32D192ED03UL;
+s1 += 0x8CB92BA72F3D8DD7UL + __lzcnt64(x);
+y = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
+y = (y ^ y >> 33) * 0xF1357AEA2E62A9C5UL;
+return y ^ y >> 27;
 
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
