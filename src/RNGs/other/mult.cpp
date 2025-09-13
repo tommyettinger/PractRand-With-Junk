@@ -4883,7 +4883,8 @@ s0 += 0xD1B54A32D192ED03UL;
 s1 += 0x8CB92BA72F3D8DD7UL + __lzcnt64(x);
 y = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
 y = (y ^ y >> 33) * 0xF1357AEA2E62A9C5UL;
-return y ^ y >> 27;
+y ^= y >> 27;
+return y;
 
 				}
 				std::string twinLinear::get_name() const { return "twinLinear"; }
@@ -6540,12 +6541,22 @@ return fd;
 	
 	// Tested with the "worst-case" stream, this still passses 64TB fine!
 	// Period is 2 to the 64 minimum, but likely 2 to the 319 expected. 2 to the 24 possible streams.
-    stateA = fa + stream;
-    stateB = fa ^ fe;
-    stateC = fb + fd;
-    stateD = rotate64(fc, 44);
-    stateE = fb + fc;
-    return fb;
+    //stateA = fa + stream;
+    //stateB = fa ^ fe;
+    //stateC = fb + fd;
+    //stateD = rotate64(fc, 44);
+    //stateE = fb + fc;
+    //return fb;
+
+
+// BassD in https://quick-bench.com/q/E-wxFyZQMlGJaN-Rflh_IkObTOU
+stateA = fb ^ fd;
+stateB = fe ^ fc;
+stateC = fa + fb;
+stateD = rotate64(fc, 52);
+stateE = fe + 0x9E3779B97F4A7C15UL;
+return fa;
+
 				}
 				std::string overload320::get_name() const { return "overload320"; }
 				void overload320::walk_state(StateWalkingObject *walker) {
@@ -6557,8 +6568,8 @@ return fd;
 					//stateE |= 1UL;
 					walker->handle(stream);
 					// worst case?
-					stream = 0x9E3779B97F4A7C15UL;
-					stream = (stream & 0x003569CA5369AC00UL) ^ 0x9E3779B97F4A7C15UL;
+					//stream = 0x9E3779B97F4A7C15UL;
+					//stream = (stream & 0x003569CA5369AC00UL) ^ 0x9E3779B97F4A7C15UL;
 					printf("stateA: %016llX\n", stateA);
 					printf("stateB: %016llX\n", stateB);
 					printf("stateC: %016llX\n", stateC);
