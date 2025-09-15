@@ -6550,6 +6550,8 @@ return fd;
 
 
 // BassD in https://quick-bench.com/q/E-wxFyZQMlGJaN-Rflh_IkObTOU
+// Passes 64TB with no anomalies!
+// Minimim period is 2 to the 64, expected period is a much higher multiple.
 stateA = fb ^ fd;
 stateB = fe ^ fc;
 stateC = fa + fb;
