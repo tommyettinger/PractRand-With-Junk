@@ -4965,12 +4965,12 @@ return y;
 					// Period is 2 to the 64, state and output sizes are each 64 bits.
 					// One-dimensionally equidistributed.
 					// May work as a unary hash?
-					uint64_t x = ++state;
-					x ^= x << (x & 31) + 5 ^ x << 41;
-					x *= 0xBEA225F9EB34556DULL;
-					x ^= x >> (x >> 59) + 7 ^ x >> 47;
-					x *= 0xD1342543DE82EF95ULL;
-					return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+					//uint64_t x = ++state;
+					//x ^= x << (x & 31) + 5 ^ x << 41;
+					//x *= 0xBEA225F9EB34556DULL;
+					//x ^= x >> (x >> 59) + 7 ^ x >> 47;
+					//x *= 0xD1342543DE82EF95ULL;
+					//return x ^ x >> (x >> 59) + 6 ^ x >> 44;
 
 					//x ^= x << 28 ^ 0xD1342543DE82EF95ULL;
 					//x *= 0x3C79AC492BA7B653ULL;
@@ -4986,6 +4986,31 @@ return y;
 					//x ^= x >> (x >> 59) + 7 ^ x >> 47;
 					//x *= 0xD1342543DE82EF95ULL;
 					//return x ^ x >> (x >> 59) + 6 ^ x >> 44;
+
+					// memorable constant, but has an "unusual" anomaly at 1TB
+					//uint64_t x = (state -= 987654321987654321UL);
+
+					// Not a failure, but close after 8TB and very close after 16TB; failure was likely imminent.
+//rng=moremur64, seed=0x0
+//length= 8 terabytes (2^43 bytes), time= 22566 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/8]FPF-14+6/16:cross         R=  +7.1  p =  2.4e-6   mildly suspicious
+//  ...and 1080 test result(s) without anomalies
+// 
+//rng=moremur64, seed=0x0
+//length= 16 terabytes (2^44 bytes), time= 42079 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/8]FPF-14+6/16:cross         R= +11.8  p =  2.8e-10   VERY SUSPICIOUS
+//  ...and 1106 test result(s) without anomalies
+					uint64_t x = (state += 5555555555555555555UL);
+					x ^= x * x | 5UL; x = rotate64(x, 35); // round 1, can repeat
+					x ^= x * x | 1UL; x ^= x >> 27; // finisher is different from the round line
+					return x;
+
+					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
+					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
+					//x ^= x * x | 1UL; x ^= x >> 31; // last part of finisher is different from the round line
+					//return x;
 
 				}
 				std::string moremur64::get_name() const { return "moremur64"; }
