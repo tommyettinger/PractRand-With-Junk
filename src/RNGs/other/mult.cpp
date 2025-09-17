@@ -5002,10 +5002,23 @@ return y;
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low1/8]FPF-14+6/16:cross         R= +11.8  p =  2.8e-10   VERY SUSPICIOUS
 //  ...and 1106 test result(s) without anomalies
-					uint64_t x = (state += 5555555555555555555UL);
-					x ^= x * x | 5UL; x = rotate64(x, 35); // round 1, can repeat
-					x ^= x * x | 1UL; x ^= x >> 27; // finisher is different from the round line
-					return x;
+					//uint64_t x = (state += 5555555555555555555UL);
+					//x ^= x * x | 5UL; x = rotate64(x, 35); // round 1, can repeat
+					//x ^= x * x | 1UL; x ^= x >> 27; // finisher is different from the round line
+					//return x;
+
+					// Sad...
+//rng=moremur64, seed=0x0
+//length= 4 terabytes (2^42 bytes), time= 20506 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/32]BCFN(2+0,13-0,T)         R= +11.5  p =  1.1e-5   mildly suspicious
+//  [Low8/32]Gap-16:B                 R=  +6.4  p =  2.0e-5   mildly suspicious
+//  ...and 1050 test result(s) without anomalies
+uint64_t x = (state += 5555555555555555555UL);
+x ^= x * x | 5UL; x = rotate64(x, 42); // round 1, can repeat
+x ^= x * x | 5UL; x ^= x >> 29; // finisher is different from the round line
+return x;
+
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
