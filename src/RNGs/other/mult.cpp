@@ -5014,9 +5014,16 @@ return y;
 //  [Low4/32]BCFN(2+0,13-0,T)         R= +11.5  p =  1.1e-5   mildly suspicious
 //  [Low8/32]Gap-16:B                 R=  +6.4  p =  2.0e-5   mildly suspicious
 //  ...and 1050 test result(s) without anomalies
+//uint64_t x = (state += 5555555555555555555UL);
+//x ^= x * x | 5UL; x = rotate64(x, 42); // round 1, can repeat
+//x ^= x * x | 5UL; x ^= x >> 29; // finisher is different from the round line
+//return x;
+
+// HornRandom
+// Human-memorable! Passes 64TB with no anomalies! Period is 2 to the 64, 1D-equidistributed.
 uint64_t x = (state += 5555555555555555555UL);
-x ^= x * x | 5UL; x = rotate64(x, 42); // round 1, can repeat
-x ^= x * x | 5UL; x ^= x >> 29; // finisher is different from the round line
+x ^= x * x | 7UL; x = rotate64(x, 37); // round 1, can repeat
+x ^= x * x | 7UL; x ^= x >> 27; // finisher is different from the round line
 return x;
 
 
