@@ -5021,9 +5021,16 @@ return y;
 
 // HornRandom
 // Human-memorable! Passes 64TB with no anomalies! Period is 2 to the 64, 1D-equidistributed.
+//uint64_t x = (state += 5555555555555555555UL);
+//x ^= x * x | 7UL; x = rotate64(x, 37); // round 1, can repeat
+//x ^= x * x | 7UL; x ^= x >> 27; // finisher is different from the round line
+//return x;
+
+// WoolRandom
+// Also human-memorable, maybe more-so! Passes 64TB with no anomalies (on the fifth seed tried)!
 uint64_t x = (state += 5555555555555555555UL);
-x ^= x * x | 7UL; x = rotate64(x, 37); // round 1, can repeat
-x ^= x * x | 7UL; x ^= x >> 27; // finisher is different from the round line
+x ^= x * x | 25UL; x = rotate64(x, 39); // round 1, can repeat
+x ^= x * x | 25UL; x ^= x >> 25; // finisher is different from the round line
 return x;
 
 
