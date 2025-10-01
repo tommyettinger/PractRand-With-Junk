@@ -5028,9 +5028,18 @@ return y;
 
 // WoolRandom
 // Also human-memorable, maybe more-so! Passes 64TB with no anomalies (on the fifth seed tried)!
-uint64_t x = (state += 5555555555555555555UL);
-x ^= x * x | 25UL; x = rotate64(x, 39); // round 1, can repeat
-x ^= x * x | 25UL; x ^= x >> 25; // finisher is different from the round line
+//uint64_t x = (state += 5555555555555555555UL);
+//x ^= x * x | 25UL; x = rotate64(x, 39); // round 1, can repeat
+//x ^= x * x | 25UL; x ^= x >> 25; // finisher is different from the round line
+//return x;
+
+// fails early!
+uint64_t x = (state += 5555555555555555555UL), y = x | 1UL;
+x = x * x + y;
+x = rotate64(x, 35);
+y = x | 1UL;
+x = x * x + y;
+x ^= x >> 26;
 return x;
 
 
