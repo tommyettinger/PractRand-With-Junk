@@ -2591,7 +2591,26 @@ return x;
 				}
 
 				Uint64 acorn64_10::raw64() {
-				    return (j += i += h += g += f += e += d += c += b += a += stream);
+					// Passes 16TB with only one anomaly.
+					// (Test was cut short due to a planned power outage.)
+//rng=acorn64_10, seed=0x0
+//length= 512 gigabytes (2^39 bytes), time= 1269 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low8/32]BCFN(2+0,13-0,T)         R=  +9.8  p =  8.6e-5   unusual
+//  ...and 951 test result(s) without anomalies
+					a += stream;
+					b += rotate64(a, 1);
+					c += rotate64(b, 2);
+					d += rotate64(c, 1);
+					e += rotate64(d, 2);
+					f += rotate64(e, 1);
+					g += rotate64(f, 2);
+					h += rotate64(g, 1);
+					i += rotate64(h, 2);
+					j += rotate64(i, 1);
+					return j;
+					// Fails immediately, on many, many tests.
+				    //return (j += i += h += g += f += e += d += c += b += a += stream);
 //					t = (t ^ t >> 31) * (stream += 0x9E3779B97F4A7C16UL);
 //					return t ^ t >> 26 ^ t >> 6;
 				}
