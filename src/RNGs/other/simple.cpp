@@ -2598,26 +2598,128 @@ return x;
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low8/32]BCFN(2+0,13-0,T)         R=  +9.8  p =  8.6e-5   unusual
 //  ...and 951 test result(s) without anomalies
+					//a += stream;
+					//b += rotate64(a, 1);
+					//c += rotate64(b, 2);
+					//d += rotate64(c, 1);
+					//e += rotate64(d, 2);
+					//f += rotate64(e, 1);
+					//g += rotate64(f, 2);
+					//h += rotate64(g, 1);
+					//i += rotate64(h, 2);
+					//j += rotate64(i, 1);
+					//return j;
+					
+					// four states is too few...
+//rng=acorn64_10, seed=0x0
+//length= 1 gigabyte (2^30 bytes), time= 2.1 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  BCFN(2+0,13-1,T)                  R= +60.4  p =  5.6e-32    FAIL !!!
+//  BCFN(2+1,13-1,T)                  R= +54.2  p =  1.2e-28    FAIL !!!
+//  BCFN(2+2,13-1,T)                  R= +39.8  p =  6.6e-21    FAIL !!
+//  BCFN(2+3,13-1,T)                  R= +20.5  p =  1.7e-10   VERY SUSPICIOUS
+//  mod3n(5):(3,9-1)                  R= +19.5  p =  9.8e-12   VERY SUSPICIOUS
+//  [Low1/8]BCFN(2+0,13-3,T)          R=+177.4  p =  9.2e-84    FAIL !!!!
+//  [Low1/8]BCFN(2+1,13-3,T)          R= +40.3  p =  7.5e-19    FAIL !
+//  [Low1/8]DC6-9x1Bytes-1            R= +26.4  p =  8.3e-16    FAIL !
+//  [Low1/16]BCFN(2+0,13-3,T)         R=+104.1  p =  4.4e-49    FAIL !!!!
+//  [Low1/16]BCFN(2+1,13-3,T)         R= +30.6  p =  2.7e-14    FAIL
+//  [Low1/16]DC6-9x1Bytes-1           R=+141.3  p =  1.6e-89    FAIL !!!!!
+//  [Low1/16]FPF-14+6/16:(4,14-2)     R= +23.1  p =  5.1e-20    FAIL !
+//  [Low1/16]FPF-14+6/16:(5,14-3)     R= +16.7  p =  2.0e-14    FAIL
+//  [Low1/16]FPF-14+6/16:(6,14-4)     R=  +9.0  p =  2.9e-7   mildly suspicious
+//  [Low1/16]FPF-14+6/16:all          R= +13.2  p =  7.5e-12   VERY SUSPICIOUS
+//  [Low1/32]BCFN(2+0,13-4,T)         R=+110.1  p =  4.7e-48    FAIL !!!
+//  [Low1/32]DC6-9x1Bytes-1           R=+462.1  p =  2.3e-310   FAIL !!!!!!
+//  [Low1/32]Gap-16:A                 R= +1365  p =  1e-1119    FAIL !!!!!!!!
+//  [Low1/32]Gap-16:B                 R= +89.9  p =  5.9e-74    FAIL !!!!
+//  [Low1/32]FPF-14+6/16:(0,14-0)     R=+539.6  p =  1.2e-496   FAIL !!!!!!!
+//  [Low1/32]FPF-14+6/16:(1,14-1)     R=+384.5  p =  1.7e-340   FAIL !!!!!!!
+//  [Low1/32]FPF-14+6/16:(2,14-2)     R=+273.3  p =  8.0e-239   FAIL !!!!!!
+//  [Low1/32]FPF-14+6/16:(3,14-2)     R=+135.9  p =  1.3e-118   FAIL !!!!!
+//  [Low1/32]FPF-14+6/16:(4,14-3)     R= +91.7  p =  3.6e-80    FAIL !!!!
+//  [Low1/32]FPF-14+6/16:(5,14-4)     R= +66.6  p =  2.2e-54    FAIL !!!!
+//  [Low1/32]FPF-14+6/16:(6,14-5)     R= +47.4  p =  3.7e-39    FAIL !!!
+//  [Low1/32]FPF-14+6/16:(7,14-5)     R= +54.2  p =  9.1e-45    FAIL !!!
+//  [Low1/32]FPF-14+6/16:(8,14-6)     R= +54.3  p =  1.2e-41    FAIL !!!
+//  [Low1/32]FPF-14+6/16:(9,14-7)     R= +14.6  p =  1.9e-11   VERY SUSPICIOUS
+//  [Low1/32]FPF-14+6/16:(10,14-8)    R= +14.2  p =  2.7e-10  very suspicious
+//  [Low1/32]FPF-14+6/16:all          R=+723.2  p =  2.9e-678   FAIL !!!!!!!
+//  [Low1/32]FPF-14+6/16:cross        R= +24.5  p =  8.7e-20    FAIL !
+//  [Low1/64]BCFN(2+0,13-5,T)         R= +20.3  p =  3.8e-8   very suspicious
+//  [Low1/64]BCFN(2+1,13-5,T)         R= +14.8  p =  5.4e-6   mildly suspicious
+//  [Low1/64]DC6-9x1Bytes-1           R= +1149  p =  5.4e-665   FAIL !!!!!!!
+//  [Low1/64]Gap-16:A                 R=+48582  p = 0           FAIL !!!!!!!!
+//  [Low1/64]Gap-16:B                 R=+57991  p = 0           FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(0,14-1)     R=+15943  p = 0           FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(1,14-2)     R=+11292  p =  4e-9876    FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(2,14-2)     R= +8008  p =  1e-7003    FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(3,14-3)     R= +5649  p =  1e-4951    FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(4,14-4)     R= +4100  p =  8e-3350    FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(5,14-5)     R= +2746  p =  4e-2276    FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(6,14-5)     R= +2015  p =  1e-1670    FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(7,14-6)     R= +1482  p =  3e-1134    FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:(8,14-7)     R= +1004  p =  1.6e-798   FAIL !!!!!!!
+//  [Low1/64]FPF-14+6/16:(9,14-8)     R=+703.1  p =  5.8e-506   FAIL !!!!!!!
+//  [Low1/64]FPF-14+6/16:(10,14-8)    R=+448.0  p =  2.1e-322   FAIL !!!!!!
+//  [Low1/64]FPF-14+6/16:(11,14-9)    R=+128.0  p =  7.3e-81    FAIL !!!!
+//  [Low1/64]FPF-14+6/16:(12,14-10)   R= +63.6  p =  2.1e-34    FAIL !!!
+//  [Low1/64]FPF-14+6/16:(13,14-11)   R= +27.9  p =  5.1e-13   VERY SUSPICIOUS
+//  [Low1/64]FPF-14+6/16:(14,14-11)   R= +27.4  p =  9.0e-13   VERY SUSPICIOUS
+//  [Low1/64]FPF-14+6/16:all          R=+22190  p = 0           FAIL !!!!!!!!
+//  [Low1/64]FPF-14+6/16:cross        R=+471.0  p =  3.6e-370   FAIL !!!!!!!
+//  [Low1/64]mod3n(5):(0,9-3)         R= +96.8  p =  1.8e-50    FAIL !!!!
+//  [Low4/16]BCFN(2+0,13-2,T)         R=+706.8  p =  7.9e-361   FAIL !!!!!!!
+//  [Low4/16]BCFN(2+1,13-2,T)         R=+398.8  p =  2.0e-203   FAIL !!!!!!
+//  [Low4/16]BCFN(2+2,13-3,T)         R= +45.3  p =  2.9e-21    FAIL !!
+//  [Low4/16]DC6-9x1Bytes-1           R= +82.9  p =  1.7e-43    FAIL !!!
+//  [Low4/32]BCFN(2+0,13-3,T)         R= +1989  p =  4.3e-941   FAIL !!!!!!!
+//  [Low4/32]BCFN(2+1,13-3,T)         R=+177.5  p =  8.6e-84    FAIL !!!!
+//  [Low4/32]BCFN(2+2,13-3,T)         R= +11.2  p =  4.1e-5   unusual
+//  [Low4/32]DC6-9x1Bytes-1           R=+934.2  p =  1.5e-573   FAIL !!!!!!!
+//  [Low4/64]BCFN(2+0,13-3,T)         R=+721.1  p =  4.3e-341   FAIL !!!!!!!
+//  [Low4/64]BCFN(2+1,13-3,T)         R= +92.8  p =  1.0e-43    FAIL !!!
+//  [Low4/64]BCFN(2+2,13-4,T)         R= +31.3  p =  1.3e-13    FAIL
+//  [Low4/64]DC6-9x1Bytes-1           R= +3455  p =  5e-2203    FAIL !!!!!!!!
+//  [Low4/64]Gap-16:A                 R=+94487  p = 0           FAIL !!!!!!!!
+//  [Low4/64]Gap-16:B                 R=+15030  p = 0           FAIL !!!!!!!!
+//  [Low4/64]FPF-14+6/16:(4,14-2)     R= +24.2  p =  6.2e-21    FAIL !
+//  [Low4/64]FPF-14+6/16:(5,14-3)     R= +15.9  p =  1.1e-13    FAIL
+//  [Low4/64]FPF-14+6/16:(6,14-4)     R= +10.4  p =  1.8e-8   suspicious
+//  [Low4/64]FPF-14+6/16:(8,14-5)     R=+165.2  p =  8.1e-137   FAIL !!!!!
+//  [Low4/64]FPF-14+6/16:(9,14-6)     R=+448.7  p =  1.9e-343   FAIL !!!!!!!
+//  [Low4/64]FPF-14+6/16:(10,14-7)    R=+330.1  p =  1.5e-262   FAIL !!!!!!
+//  [Low4/64]FPF-14+6/16:(11,14-8)    R=+237.8  p =  3.5e-171   FAIL !!!!!!
+//  [Low4/64]FPF-14+6/16:(12,14-8)    R=+606.2  p =  3.0e-436   FAIL !!!!!!!
+//  [Low4/64]FPF-14+6/16:(13,14-9)    R=+228.7  p =  2.8e-144   FAIL !!!!!
+//  [Low4/64]FPF-14+6/16:(14,14-10)   R=+149.0  p =  7.3e-80    FAIL !!!!
+//  [Low4/64]FPF-14+6/16:(15,14-11)   R= +98.7  p =  7.2e-44    FAIL !!!
+//  [Low4/64]FPF-14+6/16:(16,14-11)   R=+140.5  p =  4.5e-62    FAIL !!!!
+//  [Low4/64]FPF-14+6/16:all          R=+114.0  p =  1.6e-106   FAIL !!!!!
+//  [Low4/64]FPF-14+6/16:cross        R= +12.8  p =  1.5e-11   VERY SUSPICIOUS
+//  [Low8/32]BCFN(2+0,13-2,T)         R=+746.4  p =  4.8e-381   FAIL !!!!!!!
+//  [Low8/32]BCFN(2+1,13-2,T)         R=+380.8  p =  3.4e-194   FAIL !!!!!!
+//  [Low8/32]BCFN(2+2,13-3,T)         R= +53.9  p =  2.5e-25    FAIL !!
+//  [Low8/32]DC6-9x1Bytes-1           R= +85.9  p =  4.7e-45    FAIL !!!
+//  [Low8/64]BCFN(2+0,13-3,T)         R= +1963  p =  7.3e-929   FAIL !!!!!!!
+//  [Low8/64]BCFN(2+1,13-3,T)         R=+191.1  p =  2.9e-90    FAIL !!!!!
+//  [Low8/64]BCFN(2+2,13-3,T)         R= +13.6  p =  3.3e-6   mildly suspicious
+//  [Low8/64]DC6-9x1Bytes-1           R= +1095  p =  3.6e-672   FAIL !!!!!!!
+//  [Low8/64]Gap-16:B                 R= +11.0  p =  7.6e-9   very suspicious
+//  ...and 508 test result(s) without anomalies
 					a += stream;
 					b += rotate64(a, 1);
 					c += rotate64(b, 2);
 					d += rotate64(c, 1);
-					e += rotate64(d, 2);
-					f += rotate64(e, 1);
-					g += rotate64(f, 2);
-					h += rotate64(g, 1);
-					i += rotate64(h, 2);
-					j += rotate64(i, 1);
-					return j;
+					return d;
+
 					// Fails immediately, on many, many tests.
 				    //return (j += i += h += g += f += e += d += c += b += a += stream);
-//					t = (t ^ t >> 31) * (stream += 0x9E3779B97F4A7C16UL);
-//					return t ^ t >> 26 ^ t >> 6;
 				}
 				std::string acorn64_10::get_name() const { return "acorn64_10"; }
 				void acorn64_10::walk_state(StateWalkingObject *walker) {
 					walker->handle(stream);
-					stream |= 1U;
+					stream = 0x9E3779B97F4A7C15UL ^ (stream & 0x0055555555555500UL);
 					walker->handle(a);
 					walker->handle(b);
 					walker->handle(c);
