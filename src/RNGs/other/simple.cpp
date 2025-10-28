@@ -2735,13 +2735,29 @@ return x;
 //  [Low4/64]Gap-16:B                 R=  +6.7  p =  1.2e-5   mildly suspicious
 //  [Low8/64]DC6-9x1Bytes-1           R= +15.8  p =  1.4e-8    VERY SUSPICIOUS
 //  ...and 877 test result(s) without anomalies
+					//a += stream;
+					//b += rotate64(a, 1);
+					//c += rotate64(b, 1);
+					//d += rotate64(c, 1);
+					//e += rotate64(d, 1);
+					//f += rotate64(e, 1);
+					//g += rotate64(f, 1);
+					//return g;
+					 
+					// Much stronger with some larger rotations, even with just 6 changing states (7 total)!
+					// Still on its way to fail at or before 64TB, but no anomalies at 8TB or earlier.
+//rng=acorn64_10, seed=0x0
+//length= 16 terabytes (2^44 bytes), time= 39412 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/64]FPF-14+6/16:all          R=  +6.4  p =  1.7e-5   mildly suspicious
+//  ...and 1106 test result(s) without anomalies
 					a += stream;
 					b += rotate64(a, 1);
-					c += rotate64(b, 1);
-					d += rotate64(c, 1);
-					e += rotate64(d, 1);
-					f += rotate64(e, 1);
-					g += rotate64(f, 1);
+					c += rotate64(b, 2);
+					d += rotate64(c, 3);
+					e += rotate64(d, 5);
+					f += rotate64(e, 7);
+					g += rotate64(f, 11);
 					return g;
 
 					// Fails immediately, on many, many tests.
