@@ -5034,13 +5034,22 @@ return y;
 //return x;
 
 // fails early!
-uint64_t x = (state += 5555555555555555555UL), y = x | 1UL;
-x = x * x + y;
-x = rotate64(x, 35);
-y = x | 1UL;
-x = x * x + y;
-x ^= x >> 26;
-return x;
+//uint64_t x = (state += 5555555555555555555UL), y = x | 1UL;
+//x = x * x + y;
+//x = rotate64(x, 35);
+//y = x | 1UL;
+//x = x * x + y;
+//x ^= x >> 26;
+//return x;
+
+
+// Hasher.randomize1()
+// Passes at least 128GB without anomalies (interrupted)
+uint64_t x = (state += 0x632BE59BD9B4E019UL);
+x = ((x ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL);
+x = (x ^ x >> 27) * 0xAEF17502108EF2D9UL;
+return x ^ x >> 25;
+
 
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
