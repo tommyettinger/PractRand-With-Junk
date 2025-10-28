@@ -2707,11 +2707,24 @@ return x;
 //  [Low8/64]DC6-9x1Bytes-1           R= +1095  p =  3.6e-672   FAIL !!!!!!!
 //  [Low8/64]Gap-16:B                 R= +11.0  p =  7.6e-9   very suspicious
 //  ...and 508 test result(s) without anomalies
+
+					// six states do a bit better, maybe rotation amounts can help here?
+//rng=acorn64_10, seed=0x0
+//length= 16 gigabytes (2^34 bytes), time= 36.6 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/64]FPF-14+6/16:(2,14-0)     R= +11.2  p =  5.9e-10  very suspicious
+//  [Low1/64]FPF-14+6/16:(3,14-0)     R=  +9.5  p =  2.0e-8   suspicious
+//  [Low1/64]FPF-14+6/16:all          R= +11.3  p =  4.1e-10   VERY SUSPICIOUS
+//  [Low4/64]DC6-9x1Bytes-1           R= +28.8  p =  4.8e-15    FAIL !
+//  [Low8/64]DC6-9x1Bytes-1           R= +14.3  p =  9.2e-8   very suspicious
+//  ...and 764 test result(s) without anomalies
 					a += stream;
 					b += rotate64(a, 1);
 					c += rotate64(b, 2);
 					d += rotate64(c, 1);
-					return d;
+					e += rotate64(d, 2);
+					f += rotate64(e, 1);
+					return f;
 
 					// Fails immediately, on many, many tests.
 				    //return (j += i += h += g += f += e += d += c += b += a += stream);
