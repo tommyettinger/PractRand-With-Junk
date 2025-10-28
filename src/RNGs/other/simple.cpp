@@ -2718,13 +2718,31 @@ return x;
 //  [Low4/64]DC6-9x1Bytes-1           R= +28.8  p =  4.8e-15    FAIL !
 //  [Low8/64]DC6-9x1Bytes-1           R= +14.3  p =  9.2e-8   very suspicious
 //  ...and 764 test result(s) without anomalies
+					//a += stream;
+					//b += rotate64(a, 1);
+					//c += rotate64(b, 2);
+					//d += rotate64(c, 1);
+					//e += rotate64(d, 2);
+					//f += rotate64(e, 1);
+					//return f;
+
+					// seven states do... better... but still fail at 128 GB.
+					// I tried using all left rotations by 1 here, it doesn't seem to have much effect.
+//rng=acorn64_10, seed=0x0
+//length= 128 gigabytes (2^37 bytes), time= 326 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/64]DC6-9x1Bytes-1           R= +26.1  p =  3.7e-14    FAIL
+//  [Low4/64]Gap-16:B                 R=  +6.7  p =  1.2e-5   mildly suspicious
+//  [Low8/64]DC6-9x1Bytes-1           R= +15.8  p =  1.4e-8    VERY SUSPICIOUS
+//  ...and 877 test result(s) without anomalies
 					a += stream;
 					b += rotate64(a, 1);
-					c += rotate64(b, 2);
+					c += rotate64(b, 1);
 					d += rotate64(c, 1);
-					e += rotate64(d, 2);
+					e += rotate64(d, 1);
 					f += rotate64(e, 1);
-					return f;
+					g += rotate64(f, 1);
+					return g;
 
 					// Fails immediately, on many, many tests.
 				    //return (j += i += h += g += f += e += d += c += b += a += stream);
