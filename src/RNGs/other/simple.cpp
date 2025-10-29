@@ -2751,14 +2751,30 @@ return x;
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low1/64]FPF-14+6/16:all          R=  +6.4  p =  1.7e-5   mildly suspicious
 //  ...and 1106 test result(s) without anomalies
-					a += stream;
-					b += rotate64(a, 1);
-					c += rotate64(b, 2);
-					d += rotate64(c, 3);
-					e += rotate64(d, 5);
-					f += rotate64(e, 7);
-					g += rotate64(f, 11);
-					return g;
+					//a += stream;
+					//b += rotate64(a, 1);
+					//c += rotate64(b, 2);
+					//d += rotate64(c, 3);
+					//e += rotate64(d, 5);
+					//f += rotate64(e, 7);
+					//g += rotate64(f, 11);
+					//return g;
+
+// This approach is guaranteed to lengthen the minimum period of b a lot, which should extend the whole thing.
+// It fails at 128GB, which the variant with 7 changing states (and an unchanging stream as well) did, too.
+// This has just 6 changing states, which suggests this is a better approach going forward...
+//rng=acorn64_10, seed=0x0
+//length= 128 gigabytes (2^37 bytes), time= 311 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low8/64]DC6-9x1Bytes-1           R= +22.9  p =  3.4e-12    FAIL
+//  ...and 879 test result(s) without anomalies
+					stream ^= e;
+					a += 0x9E3779B97F4A7C15UL;
+					b = rotate64(b, 1) + _lzcnt_u64(a);
+					c = rotate64(c, 1) + b;
+					d = rotate64(d, 1) + c;
+					e = rotate64(e, 1) + d;
+					return stream;
 
 					// Fails immediately, on many, many tests.
 				    //return (j += i += h += g += f += e += d += c += b += a += stream);
@@ -2766,7 +2782,7 @@ return x;
 				std::string acorn64_10::get_name() const { return "acorn64_10"; }
 				void acorn64_10::walk_state(StateWalkingObject *walker) {
 					walker->handle(stream);
-					stream = 0x9E3779B97F4A7C15UL ^ (stream & 0x0055555555555500UL);
+					//stream = 0x9E3779B97F4A7C15UL ^ (stream & 0x0055555555555500UL);
 					walker->handle(a);
 					walker->handle(b);
 					walker->handle(c);
