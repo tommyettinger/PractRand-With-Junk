@@ -5045,12 +5045,23 @@ return y;
 
 // Hasher.randomize1()
 // Passes at least 128GB without anomalies (interrupted)
-uint64_t x = (state += 0x632BE59BD9B4E019UL);
-x = ((x ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL);
-x = (x ^ x >> 27) * 0xAEF17502108EF2D9UL;
-return x ^ x >> 25;
+//uint64_t x = (state += 0x632BE59BD9B4E019UL);
+//x = ((x ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL);
+//x = (x ^ x >> 27) * 0xAEF17502108EF2D9UL;
+//return x ^ x >> 25;
 
 
+// QomStage1
+// Passes 64TB with one anomaly:
+//rng=moremur64, seed=0x0
+//length= 8 terabytes (2^43 bytes), time= 19660 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/32]Gap-16:B                 R=  +6.0  p =  4.5e-5   unusual
+//  ...and 1080 test result(s) without anomalies
+// As a generator with only 64 bits of state, just one "unusual" anomaly is pretty good.
+uint64_t x = (state -= state * state | 1111111111111111111UL);
+x = (x ^ x >> 28) * 5555555555555555555UL;
+return x ^ rotate64(x, 25) ^ rotate64(x, 50);
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
