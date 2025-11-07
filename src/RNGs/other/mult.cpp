@@ -5059,9 +5059,19 @@ return y;
 //  [Low1/32]Gap-16:B                 R=  +6.0  p =  4.5e-5   unusual
 //  ...and 1080 test result(s) without anomalies
 // As a generator with only 64 bits of state, just one "unusual" anomaly is pretty good.
-uint64_t x = (state -= state * state | 1111111111111111111UL);
-x = (x ^ x >> 28) * 5555555555555555555UL;
-return x ^ rotate64(x, 25) ^ rotate64(x, 50);
+//uint64_t x = (state -= state * state | 1111111111111111111UL);
+//x = (x ^ x >> 28) * 5555555555555555555UL;
+//return x ^ rotate64(x, 25) ^ rotate64(x, 50);
+
+// Has one "unusual" anomaly at 64TB, nothing before that.
+//rng=moremur64, seed=0x0
+//length= 64 terabytes (2^46 bytes), time= 168639 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/32]FPF-14+6/16:cross        R=  -2.6  p =1-9.7e-5   unusual
+//  ...and 1158 test result(s) without anomalies
+uint64_t x = (state ^ state >> 28) * 5555555555555555555UL;
+state -= state * state | 1111111111111111111UL;
+return x ^ x >> 28;
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
