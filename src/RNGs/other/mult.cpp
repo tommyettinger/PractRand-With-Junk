@@ -5103,9 +5103,21 @@ return y;
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low4/16]Gap-16:B                 R= +10.2  p =  1.3e-8   very suspicious
 //  ...and 1133 test result(s) without anomalies
-uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 5555555555555555555UL;
-state += 9090909090909090909UL;
-return (x ^ rotate64(x, 23) ^ rotate64(x, 47));
+//uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 5555555555555555555UL;
+//state += 9090909090909090909UL;
+//return (x ^ rotate64(x, 23) ^ rotate64(x, 47));
+
+// Well, that's interesting...
+// Changing the rotations to lower amounts yields a hard BRank failure at 512GB, and nothing before that.
+// The constants for the multiplier and increment were also flipped.
+//rng=moremur64, seed=0x0
+//length= 512 gigabytes (2^39 bytes), time= 1250 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  BRank(12):24K(1)                  R= +1574  p~=  1.0e-474   FAIL !!!!!!!
+//  ...and 951 test result(s) without anomalies
+uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 9090909090909090909UL;
+state += 5555555555555555555UL;
+return (x ^ rotate64(x, 11) ^ rotate64(x, 42));
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
