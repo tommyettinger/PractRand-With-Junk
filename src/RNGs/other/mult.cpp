@@ -5079,9 +5079,33 @@ return y;
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low1/32]Gap-16:B                 R=  -5.3  p =1-2.1e-4   unusual
 //  ...and 1051 test result(s) without anomalies
-uint64_t x = (state ^ state >> 29) * 5555555555555555555UL;
-state = state * 9090909090909090909UL + 5555555555555555555UL;
-return x ^ x >> 29;
+//uint64_t x = (state ^ state >> 29) * 5555555555555555555UL;
+//state = state * 9090909090909090909UL + 5555555555555555555UL;
+//return x ^ x >> 29;
+
+// More anomalies here, ending the run with an unacceptable "very suspicious" result at 32TB.
+//rng=moremur64, seed=0x0
+//length= 64 gigabytes (2^36 bytes), time= 151 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/32]BCFN(2+0,13-0,T)         R=  -8.1  p =1-3.1e-4   unusual
+//  ...and 842 test result(s) without anomalies
+// 
+//...  results from 128GB through 8TB removed for brevity; no anomalies found there...
+//
+//rng=moremur64, seed=0x0
+//length= 16 terabytes (2^44 bytes), time= 54615 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]Gap-16:B                 R=  +5.9  p =  5.9e-5   unusual
+//  ...and 1106 test result(s) without anomalies
+//
+//rng=moremur64, seed=0x0
+//length= 32 terabytes (2^45 bytes), time= 95986 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]Gap-16:B                 R= +10.2  p =  1.3e-8   very suspicious
+//  ...and 1133 test result(s) without anomalies
+uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 5555555555555555555UL;
+state += 9090909090909090909UL;
+return (x ^ rotate64(x, 23) ^ rotate64(x, 47));
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
