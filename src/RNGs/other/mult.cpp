@@ -5115,9 +5115,22 @@ return y;
 //  Test Name                         Raw       Processed     Evaluation
 //  BRank(12):24K(1)                  R= +1574  p~=  1.0e-474   FAIL !!!!!!!
 //  ...and 951 test result(s) without anomalies
-uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 9090909090909090909UL;
-state += 5555555555555555555UL;
-return (x ^ rotate64(x, 11) ^ rotate64(x, 42));
+//uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 9090909090909090909UL;
+//state += 5555555555555555555UL;
+//return (x ^ rotate64(x, 11) ^ rotate64(x, 42));
+
+// Another fail at 512GB... This time with a (very minor) "unusual" anomaly to boot.
+// The evaluation, at least, has one less exclamation mark after FAIL.
+// There were no anomalies before 512GB, at least.
+//rng=moremur64, seed=0x0
+//length= 512 gigabytes (2^39 bytes), time= 1253 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  DC6-9x1Bytes-1                    R=  -6.4  p =1-1.1e-3   unusual
+//  BRank(12):24K(1)                  R=+734.0  p~=  5.5e-222   FAIL !!!!!!
+//  ...and 950 test result(s) without anomalies
+uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 5555555555555555555UL;
+state += 7777777777777777777UL;
+return (x ^ rotate64(x, 11) ^ rotate64(x, 41));
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
