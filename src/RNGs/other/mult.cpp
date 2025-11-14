@@ -5138,9 +5138,35 @@ return y;
 //  Test Name                         Raw       Processed     Evaluation
 //  BRank(12):24K(1)                  R=+734.0  p~=  5.5e-222   FAIL !!!!!!
 //  ...and 951 test result(s) without anomalies
+//uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 5555555555555555555UL;
+//state += 7777777777777777777UL;
+//return (x ^ rotate64(x, 17) ^ rotate64(x, 41));
+
+// This one also goes to 32TB, like the last one that used 9090909...
+// It still gets to extremely suspicious results after a while, actually worse than before.
+//rng=moremur64, seed=0x0
+//length= 8 terabytes (2^43 bytes), time= 19270 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/64]BCFN(2+4,13-0,T)         R=  -9.4  p =1-4.9e-5   unusual
+//  ...and 1080 test result(s) without anomalies
+//
+//rng=moremur64, seed=0x0
+//length= 16 terabytes (2^44 bytes), time= 40234 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low8/64]Gap-16:A                 R=  +6.7  p =  9.6e-5   unusual
+//  ...and 1106 test result(s) without anomalies
+//
+//rng=moremur64, seed=0x0
+//length= 32 terabytes (2^45 bytes), time= 120580 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/64]BCFN(2+15,13-3,T)        R= +14.2  p =  1.5e-6   unusual
+//  [Low8/32]Gap-16:B                 R=  +7.1  p =  5.2e-6   mildly suspicious
+//  [Low8/64]Gap-16:A                 R=  +8.0  p =  1.4e-5   mildly suspicious
+//  [Low8/64]Gap-16:B                 R= +10.9  p =  2.9e-9    VERY SUSPICIOUS
+//  ...and 1130 test result(s) without anomalies
 uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 5555555555555555555UL;
-state += 7777777777777777777UL;
-return (x ^ rotate64(x, 17) ^ rotate64(x, 41));
+state += 9090909090909090909UL;
+return (x ^ rotate64(x, 37) ^ rotate64(x, 47));
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
