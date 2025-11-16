@@ -5044,11 +5044,16 @@ return y;
 
 
 // Hasher.randomize1()
-// Passes at least 128GB without anomalies (interrupted)
-//uint64_t x = (state += 0x632BE59BD9B4E019UL);
-//x = ((x ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL);
-//x = (x ^ x >> 27) * 0xAEF17502108EF2D9UL;
-//return x ^ x >> 25;
+// Passes at least 64TB with one anomaly at 16TB ("unusual"):
+//rng=moremur64, seed=0x0
+//length= 16 terabytes (2^44 bytes), time= 61015 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low8/32]BCFN(2+0,13-0,T)         R=  -8.8  p =1-1.2e-4   unusual
+//  ...and 1106 test result(s) without anomalies
+uint64_t x = (state += 0x632BE59BD9B4E019UL);
+x = ((x ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL);
+x = (x ^ x >> 27) * 0xAEF17502108EF2D9UL;
+return x ^ x >> 25;
 
 
 // QomStage1
@@ -5164,9 +5169,9 @@ return y;
 //  [Low8/64]Gap-16:A                 R=  +8.0  p =  1.4e-5   mildly suspicious
 //  [Low8/64]Gap-16:B                 R= +10.9  p =  2.9e-9    VERY SUSPICIOUS
 //  ...and 1130 test result(s) without anomalies
-uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 5555555555555555555UL;
-state += 9090909090909090909UL;
-return (x ^ rotate64(x, 37) ^ rotate64(x, 47));
+//uint64_t x = (state ^ rotate64(state, 25) ^ rotate64(state, 50)) * 5555555555555555555UL;
+//state += 9090909090909090909UL;
+//return (x ^ rotate64(x, 37) ^ rotate64(x, 47));
 
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 1
 					//x ^= x * x | 1UL; x = rotate64(x, 32); // round 2, can repeat if desired
