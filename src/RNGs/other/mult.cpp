@@ -4287,9 +4287,17 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  [Low4/32]FPF-14+6/16:(10,14-2)    R= +10.5  p =  5.4e-9   suspicious
 //  [Low4/32]FPF-14+6/16:all          R= +15.3  p =  8.1e-14    FAIL
 //  ...and 839 test result(s) without anomalies
-					uint64_t z = (a = a + 0xDE916ABCC965815BULL + (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL)));
-					z = (z ^ z >> 29) * 0xD1342543DE82EF95ULL;
-					return z ^ z >> 31;
+					//uint64_t z = (a = a + 0xDE916ABCC965815BULL + (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL)));
+					//z = (z ^ z >> 29) * 0xD1342543DE82EF95ULL;
+					//return z ^ z >> 31;
+
+					// Fails tests all over immediately.
+					//uint64_t z = (a = a + 0xDE916ABCC965815BULL + (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL)));
+					//return z ^ z >> 25 ^ z >> 50;
+
+					// Also fails all over, but fails BRank instead of BCFN.
+					uint64_t z = (a = a + 0xDE916ABCC965815BULL ^ (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL)));
+					return z ^ rotate64(z, 39) ^ rotate64(z, 14);
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
