@@ -4296,7 +4296,15 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//return z ^ z >> 25 ^ z >> 50;
 
 					// Also fails all over, but fails BRank instead of BCFN.
-					uint64_t z = (a = a + 0xDE916ABCC965815BULL ^ (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL)));
+					//uint64_t z = (a = a + 0xDE916ABCC965815BULL ^ (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL)));
+					//return z ^ rotate64(z, 39) ^ rotate64(z, 14);
+
+					// Only fails Low4/64 and Low8/64 tests... But fails immediately.
+					//uint64_t z = (a = a + 0xDE916ABCC965815BULL + (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL))) * 0xD1342543DE82EF95ULL;
+					//return z ^ rotate64(z, 39) ^ rotate64(z, 14);
+					
+					// Despite being similar, this one fails more than the last one. This also includes some Low4/32 failures.
+					uint64_t z = (a = a + 0xDE916ABCC965815BULL + (b = (b >> 1) ^ (0ULL - (b & 1ULL) & 0xFEEDBABEDEADBEEFULL))) * 0xD1342543DE82EF95ULL;
 					return z ^ rotate64(z, 39) ^ rotate64(z, 14);
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
