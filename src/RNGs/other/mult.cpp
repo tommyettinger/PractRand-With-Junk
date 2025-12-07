@@ -4276,7 +4276,20 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//return (rotate64(s, 47) + a) ^ rotate64(a, 23);
 
 					// fails BRank immediately.
-					return (a = a * 0xD1342543DE82EF95ULL + 0xDE916ABCC965815BULL ^ (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL))) ^ a >> 27;
+					//return (a = a * 0xD1342543DE82EF95ULL + 0xDE916ABCC965815BULL ^ (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL))) ^ a >> 27;
+
+					// Has a long period... Fails multiple tests at 64GB, nothing before that.
+//rng=moverCounter64, seed=0x0
+//length= 64 gigabytes (2^36 bytes), time= 153 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/32]FPF-14+6/16:(8,14-0)     R= +27.3  p =  7.6e-25    FAIL !!
+//  [Low4/32]FPF-14+6/16:(9,14-1)     R= +16.9  p =  9.8e-15    FAIL
+//  [Low4/32]FPF-14+6/16:(10,14-2)    R= +10.5  p =  5.4e-9   suspicious
+//  [Low4/32]FPF-14+6/16:all          R= +15.3  p =  8.1e-14    FAIL
+//  ...and 839 test result(s) without anomalies
+					uint64_t z = (a = a + 0xDE916ABCC965815BULL + (b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL)));
+					z = (z ^ z >> 29) * 0xD1342543DE82EF95ULL;
+					return z ^ z >> 31;
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
