@@ -4304,8 +4304,31 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//return z ^ rotate64(z, 39) ^ rotate64(z, 14);
 					
 					// Despite being similar, this one fails more than the last one. This also includes some Low4/32 failures.
-					uint64_t z = (a = a + 0xDE916ABCC965815BULL + (b = (b >> 1) ^ (0ULL - (b & 1ULL) & 0xFEEDBABEDEADBEEFULL))) * 0xD1342543DE82EF95ULL;
-					return z ^ rotate64(z, 39) ^ rotate64(z, 14);
+					//uint64_t z = (a = a + 0xDE916ABCC965815BULL + (b = (b >> 1) ^ (0ULL - (b & 1ULL) & 0xFEEDBABEDEADBEEFULL))) * 0xD1342543DE82EF95ULL;
+					//return z ^ rotate64(z, 39) ^ rotate64(z, 14);
+					
+					// Passes at least 256GB with no anomalies.
+					//uint64_t x = (a = a + 5555555555555555555ULL + b);
+					//b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL);
+					//x ^= x >> 29;
+					//x ^= x * x | 29ULL;
+					//x ^= x >> 29;
+					//x ^= x * x | 29ULL;
+					//x ^= x >> 29;
+					//return x;
+					
+// Passes 64TB with one anomaly at 2TB:
+//rng=moverCounter64, seed=0x0
+//length= 2 terabytes (2^41 bytes), time= 7209 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/64]BCFN(2+4,13-0,T)         R= +11.8  p =  7.2e-6   unusual
+//  ...and 1019 test result(s) without anomalies
+					uint64_t x = (a = a + 5555555555555555555ULL + b);
+					b = (b << 1) ^ (0u - (b >> 63) & 0xFEEDBABEDEADBEEFL);
+					x ^= x >> 28;
+					x ^= x * x | 29ULL;
+					x ^= x >> 30;
+					return x;
 				}
 				std::string moverCounter64::get_name() const { return "moverCounter64"; }
 				void moverCounter64::walk_state(StateWalkingObject *walker) {
