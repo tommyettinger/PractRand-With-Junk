@@ -4766,7 +4766,31 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //return z;
 
 // Fails all tests, also... Even quite a bit before the short period should be exhausted.
-int z = b ^ b >> 15;
+//int z = b ^ b >> 15;
+//b = b + 555555555;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//return z;
+
+// It was int vs. uint32_t. Come on... This still fails at 16GB, but only two tests are problems:
+//rng=zig32, seed=0x0
+//length= 16 gigabytes (2^34 bytes), time= 38.1 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  Gap-16:A                          R= +12.4  p =  1.7e-8   very suspicious
+//  Gap-16:B                          R= +16.5  p =  5.4e-14    FAIL
+//  ...and 767 test result(s) without anomalies
+uint32_t z = (a ^ rotate32(b, 17));
+a = a + 333333333 + _lzcnt_u32(b);
 b = b + 555555555;
 z = (z ^ 333333333) * 555555555;
 z ^= z >> 15;
@@ -4774,13 +4798,8 @@ z = (z ^ 333333333) * 555555555;
 z ^= z >> 15;
 z = (z ^ 333333333) * 555555555;
 z ^= z >> 15;
-z = (z ^ 333333333) * 555555555;
-z ^= z >> 15;
-z = (z ^ 333333333) * 555555555;
-z ^= z >> 15;
-z = (z ^ 333333333) * 555555555;
-z ^= z >> 15;
 return z;
+
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
