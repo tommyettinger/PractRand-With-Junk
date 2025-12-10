@@ -4750,14 +4750,14 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Gap-16:A                          R=  +9.5  p =  1.4e-6   suspicious
 //  Gap-16:B                          R= +14.4  p =  3.2e-12    FAIL
 //  ...and 767 test result(s) without anomalies
-uint32_t z = (a ^ rotate32(b, 17));
-a = a + 333333333 + _lzcnt_u32(b);
-b = b + 555555555;
-z ^= z * z | 15;
-z ^= z >> 15;
-z ^= z * z | 15;
-z ^= z >> 15;
-return z;
+//uint32_t z = (a ^ rotate32(b, 17));
+//a = a + 333333333 + _lzcnt_u32(b);
+//b = b + 555555555;
+//z ^= z * z | 15;
+//z ^= z >> 15;
+//z ^= z * z | 15;
+//z ^= z >> 15;
+//return z;
 
 // Also fails all tests immediately...
 //int z = (a ^ rotate32(b, 19));
@@ -4806,6 +4806,36 @@ return z;
 //z ^= z >> 15;
 //return z;
 
+// Failed a bunch, but only at 256GB. No anomalies from 1GB to 32GB.
+//rng=zig32, seed=0x0
+//length= 256 gigabytes (2^38 bytes), time= 702 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]Gap-16:A                 R=  +6.3  p =  1.6e-4   unusual
+//  [Low4/16]Gap-16:B                 R=  +9.2  p =  8.3e-8   very suspicious
+//  [Low4/32]Gap-16:A                 R=  +7.3  p =  3.8e-5   mildly suspicious
+//  [Low4/32]Gap-16:B                 R= +11.0  p =  2.4e-9    VERY SUSPICIOUS
+//  [Low4/32]FPF-14+6/16:(0,14-0)     R= +22.6  p =  1.4e-20    FAIL !
+//  [Low4/32]FPF-14+6/16:(1,14-0)     R= +14.4  p =  6.2e-13   VERY SUSPICIOUS
+//  [Low4/32]FPF-14+6/16:all          R= +14.0  p =  1.3e-12    FAIL
+//  [Low4/32]FPF-14+6/16:cross        R=  +8.1  p =  3.8e-7   suspicious
+//  [Low4/64]Gap-16:A                 R=  +8.9  p =  3.5e-6   suspicious
+//  [Low4/64]Gap-16:B                 R= +12.9  p =  6.4e-11   VERY SUSPICIOUS
+//  [Low4/64]FPF-14+6/16:all          R=  +5.3  p =  1.8e-4   unusual
+//  [Low8/32]Gap-16:A                 R= +12.3  p =  1.9e-8   very suspicious
+//  [Low8/32]Gap-16:B                 R= +19.9  p =  5.8e-17    FAIL !
+//  [Low8/32]FPF-14+6/16:(0,14-0)     R=  +7.4  p =  1.6e-6   unusual
+//  [Low8/32]FPF-14+6/16:all          R=  +5.7  p =  7.7e-5   unusual
+//  [Low8/64]Gap-16:A                 R=  +8.7  p =  4.4e-6   mildly suspicious
+//  [Low8/64]Gap-16:B                 R= +14.5  p =  2.6e-12    FAIL
+//  [Low8/64]FPF-14+6/16:(0,14-0)     R=  +7.9  p =  6.6e-7   unusual
+//  ...and 897 test result(s) without anomalies
+uint32_t z = (a ^ rotate32(b, 13));
+a = a + 777777777 + _lzcnt_u32(b);
+b = (b ^ 555555555) * 333333333;
+z ^= z >> 17;
+z ^= z * z | 15;
+z ^= z >> 13;
+return z;
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
