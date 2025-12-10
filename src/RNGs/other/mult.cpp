@@ -4829,11 +4829,32 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  [Low8/64]Gap-16:B                 R= +14.5  p =  2.6e-12    FAIL
 //  [Low8/64]FPF-14+6/16:(0,14-0)     R=  +7.9  p =  6.6e-7   unusual
 //  ...and 897 test result(s) without anomalies
-uint32_t z = (a ^ rotate32(b, 13));
+//uint32_t z = (a ^ rotate32(b, 13));
+//a = a + 777777777 + _lzcnt_u32(b);
+//b = (b ^ 555555555) * 333333333;
+//z ^= z >> 17;
+//z ^= z * z | 15;
+//z ^= z >> 13;
+//return z;
+
+// Very strange! Passes 256GB without anomalies on seed 0, but fails all over after 16GB on seed 1.
+//uint32_t z = (a + rotate32(b, 13));
+//a = a + 777777777 + _lzcnt_u32(b);
+//b = (b ^ 555555555) * 333333333;
+//z ^= z >> 17;
+//z ^= z * z | 15;
+//z ^= z >> 15;
+//z ^= z * z | 13;
+//z ^= z >> 13;
+//return z;
+
+uint32_t z = (a + rotate32(b, 13));
 a = a + 777777777 + _lzcnt_u32(b);
-b = (b ^ 555555555) * 333333333;
+b = b * 555555555 ^ 333333333;
 z ^= z >> 17;
 z ^= z * z | 15;
+z ^= z >> 15;
+z ^= z * z | 13;
 z ^= z >> 13;
 return z;
 
