@@ -4534,10 +4534,10 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					a = (a ^ X) * M;
 					b = (b ^ Y) * N;
 					*/
-					enum {
-						X = 0xC74EAD55,//0x632BE5AB,//must end in 5 or D
-						M = 0xA5CB3,//must end in 3 or B
-					};
+					//enum {
+					//	X = 0xC74EAD55,//0x632BE5AB,//must end in 5 or D
+					//	M = 0xA5CB3,//must end in 3 or B
+					//};
 					// doesn't work well at all
 					//a ^= a >> 13;
 					//a ^= a << 5;
@@ -4692,9 +4692,11 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//(a = a * 0x7E57Du + 1u);//(b = b * 0x6EBD5u - 1u)
 					//const uint32_t z = (((s + 0x80000000u < 0x65C5u) ? b : (b += 0xD8AB2475u)) | 1u) * (s ^ s >> 15);
 
-					const uint32_t s = (a += 0xC1C64E6Du);
-				    uint32_t z = ((s + 0x80000000u < 0x5C5u) ? b : (b += 0xD8AB2475u)) ^ s ^ s >> 15;
-					z ^= rotate32(z, (s >> 28) + 16) ^ rotate32(z, (s >> 24 & 15) + 1);
+					//const uint32_t s = (a += 0xC1C64E6Du);
+				 //   uint32_t z = ((s + 0x80000000u < 0x5C5u) ? b : (b += 0xD8AB2475u)) ^ s ^ s >> 15;
+					//z ^= rotate32(z, (s >> 28) + 16) ^ rotate32(z, (s >> 24 & 15) + 1);
+					//return z ^ rotate32(z, (s >> 20 & 15) + 16) ^ rotate32(z, (s >> 16 & 15) + 1);
+
 					//const uint32_t s = (a = a * 0xFB85u + 1u);
 				    //uint32_t z = ((s == 0u) ? b : (b = b * 0xD09Du + 1u)) ^ s ^ s >> 14;
 					//z ^= z >> 15;
@@ -4713,7 +4715,7 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 					//return z ^ rotate32(z, 11) ^ rotate32(z, 23) ^ rotate32(z, 7) ^ rotate32(z, 19);
 
 					//return rotate32(z, (s >> 29)) ^ rotate32(z, (s >> 23 & 7) + 16) ^ rotate32(z, (s >> 17 & 7) + 8);
-					return z ^ rotate32(z, (s >> 20 & 15) + 16) ^ rotate32(z, (s >> 16 & 15) + 1);
+					//return z ^ rotate32(z, (s >> 20 & 15) + 16) ^ rotate32(z, (s >> 16 & 15) + 1);
 					
 					
 					//uint64_t r = rotate32(a, 16) ^ b;
@@ -4740,6 +4742,16 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //x *= 0x297a2d39;
 //x ^= x >> 15;
 //return x;
+
+// Hoofsy32Random from juniper tests; fails all over immediately.
+int z = (a ^ rotate32(b, 17));
+a = a + 333333333 + _lzcnt_u32(b);
+b = b + 555555555;
+z ^= z * z | 15;
+z ^= z >> 15;
+z ^= z * z | 15;
+z ^= z >> 15;
+return z;
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
