@@ -4743,15 +4743,21 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //x ^= x >> 15;
 //return x;
 
-// Hoofsy32Random from juniper tests; fails all over immediately.
-//int z = (a ^ rotate32(b, 17));
-//a = a + 333333333 + _lzcnt_u32(b);
-//b = b + 555555555;
-//z ^= z * z | 15;
-//z ^= z >> 15;
-//z ^= z * z | 15;
-//z ^= z >> 15;
-//return z;
+// Hoofsy32Random from juniper tests; fails at 16GB with:
+//rng=zig32, seed=0x0
+//length= 16 gigabytes (2^34 bytes), time= 38.0 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  Gap-16:A                          R=  +9.5  p =  1.4e-6   suspicious
+//  Gap-16:B                          R= +14.4  p =  3.2e-12    FAIL
+//  ...and 767 test result(s) without anomalies
+uint32_t z = (a ^ rotate32(b, 17));
+a = a + 333333333 + _lzcnt_u32(b);
+b = b + 555555555;
+z ^= z * z | 15;
+z ^= z >> 15;
+z ^= z * z | 15;
+z ^= z >> 15;
+return z;
 
 // Also fails all tests immediately...
 //int z = (a ^ rotate32(b, 19));
@@ -4789,16 +4795,16 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Gap-16:A                          R= +12.4  p =  1.7e-8   very suspicious
 //  Gap-16:B                          R= +16.5  p =  5.4e-14    FAIL
 //  ...and 767 test result(s) without anomalies
-uint32_t z = (a ^ rotate32(b, 17));
-a = a + 333333333 + _lzcnt_u32(b);
-b = b + 555555555;
-z = (z ^ 333333333) * 555555555;
-z ^= z >> 15;
-z = (z ^ 333333333) * 555555555;
-z ^= z >> 15;
-z = (z ^ 333333333) * 555555555;
-z ^= z >> 15;
-return z;
+//uint32_t z = (a ^ rotate32(b, 17));
+//a = a + 333333333 + _lzcnt_u32(b);
+//b = b + 555555555;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//z = (z ^ 333333333) * 555555555;
+//z ^= z >> 15;
+//return z;
 
 
 				}
