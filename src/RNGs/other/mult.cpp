@@ -4754,17 +4754,33 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //return z;
 
 // Also fails all tests immediately...
-int z = (a ^ rotate32(b, 19));
-a = a + 111111111 + _lzcnt_u32(b);
-b = b + 333333333;
-z = z * 555555555;
-z ^= z >> 17;
-z = z * 777777777;
-z ^= z >> 15;
-z = z * 999999999;
-z ^= z >> 13;
-return z;
+//int z = (a ^ rotate32(b, 19));
+//a = a + 111111111 + _lzcnt_u32(b);
+//b = b + 333333333;
+//z = z * 555555555;
+//z ^= z >> 17;
+//z = z * 777777777;
+//z ^= z >> 15;
+//z = z * 999999999;
+//z ^= z >> 13;
+//return z;
 
+// Fails all tests, also... Even quite a bit before the short period should be exhausted.
+int z = b ^ b >> 15;
+b = b + 555555555;
+z = (z ^ 333333333) * 555555555;
+z ^= z >> 15;
+z = (z ^ 333333333) * 555555555;
+z ^= z >> 15;
+z = (z ^ 333333333) * 555555555;
+z ^= z >> 15;
+z = (z ^ 333333333) * 555555555;
+z ^= z >> 15;
+z = (z ^ 333333333) * 555555555;
+z ^= z >> 15;
+z = (z ^ 333333333) * 555555555;
+z ^= z >> 15;
+return z;
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
