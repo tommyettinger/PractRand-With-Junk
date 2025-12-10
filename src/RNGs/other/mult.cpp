@@ -4744,14 +4744,27 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //return x;
 
 // Hoofsy32Random from juniper tests; fails all over immediately.
-int z = (a ^ rotate32(b, 17));
-a = a + 333333333 + _lzcnt_u32(b);
-b = b + 555555555;
-z ^= z * z | 15;
+//int z = (a ^ rotate32(b, 17));
+//a = a + 333333333 + _lzcnt_u32(b);
+//b = b + 555555555;
+//z ^= z * z | 15;
+//z ^= z >> 15;
+//z ^= z * z | 15;
+//z ^= z >> 15;
+//return z;
+
+// Also fails all tests immediately...
+int z = (a ^ rotate32(b, 19));
+a = a + 111111111 + _lzcnt_u32(b);
+b = b + 333333333;
+z = z * 555555555;
+z ^= z >> 17;
+z = z * 777777777;
 z ^= z >> 15;
-z ^= z * z | 15;
-z ^= z >> 15;
+z = z * 999999999;
+z ^= z >> 13;
 return z;
+
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
