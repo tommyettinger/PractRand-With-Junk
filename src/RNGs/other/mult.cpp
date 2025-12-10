@@ -4848,6 +4848,13 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //z ^= z >> 13;
 //return z;
 
+// Fails at 8TB, after a "very suspicious" at 4TB.
+//rng=zig32, seed=0x0
+//length= 8 terabytes (2^43 bytes), time= 21092 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  Gap-16:A                          R= +11.4  p =  7.4e-8   very suspicious
+//  Gap-16:B                          R= +16.8  p =  3.0e-14    FAIL
+//  ...and 1079 test result(s) without anomalies
 uint32_t z = (a + rotate32(b, 13));
 a = a + 777777777 + _lzcnt_u32(b);
 b = b * 555555555 ^ 333333333;
