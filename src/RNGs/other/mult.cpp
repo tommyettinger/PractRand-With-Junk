@@ -4855,14 +4855,30 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Gap-16:A                          R= +11.4  p =  7.4e-8   very suspicious
 //  Gap-16:B                          R= +16.8  p =  3.0e-14    FAIL
 //  ...and 1079 test result(s) without anomalies
-uint32_t z = (a + rotate32(b, 13));
+//uint32_t z = (a + rotate32(b, 13));
+//a = a + 777777777 + _lzcnt_u32(b);
+//b = b * 555555555 ^ 333333333;
+//z ^= z >> 17;
+//z ^= z * z | 15;
+//z ^= z >> 15;
+//z ^= z * z | 13;
+//z ^= z >> 13;
+//return z;
+
+// Shows signs of imminent failure at 32TB...
+//rng=zig32, seed=0x0
+//length= 32 terabytes (2^45 bytes), time= 90565 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  Gap-16:A                          R=  +8.2  p =  1.0e-5   mildly suspicious
+//  Gap-16:B                          R=  +8.5  p =  3.7e-7   very suspicious
+//  FPF-14+6/16:all                   R= -11.7  p =1-4.6e-11   VERY SUSPICIOUS
+//  ...and 1131 test result(s) without anomalies
+uint32_t z = (a ^ rotate32(b, 777 & 31));
 a = a + 777777777 + _lzcnt_u32(b);
 b = b * 555555555 ^ 333333333;
-z ^= z >> 17;
-z ^= z * z | 15;
-z ^= z >> 15;
-z ^= z * z | 13;
-z ^= z >> 13;
+z ^= rotate32(z, 3) ^ rotate32(z, 555 & 31);
+z ^= z * z | 7;
+z ^= rotate32(z, 5) ^ rotate32(z, 333 & 31);
 return z;
 
 				}
