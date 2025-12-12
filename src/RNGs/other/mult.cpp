@@ -4887,6 +4887,18 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //b = b * 555555555 ^ 333333333;
 //return z ^ rotate32(z, 5) ^ rotate32(z, 25);
 
+// Fine until 8TB, then the TMFn problems start all st once.
+//rng=zig32, seed=0x0
+//length= 8 terabytes (2^43 bytes), time= 21925 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]TMFn(2+12):wl            R= +23.7  p~=   1e-7    mildly suspicious
+//  [Low4/32]TMFn(2+11):wl            R= +26.3  p~=   7e-9    very suspicious
+//  [Low4/32]TMFn(2+13):wl            R= +20.7  p~=   3e-6    unusual
+//  [Low4/64]TMFn(2+10):wl            R= +20.9  p~=   2e-6    unusual
+//  [Low8/32]TMFn(2+12):wl            R= +25.7  p~=   1e-8    suspicious
+//  [Low8/32]TMFn(2+13):wl            R= +22.6  p~=   4e-7    mildly suspicious
+//  [Low8/64]TMFn(2+11):wl            R= +20.6  p~=   4e-6    unusual
+//  ...and 1074 test result(s) without anomalies
 uint32_t z = (a ^ rotate32(b, 15));
 a = (a + _lzcnt_u32(b)) * 777777777;
 b = (b + 555555555) * 333333333;
