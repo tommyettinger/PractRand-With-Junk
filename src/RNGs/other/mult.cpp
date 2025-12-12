@@ -4873,13 +4873,24 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Gap-16:B                          R=  +8.5  p =  3.7e-7   very suspicious
 //  FPF-14+6/16:all                   R= -11.7  p =1-4.6e-11   VERY SUSPICIOUS
 //  ...and 1131 test result(s) without anomalies
-uint32_t z = (a ^ rotate32(b, 777 & 31));
-a = a + 777777777 + _lzcnt_u32(b);
-b = b * 555555555 ^ 333333333;
-z ^= rotate32(z, 3) ^ rotate32(z, 555 & 31);
-z ^= z * z | 7;
-z ^= rotate32(z, 5) ^ rotate32(z, 333 & 31);
-return z;
+//uint32_t z = (a ^ rotate32(b, 777 & 31));
+//a = a + 777777777 + _lzcnt_u32(b);
+//b = b * 555555555 ^ 333333333;
+//z ^= rotate32(z, 3) ^ rotate32(z, 555 & 31);
+//z ^= z * z | 7;
+//z ^= rotate32(z, 5) ^ rotate32(z, 333 & 31);
+//return z;
+
+// two "unusual" anomalies on the low 1 bit at 1TB and 2TB, we'll see if it can be better...
+//uint32_t z = (a ^ rotate32(b, 15));
+//a = (a + _lzcnt_u32(b)) * 777777777;
+//b = b * 555555555 ^ 333333333;
+//return z ^ rotate32(z, 5) ^ rotate32(z, 25);
+
+uint32_t z = (a ^ rotate32(b, 15));
+a = (a + _lzcnt_u32(b)) * 777777777;
+b = (b + 555555555) * 333333333;
+return z ^ rotate32(z, 5) ^ rotate32(z, 25);
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
