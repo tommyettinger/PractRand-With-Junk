@@ -4899,10 +4899,25 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  [Low8/32]TMFn(2+13):wl            R= +22.6  p~=   4e-7    mildly suspicious
 //  [Low8/64]TMFn(2+11):wl            R= +20.6  p~=   4e-6    unusual
 //  ...and 1074 test result(s) without anomalies
-uint32_t z = (a ^ rotate32(b, 15));
+//uint32_t z = (a ^ rotate32(b, 15));
+//a = (a + _lzcnt_u32(b)) * 777777777;
+//b = (b + 555555555) * 333333333;
+//return z ^ rotate32(z, 5) ^ rotate32(z, 25);
+
+// 8TB again with an LCG...
+//rng=zig32, seed=0x0
+//length= 8 terabytes (2^43 bytes), time= 20016 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low1/64]TMFn(2+12):wl            R= +21.6  p~=   1e-6    unusual
+//  [Low4/32]TMFn(2+11):wl            R= +20.0  p~=   7e-6    unusual
+//  [Low4/64]TMFn(2+10):wl            R= +21.1  p~=   2e-6    unusual
+//  [Low8/32]TMFn(2+12):wl            R= +20.6  p~=   4e-6    unusual
+//  [Low8/64]TMFn(2+11):wl            R= +21.2  p~=   2e-6    unusual
+//  ...and 1076 test result(s) without anomalies
+uint32_t z = (a + rotate32(b, 17));
 a = (a + _lzcnt_u32(b)) * 777777777;
-b = (b + 555555555) * 333333333;
-return z ^ rotate32(z, 5) ^ rotate32(z, 25);
+b = (b * 555555555) ^ 333333333;
+return z ^ rotate32(z, 7) ^ rotate32(z, 27);
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
