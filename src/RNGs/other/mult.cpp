@@ -4964,10 +4964,23 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  [Low4/16]Gap-16:A                 R= +14.7  p =  5.2e-10   VERY SUSPICIOUS
 //  [Low4/16]Gap-16:B                 R= +26.5  p =  1.3e-22    FAIL !!
 //  ...and 878 test result(s) without anomalies
-uint32_t z = (a ^ rotate32(b, 15)) * 999999999;
+//uint32_t z = (a ^ rotate32(b, 15)) * 999999999;
+//a = (a + _lzcnt_u32(b)) * 777777777;
+//b = (b * 555555555) ^ 333333333;
+//return z ^ z >> 15;
+
+// using 19 for the rotation and shift fails earlier...
+//rng=zig32, seed=0x0
+//length= 16 gigabytes (2^34 bytes), time= 38.7 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]Gap-16:A                 R= +18.5  p =  2.5e-12    FAIL
+//  [Low4/16]Gap-16:B                 R= +22.7  p =  2.3e-19    FAIL !
+//  [Low8/64]DC6-9x1Bytes-1           R=  +6.5  p =  1.3e-3   unusual
+//  ...and 766 test result(s) without anomalies
+uint32_t z = (a ^ rotate32(b, 19)) * 999999999;
 a = (a + _lzcnt_u32(b)) * 777777777;
 b = (b * 555555555) ^ 333333333;
-return z ^ z >> 15;
+return z ^ z >> 19;
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
