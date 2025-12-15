@@ -4925,11 +4925,24 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  Test Name                         Raw       Processed     Evaluation
 //  [Low1/16]DC6-9x1Bytes-1           R=  -5.1  p =1-1.4e-3   unusual
 //  ...and 951 test result(s) without anomalies
-uint32_t z = (a + rotate32(b, 13));
+//uint32_t z = (a + rotate32(b, 13));
+//a = (a + _lzcnt_u32(b)) * 777777777;
+//b = (b * 555555555) ^ 333333333;
+//z ^= z * z | 3;
+//return z ^ z >> 23;
+
+// Fails at 16GB.
+//rng=zig32, seed=0x0
+//length= 16 gigabytes (2^34 bytes), time= 37.3 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]Gap-16:A                 R= +23.7  p =  1.0e-15    FAIL !
+//  [Low4/16]Gap-16:B                 R= +30.1  p =  1.2e-25    FAIL !!
+//  ...and 767 test result(s) without anomalies
+uint32_t z = (a + rotate32(b, 15));
 a = (a + _lzcnt_u32(b)) * 777777777;
 b = (b * 555555555) ^ 333333333;
-z ^= z * z | 3;
-return z ^ z >> 23;
+z ^= z * z | 15;
+return z ^ z >> 15;
 
 				}
 				std::string zig32::get_name() const { return "zig32"; }
