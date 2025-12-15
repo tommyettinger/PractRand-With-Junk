@@ -4938,7 +4938,20 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //  [Low4/16]Gap-16:A                 R= +23.7  p =  1.0e-15    FAIL !
 //  [Low4/16]Gap-16:B                 R= +30.1  p =  1.2e-25    FAIL !!
 //  ...and 767 test result(s) without anomalies
-uint32_t z = (a + rotate32(b, 15));
+//uint32_t z = (a + rotate32(b, 15));
+//a = (a + _lzcnt_u32(b)) * 777777777;
+//b = (b * 555555555) ^ 333333333;
+//z ^= z * z | 15;
+//return z ^ z >> 15;
+
+// Using XOR instead of adding delays the failure a little.
+//rng=zig32, seed=0x0
+//length= 32 gigabytes (2^35 bytes), time= 74.2 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/16]Gap-16:A                 R= +19.1  p =  6.4e-13    FAIL
+//  [Low4/16]Gap-16:B                 R= +32.5  p =  1.1e-27    FAIL !!
+//  ...and 803 test result(s) without anomalies
+uint32_t z = (a ^ rotate32(b, 15));
 a = (a + _lzcnt_u32(b)) * 777777777;
 b = (b * 555555555) ^ 333333333;
 z ^= z * z | 15;
