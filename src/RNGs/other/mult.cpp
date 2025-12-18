@@ -4982,7 +4982,10 @@ return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
 //b = (b * 555555555) ^ 333333333;
 //return z ^ z >> 19;
 
-// Passes at least 2TB with no anomalies (interrupted).
+// Lamb32Random
+// Passes 64TB with no anomalies.
+// Period is 2 to the 64.
+// Meant to be portable to JavaScript, using imul() and clz32() .
 uint32_t z = (a ^ rotate32(b, 12)) * 999999999;
 a = (a + _lzcnt_u32(b)) * 777777777;
 b = (b * 555555555) ^ 333333333;
