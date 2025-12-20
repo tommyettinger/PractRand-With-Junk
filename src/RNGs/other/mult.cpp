@@ -3886,15 +3886,24 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 
 // Chip32Random
 // Passes 64TB with no anomalies.
-const uint32_t fa = stateA;
-const uint32_t fb = stateB;
-const uint32_t fc = stateC;
-const uint32_t fd = stateD;
-stateA = fb + fc;
-stateB = fd ^ fa;
-stateC = rotate32(fb, 11);
-stateD = fd + 0x9E3779B9;
-return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
+//const uint32_t fa = stateA;
+//const uint32_t fb = stateB;
+//const uint32_t fc = stateC;
+//const uint32_t fd = stateD;
+//stateA = fb + fc;
+//stateB = fd ^ fa;
+//stateC = rotate32(fb, 11);
+//stateD = fd + 0x9E3779B9;
+//return rotate32(fa, 14) ^ rotate32(fb, 23) + fc;
+
+// Lambeau32Random
+// Passes 64TB with no anomalies.
+// On the first line, using rotations near 10-15 works better than any being larger.
+uint32_t z = (stateA ^ rotate32(stateB, 10) ^ rotate32(stateC, 13)) * 999999999;
+stateC = ~(_lzcnt_u32(stateA & stateB) + stateC);
+stateB = (_lzcnt_u32(stateA) + stateB) * 777777777;
+stateA = (stateA * 555555555) ^ 333333333;
+return z ^ z >> 23;
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
