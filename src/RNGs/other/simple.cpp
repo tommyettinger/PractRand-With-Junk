@@ -2799,14 +2799,15 @@ return x;
 // Passes 64TB of PractRand without anomalies.
 // Period is at minimum 2 to the 64, max is much higher (a multiple of 2 to the 64).
 				Uint32 chonk8x32::raw32() {
-					//const Uint32 fa = a;
-					//const Uint32 fb = b;
-					//const Uint32 fc = c;
-					//const Uint32 fd = d;
-					//const Uint32 fe = e;
-					//const Uint32 ff = f;
-					//const Uint32 fg = g;
-					//const Uint32 fh = h;
+					const Uint32 fa = a;
+					const Uint32 fb = b;
+					const Uint32 fc = c;
+					const Uint32 fd = d;
+					const Uint32 fe = e;
+					const Uint32 ff = f;
+					const Uint32 fg = g;
+					const Uint32 fh = h;
+
 					//a = fa + 0x9e3779b9;
 					//b = fa ^ ff;
 					//c = fb + fd;
@@ -2816,25 +2817,45 @@ return x;
 					//g = __lzcnt(fa);
 					//h = fh + fg;
 					//return ff;
-					Uint32 al = (a += 0x9E3779B9);
-					Uint32 bl = (b = al ^ b + __lzcnt(al));
-					Uint32 cl = (c = bl ^ c + __lzcnt(al |= bl));
-					Uint32 dl = (d = cl ^ d + __lzcnt(al &= cl));
-					Uint32 el = (e = dl ^ e + __lzcnt(al |= dl));
-					Uint32 fl = (f = el ^ f + __lzcnt(al &= el));
-					Uint32 gl = (g = fl ^ g + __lzcnt(al |= fl));
-					Uint32 hl = (h = gl ^ h + __lzcnt(al &= gl));
-					// hits VERY SUSPICIOUS at 1TB
-					//Uint32 w = ((rotate32(hl, 3) + al) ^ rotate32(al, 24)) * 0x915F77F5;
-					//w ^= w >> 16;
-					// 
-					//16 21f0aaad 15 d35a2d97 15
-					Uint32 w = al + rotate32(hl, 16);
-					w *= 0x21F0AAAD;
-					w ^= w >> 15;
-					w *= 0xD35A2D97;
-					w ^= w >> 15;
-					return w;
+
+					// fails at 16TB, but has anomalies as early as 4TB on the test that fails.
+//rng=chonk8x32, seed=0x0
+//length= 16 terabytes (2^44 bytes), time= 41209 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  BCFN(2+0,13-0,T)                  R= +13.6  p =  8.5e-7   suspicious
+//  BCFN(2+2,13-0,T)                  R= +12.3  p =  4.0e-6   mildly suspicious
+//  [Low4/64]DC6-9x1Bytes-1           R= +32.6  p =  3.7e-12    FAIL
+//  [Low4/64]FPF-14+6/16:(15,14-0)    R=  +7.1  p =  3.1e-6   unusual
+//  ...and 1103 test result(s) without anomalies
+					// This is very sensitive to the rotation amount!
+					a = fa + 0x9e3779b9;
+					b = fa ^ fg;
+					c = ff - fb;
+					d = rotate32(fc, 21);
+					e = __lzcnt(fa);
+					f = ff + fe;
+					g = fb + fd;
+					return fg;
+
+					//Uint32 al = (a += 0x9E3779B9);
+					//Uint32 bl = (b = al ^ b + __lzcnt(al));
+					//Uint32 cl = (c = bl ^ c + __lzcnt(al |= bl));
+					//Uint32 dl = (d = cl ^ d + __lzcnt(al &= cl));
+					//Uint32 el = (e = dl ^ e + __lzcnt(al |= dl));
+					//Uint32 fl = (f = el ^ f + __lzcnt(al &= el));
+					//Uint32 gl = (g = fl ^ g + __lzcnt(al |= fl));
+					//Uint32 hl = (h = gl ^ h + __lzcnt(al &= gl));
+					//// hits VERY SUSPICIOUS at 1TB
+					////Uint32 w = ((rotate32(hl, 3) + al) ^ rotate32(al, 24)) * 0x915F77F5;
+					////w ^= w >> 16;
+					//// 
+					////16 21f0aaad 15 d35a2d97 15
+					//Uint32 w = al + rotate32(hl, 16);
+					//w *= 0x21F0AAAD;
+					//w ^= w >> 15;
+					//w *= 0xD35A2D97;
+					//w ^= w >> 15;
+					//return w;
 				}
 				std::string chonk8x32::get_name() const { return "chonk8x32"; }
 				void chonk8x32::walk_state(StateWalkingObject *walker) {
