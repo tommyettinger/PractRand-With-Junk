@@ -3917,15 +3917,33 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 //  [Low4/64]FPF-14+6/16:(5,14-0)     R=  +7.6  p =  1.1e-6   unusual
 //  [Low4/64]FPF-14+6/16:all          R= +14.0  p =  1.2e-12    FAIL
 //  ...and 981 test result(s) without anomalies
+//const uint32_t fa = stateA;
+//const uint32_t fb = stateB;
+//const uint32_t fc = stateC;
+//const uint32_t fd = stateD;
+//stateA = fb ^ fc + fd;
+//stateB = (fb + __lzcnt(fd)) * 777777777;
+//stateC = fa ^ rotate32(fb, 12);
+//stateD = (fd * 555555555) ^ 333333333;
+//return fa;
+
+// no anomalies until 8TB, then a sudden failure and "mildly suspicious"...
+//rng=ta32, seed=0x0
+//length= 8 terabytes (2^43 bytes), time= 19920 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  BRank(12):64K(1)                  R=+152.8  p~=  5.1e-47    FAIL !!!
+//  [Low1/8]DC6-9x1Bytes-1            R= +11.2  p =  9.4e-5   mildly suspicious
+//  ...and 1079 test result(s) without anomalies
 const uint32_t fa = stateA;
 const uint32_t fb = stateB;
 const uint32_t fc = stateC;
 const uint32_t fd = stateD;
 stateA = fb ^ fc + fd;
-stateB = (fb + __lzcnt(fd)) * 777777777;
+stateB = fc ^ rotate32(fd, 15);
 stateC = fa ^ rotate32(fb, 12);
-stateD = (fd * 555555555) ^ 333333333;
+stateD = fd + 333333333 ^ 222222222;
 return fa;
+
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
