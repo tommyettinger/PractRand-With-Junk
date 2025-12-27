@@ -3899,11 +3899,33 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // Lambeau32Random
 // Passes 64TB with no anomalies.
 // On the first line, using rotations near 10-15 works better than any being larger.
-uint32_t z = (stateA ^ rotate32(stateB, 10) ^ rotate32(stateC, 13)) * 999999999;
-stateC = ~(_lzcnt_u32(stateA & stateB) + stateC);
-stateB = (_lzcnt_u32(stateA) + stateB) * 777777777;
-stateA = (stateA * 555555555) ^ 333333333;
-return z ^ z >> 23;
+//uint32_t z = (stateA ^ rotate32(stateB, 10) ^ rotate32(stateC, 13)) * 999999999;
+//stateC = ~(_lzcnt_u32(stateA & stateB) + stateC);
+//stateB = (_lzcnt_u32(stateA) + stateB) * 777777777;
+//stateA = (stateA * 555555555) ^ 333333333;
+//return z ^ z >> 23;
+
+// Gets up to 128GB with no anomalies, then problems start at 256GB, with two failures at 1TB.
+//rng=ta32, seed=0x0
+//length= 1 terabyte (2^40 bytes), time= 2570 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/32]FPF-14+6/16:(11,14-0)    R= +11.4  p =  3.3e-10  very suspicious
+//  [Low4/32]FPF-14+6/16:(13,14-1)    R= +13.3  p =  1.5e-11   VERY SUSPICIOUS
+//  [Low4/32]FPF-14+6/16:all          R=  +9.7  p =  1.4e-8   very suspicious
+//  [Low4/64]FPF-14+6/16:(1,14-0)     R= +17.3  p =  1.3e-15    FAIL
+//  [Low4/64]FPF-14+6/16:(2,14-0)     R= +11.5  p =  2.7e-10  very suspicious
+//  [Low4/64]FPF-14+6/16:(5,14-0)     R=  +7.6  p =  1.1e-6   unusual
+//  [Low4/64]FPF-14+6/16:all          R= +14.0  p =  1.2e-12    FAIL
+//  ...and 981 test result(s) without anomalies
+const uint32_t fa = stateA;
+const uint32_t fb = stateB;
+const uint32_t fc = stateC;
+const uint32_t fd = stateD;
+stateA = fb ^ fc + fd;
+stateB = (fb + __lzcnt(fd)) * 777777777;
+stateC = fa ^ rotate32(fb, 12);
+stateD = (fd * 555555555) ^ 333333333;
+return fa;
 
 				}
 				std::string ta32::get_name() const { return "ta32"; }
