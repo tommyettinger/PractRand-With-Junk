@@ -1,6 +1,10 @@
+#include <cmath>
 #include <string>
 #include <sstream>
 #include <cstdint>
+#include <x86gprintrin.h>
+#include <bit>
+
 #include "PractRand/config.h"
 #include "PractRand/rng_basics.h"
 #include "PractRand/rng_helpers.h"
@@ -269,14 +273,14 @@ namespace PractRand {
 
 					//Uint64 i = inc ^ state;
 					//inc += 0xDA3E39CB94B95BDBULL;
-					//state += __lzcnt64(inc);
+					//state += std::countl_zero(inc);
 					//Uint64 r = (i ^ i >> (i >> 59u) + 5u) * 0xF1357AEA2E62A9C5ULL;
 					//return (r >> 43u) ^ r;
 
 					//// PactRandom
 					//// Passes at least 64TB with no anomalies. It also passes Juniper's ICE test.
 					//Uint64 z = (rotate64(state, 13) ^ rotate64(inc, 41) + state) * 0xF1357AEA2E62A9C5ULL;
-					//inc += __lzcnt64(state);
+					//inc += std::countl_zero(state);
 					//state += 0xDA3E39CB94B95BDBULL;
 					//z = (z ^ rotate64(z, 23) ^ rotate64(z, 47)) * 0xF1357AEA2E62A9C5L;
 					//return z ^ z >> 43;
@@ -1753,11 +1757,11 @@ namespace PractRand {
 					//stream = (stream + 1ULL >> 1) * (stream | 1ULL) ^ 7ULL;
 					//return state + rotate64(stream, 17);
 
-					//stream = _lzcnt_u64(state = state * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL) - (stream ^ (stream * stream | 0x17ULL));
-					//stream = _lzcnt_u64(state = state * 0xD1342543DE82EF95ULL - 0xC6BC279692B5CC83ULL) - (stream ^ (stream * stream | 37ULL));
+					//stream = std::countl_zero(state = state * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL) - (stream ^ (stream * stream | 0x17ULL));
+					//stream = std::countl_zero(state = state * 0xD1342543DE82EF95ULL - 0xC6BC279692B5CC83ULL) - (stream ^ (stream * stream | 37ULL));
 //uint64_t x = state;
 //state = -(x ^ (x * x | 5ULL));
-//stream = -(_lzcnt_u64(x) - (stream ^ (stream * stream | 23ULL)));
+//stream = -(std::countl_zero(x) - (stream ^ (stream * stream | 23ULL)));
 //return stream - rotate64(x, 20);
 
 // CongaRandom
@@ -1768,7 +1772,7 @@ namespace PractRand {
 // The number of rotations this does may be able to be cut down.
 //uint64_t x = state;
 //state = x * 0xC6BC279692B5CC83ULL ^ 0x9E3779B97F4A7C15ULL;
-//x = rotate64(x, 20) + (stream = stream * 0xD1342543DE82EF95ULL + _lzcnt_u64(x));
+//x = rotate64(x, 20) + (stream = stream * 0xD1342543DE82EF95ULL + std::countl_zero(x));
 //return x ^ rotate64(x, 29) ^ rotate64(x, 47);
 
 // SpinyRandom
@@ -1781,19 +1785,19 @@ namespace PractRand {
 // Surprisingly fast in PractRand.
 //uint64_t x = state, y = stream;
 //state = x * 0x369DEA0F31A53F85ULL + 0xC6BC279692B5CC83ULL;
-//stream = y * 0xD1342543DE82EF95ULL + _lzcnt_u64(x);
+//stream = y * 0xD1342543DE82EF95ULL + std::countl_zero(x);
 //return (rotate64(x, 20) + y) ^ rotate64(y, 47);
 
 // Fails at 8TB with [Low1/64]TMFn(2+7):wl, [Low1/64]TMFn(2+8):wl
 //uint64_t x = state, y = stream;
 //state = x * 0x369DEA0F31A53F85ULL + 0xC6BC279692B5CC83ULL;
-//stream = y * 0xD1342543DE82EF95ULL + _lzcnt_u64(x);
+//stream = y * 0xD1342543DE82EF95ULL + std::countl_zero(x);
 //return rotate64(x, 20) + y;
 
 // Fails a lot of tests right away...
 //uint64_t x = state, y = stream;
 //state = x + 0xD1342543DE82EF95ULL;
-//stream = y + (x ^ _lzcnt_u64(x));
+//stream = y + (x ^ std::countl_zero(x));
 //return rotate64(x, 20) + (y * (y + 0xC6BC279692B5CC83ULL) >> 1);
 
 // WeaselRandom
@@ -1806,7 +1810,7 @@ namespace PractRand {
 // Only one multiply means this should be pretty fast.
 //uint64_t x = state, y = stream, z = (rotate64(x, 3) + y ^ rotate64(y, 56)) * 0xD1342543DE82EF95ULL;
 //state = x + 0xC6BC279692B5CC83ULL;
-//stream = y + (x ^ _lzcnt_u64(x));
+//stream = y + (x ^ std::countl_zero(x));
 //return z ^ rotate64(z, 29) ^ rotate64(z, 40);
 uint64_t z = (state ^ state >> 30) * 0xF1357AEA2E62A9C5UL;
 state += 0x9E3779B97F4A7C15UL + (stream = stream >> 1 ^ (-(stream & 1UL) & 0x9C82435DE0D49E35UL));
@@ -3209,7 +3213,7 @@ return z ^ z >> 29;
 // Otherwise, this is a fairly ordinary RNG; it will probably be slower than a SplitMix64
 // generator, but has a much longer period.
 					// uint64_t r = (stateA += 0x9E3779B97F4A7C15ULL);
-					// uint64_t q = (stateB += __lzcnt64(r));
+					// uint64_t q = (stateB += std::countl_zero(r));
 					// r ^= r >> 27 ^ rotate64(q, 21);
 					// r *= 0x3C79AC492BA7B653ULL;
 					// r ^= r >> 33 ^ rotate64(q, 41);
@@ -3233,7 +3237,7 @@ return z ^ z >> 29;
 //// 64 when given 0, the output will eventually be different for the same seed.
 
 //					uint64_t q = (stateA += 0x9E3779B97F4A7C15ULL);
-//					uint64_t r = (stateB += 0xC6BC279692B5C323ULL ^ __lzcnt64(q));
+//					uint64_t r = (stateB += 0xC6BC279692B5C323ULL ^ std::countl_zero(q));
 //					r ^= r >> 28;
 //					r *= q | 1ULL;
 //					r ^= r >> 30 ^ r >> 6;
@@ -3242,7 +3246,7 @@ return z ^ z >> 29;
 //// FowlRandom
 //// Passes at least 64TB with no anomalies. Passes Juniper's ICE test, typically.
 //// Period is exactly 2 to the 128; one stream.
-uint64_t x = (stateA += __lzcnt64(stateB));
+uint64_t x = (stateA += std::countl_zero(stateB));
 uint64_t y = (stateB += 0xD1B54A32D192ED03ULL);
 x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653ULL;
 x = (x ^ x >> 33) * 0xF1357AEA2E62A9C5ULL;
@@ -3900,8 +3904,8 @@ length= 128 gigabytes (2^37 bytes), time= 412 seconds
 // Passes 64TB with no anomalies.
 // On the first line, using rotations near 10-15 works better than any being larger.
 //uint32_t z = (stateA ^ rotate32(stateB, 10) ^ rotate32(stateC, 13)) * 999999999;
-//stateC = ~(_lzcnt_u32(stateA & stateB) + stateC);
-//stateB = (_lzcnt_u32(stateA) + stateB) * 777777777;
+//stateC = ~(std::countl_zero(stateA & stateB) + stateC);
+//stateB = (std::countl_zero(stateA) + stateB) * 777777777;
 //stateA = (stateA * 555555555) ^ 333333333;
 //return z ^ z >> 23;
 
@@ -4800,7 +4804,7 @@ return fa;
 //  Gap-16:B                          R= +14.4  p =  3.2e-12    FAIL
 //  ...and 767 test result(s) without anomalies
 //uint32_t z = (a ^ rotate32(b, 17));
-//a = a + 333333333 + _lzcnt_u32(b);
+//a = a + 333333333 + std::countl_zero(b);
 //b = b + 555555555;
 //z ^= z * z | 15;
 //z ^= z >> 15;
@@ -4810,7 +4814,7 @@ return fa;
 
 // Also fails all tests immediately...
 //int z = (a ^ rotate32(b, 19));
-//a = a + 111111111 + _lzcnt_u32(b);
+//a = a + 111111111 + std::countl_zero(b);
 //b = b + 333333333;
 //z = z * 555555555;
 //z ^= z >> 17;
@@ -4845,7 +4849,7 @@ return fa;
 //  Gap-16:B                          R= +16.5  p =  5.4e-14    FAIL
 //  ...and 767 test result(s) without anomalies
 //uint32_t z = (a ^ rotate32(b, 17));
-//a = a + 333333333 + _lzcnt_u32(b);
+//a = a + 333333333 + std::countl_zero(b);
 //b = b + 555555555;
 //z = (z ^ 333333333) * 555555555;
 //z ^= z >> 15;
@@ -4879,7 +4883,7 @@ return fa;
 //  [Low8/64]FPF-14+6/16:(0,14-0)     R=  +7.9  p =  6.6e-7   unusual
 //  ...and 897 test result(s) without anomalies
 //uint32_t z = (a ^ rotate32(b, 13));
-//a = a + 777777777 + _lzcnt_u32(b);
+//a = a + 777777777 + std::countl_zero(b);
 //b = (b ^ 555555555) * 333333333;
 //z ^= z >> 17;
 //z ^= z * z | 15;
@@ -4888,7 +4892,7 @@ return fa;
 
 // Very strange! Passes 256GB without anomalies on seed 0, but fails all over after 16GB on seed 1.
 //uint32_t z = (a + rotate32(b, 13));
-//a = a + 777777777 + _lzcnt_u32(b);
+//a = a + 777777777 + std::countl_zero(b);
 //b = (b ^ 555555555) * 333333333;
 //z ^= z >> 17;
 //z ^= z * z | 15;
@@ -4905,7 +4909,7 @@ return fa;
 //  Gap-16:B                          R= +16.8  p =  3.0e-14    FAIL
 //  ...and 1079 test result(s) without anomalies
 //uint32_t z = (a + rotate32(b, 13));
-//a = a + 777777777 + _lzcnt_u32(b);
+//a = a + 777777777 + std::countl_zero(b);
 //b = b * 555555555 ^ 333333333;
 //z ^= z >> 17;
 //z ^= z * z | 15;
@@ -4923,7 +4927,7 @@ return fa;
 //  FPF-14+6/16:all                   R= -11.7  p =1-4.6e-11   VERY SUSPICIOUS
 //  ...and 1131 test result(s) without anomalies
 //uint32_t z = (a ^ rotate32(b, 777 & 31));
-//a = a + 777777777 + _lzcnt_u32(b);
+//a = a + 777777777 + std::countl_zero(b);
 //b = b * 555555555 ^ 333333333;
 //z ^= rotate32(z, 3) ^ rotate32(z, 555 & 31);
 //z ^= z * z | 7;
@@ -4932,7 +4936,7 @@ return fa;
 
 // two "unusual" anomalies on the low 1 bit at 1TB and 2TB, we'll see if it can be better...
 //uint32_t z = (a ^ rotate32(b, 15));
-//a = (a + _lzcnt_u32(b)) * 777777777;
+//a = (a + std::countl_zero(b)) * 777777777;
 //b = b * 555555555 ^ 333333333;
 //return z ^ rotate32(z, 5) ^ rotate32(z, 25);
 
@@ -4949,7 +4953,7 @@ return fa;
 //  [Low8/64]TMFn(2+11):wl            R= +20.6  p~=   4e-6    unusual
 //  ...and 1074 test result(s) without anomalies
 //uint32_t z = (a ^ rotate32(b, 15));
-//a = (a + _lzcnt_u32(b)) * 777777777;
+//a = (a + std::countl_zero(b)) * 777777777;
 //b = (b + 555555555) * 333333333;
 //return z ^ rotate32(z, 5) ^ rotate32(z, 25);
 
@@ -4964,7 +4968,7 @@ return fa;
 //  [Low8/64]TMFn(2+11):wl            R= +21.2  p~=   2e-6    unusual
 //  ...and 1076 test result(s) without anomalies
 //uint32_t z = (a + rotate32(b, 17));
-//a = (a + _lzcnt_u32(b)) * 777777777;
+//a = (a + std::countl_zero(b)) * 777777777;
 //b = (b * 555555555) ^ 333333333;
 //return z ^ rotate32(z, 7) ^ rotate32(z, 27);
 
@@ -4975,7 +4979,7 @@ return fa;
 //  [Low1/16]DC6-9x1Bytes-1           R=  -5.1  p =1-1.4e-3   unusual
 //  ...and 951 test result(s) without anomalies
 //uint32_t z = (a + rotate32(b, 13));
-//a = (a + _lzcnt_u32(b)) * 777777777;
+//a = (a + std::countl_zero(b)) * 777777777;
 //b = (b * 555555555) ^ 333333333;
 //z ^= z * z | 3;
 //return z ^ z >> 23;
@@ -4988,7 +4992,7 @@ return fa;
 //  [Low4/16]Gap-16:B                 R= +30.1  p =  1.2e-25    FAIL !!
 //  ...and 767 test result(s) without anomalies
 //uint32_t z = (a + rotate32(b, 15));
-//a = (a + _lzcnt_u32(b)) * 777777777;
+//a = (a + std::countl_zero(b)) * 777777777;
 //b = (b * 555555555) ^ 333333333;
 //z ^= z * z | 15;
 //return z ^ z >> 15;
@@ -5001,7 +5005,7 @@ return fa;
 //  [Low4/16]Gap-16:B                 R= +32.5  p =  1.1e-27    FAIL !!
 //  ...and 803 test result(s) without anomalies
 //uint32_t z = (a ^ rotate32(b, 15));
-//a = (a + _lzcnt_u32(b)) * 777777777;
+//a = (a + std::countl_zero(b)) * 777777777;
 //b = (b * 555555555) ^ 333333333;
 //z ^= z * z | 15;
 //return z ^ z >> 15;
@@ -5014,7 +5018,7 @@ return fa;
 //  [Low4/16]Gap-16:B                 R= +26.5  p =  1.3e-22    FAIL !!
 //  ...and 878 test result(s) without anomalies
 //uint32_t z = (a ^ rotate32(b, 15)) * 999999999;
-//a = (a + _lzcnt_u32(b)) * 777777777;
+//a = (a + std::countl_zero(b)) * 777777777;
 //b = (b * 555555555) ^ 333333333;
 //return z ^ z >> 15;
 
@@ -5027,7 +5031,7 @@ return fa;
 //  [Low8/64]DC6-9x1Bytes-1           R=  +6.5  p =  1.3e-3   unusual
 //  ...and 766 test result(s) without anomalies
 //uint32_t z = (a ^ rotate32(b, 19)) * 999999999;
-//a = (a + _lzcnt_u32(b)) * 777777777;
+//a = (a + std::countl_zero(b)) * 777777777;
 //b = (b * 555555555) ^ 333333333;
 //return z ^ z >> 19;
 
@@ -5036,7 +5040,7 @@ return fa;
 // Period is 2 to the 64.
 // Meant to be portable to JavaScript, using imul() and clz32() .
 uint32_t z = (a ^ rotate32(b, 12)) * 999999999;
-a = (a + _lzcnt_u32(b)) * 777777777;
+a = (a + std::countl_zero(b)) * 777777777;
 b = (b * 555555555) ^ 333333333;
 return z ^ z >> 23;
 
@@ -5140,7 +5144,7 @@ return z ^ z >> 23;
 					// This passes 64TB with no anomalies!
 					// Period is exactly 2 to the 128, and all states are valid.
 					//uint64_t x = rotate64(s0, 33) + s1;
-					//s1 = s1 * 0xD1342543DE82EF95ULL + __lzcnt64(s0);
+					//s1 = s1 * 0xD1342543DE82EF95ULL + std::countl_zero(s0);
 					//s0 = s0 * 0x369DEA0F31A53F85ULL + 0x2C6FE96EE78B6955ULL;
 					//return x ^ x >> 26 ^ x >> 37;
 
@@ -5175,7 +5179,7 @@ return z ^ z >> 23;
 					//uint64_t a = s0, b = s1;
 					//uint64_t z = (a ^ b);
 					//s0 = a + 0xDE916ABCC965815BULL;
-					//s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
+					//s1 = b + 0x9E3779B97F4A7C15ULL + std::countl_zero(a);
 					//z = (z ^ rotate64(z, 25) ^ rotate64(z, 50)) + a;
 					//return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
 
@@ -5189,7 +5193,7 @@ return z ^ z >> 23;
 //uint64_t a = s0, b = s1;
 //uint64_t z = (a ^ rotate64(b, 29));
 //s0 = a + 0xDE916ABCC965815BULL;
-//s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
+//s1 = b + 0x9E3779B97F4A7C15ULL + std::countl_zero(a);
 //z = (z ^ rotate64(z, 25) ^ rotate64(z, 50));
 //return (z ^ rotate64(z, 11) ^ rotate64(z, 42)) + b;
 
@@ -5203,12 +5207,12 @@ return z ^ z >> 23;
 //  ...and 985 test result(s) without anomalies
 //uint64_t a = s0, b = s1, z = (b ^ rotate64(b, 11) ^ rotate64(b, 40)) + (a ^ rotate64(a, 25) ^ rotate64(a, 50));
 //s0 = a + 0xDE916ABCC965815BULL;
-//s1 = b + 0x9E3779B97F4A7C15ULL + __lzcnt64(a);
+//s1 = b + 0x9E3779B97F4A7C15ULL + std::countl_zero(a);
 //return (z ^ rotate64(z, 19) ^ rotate64(z, 47));
  
 					//uint64_t a = s0, b = s1, x = rotate64(a, 30) + b;
 					//s0 = a * 0xD1342543DE82EF95ULL + 0x9E3779B97F4A7C15ULL;
-					//s1 = b * 0xF1357AEA2E62A9C5ULL + __lzcnt64(a);
+					//s1 = b * 0xF1357AEA2E62A9C5ULL + std::countl_zero(a);
 					//return x ^ x >> 28;
 
 //x = (x ^ x >> 27 ^ y) * 0x3C79AC492BA7B653UL;
@@ -5231,7 +5235,7 @@ return z ^ z >> 23;
 uint64_t x = s0;
 uint64_t y = s1;
 s0 += 0xD1B54A32D192ED03UL;
-s1 += 0x8CB92BA72F3D8DD7UL + __lzcnt64(x);
+s1 += 0x8CB92BA72F3D8DD7UL + std::countl_zero(x);
 y = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
 y = (y ^ y >> 33) * 0xF1357AEA2E62A9C5UL;
 y ^= y >> 27;
@@ -6599,12 +6603,12 @@ return x ^ x >> 25;
 // OrbitalRandom
 // Period is 2 to the 128, no streams.
 // Passes 64TB of PractRand with no anomalies.
-// Uses __lzcnt64 in C++, and would use some other technique to count leading zeros elsewhere.
-// In most ways, very similar to FlowRandom, but stateB uses a different increment and adds __lzcnt64(stateA).
+// Uses std::countl_zero in C++, and would use some other technique to count leading zeros elsewhere.
+// In most ways, very similar to FlowRandom, but stateB uses a different increment and adds std::countl_zero(stateA).
 // Because stateA and stateB are different in where entropy occurs, this doesn't do (x ^ rotate64(y, 37)), and
 // instead does (y ^ rotate64(x, 37)) .
 					//uint64_t x = (stateA += 0xD1B54A32D192ED03L);
-					//uint64_t y = (stateB += 0x9E3779B97F4A7C15L + __lzcnt64(x));
+					//uint64_t y = (stateB += 0x9E3779B97F4A7C15L + std::countl_zero(x));
 					//x = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
 					//x = (x ^ x >> 33) * 0x1C69B3F74AC4AE35UL;
 					//x ^= x >> 27;
@@ -6612,7 +6616,7 @@ return x ^ x >> 25;
 
 // Passes 32TB, but has real trouble with ICE tests.
 					//uint64_t x = (stateA += 0xD1B54A32D192ED03UL);
-					//uint64_t y = (stateB += 0x9E3779B97F4A7C15UL + __lzcnt64(x));
+					//uint64_t y = (stateB += 0x9E3779B97F4A7C15UL + std::countl_zero(x));
 					//x = (x ^ x >> 32) * 0xBEA225F9EB34556DUL;
 					//y = (y ^ y >> 29) * 0xF1357AEA2E62A9C5UL;
 					//x ^= x >> 29;
@@ -7036,12 +7040,12 @@ return fd;
 //               6.579 15 =>     5.025017e-02           12.974 15 =>     4.716522e-01           21.466 15 =>   1-9.052175e-02           11.248 15 =>     3.332448e-01            8.548 15 =>     1.409673e-01
 //
 //--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- lantern320 -- 64 bits: 	ps:   5.025e-02*   4.717e-01  1-9.052e-02    3.332e-01    1.410e-01   => p <   5.76107e-01   2^54.32 calls, 2^57.32 bytes	2^37.96 bytes/second	used:   7::18:15:57.98
-//    stateA = fa + 0x9E3779B97F4A7C15UL;
-//    stateB = fa ^ fe;
-//    stateC = fb + fd;
-//    stateD = rotate64(fc, 52);
-//    stateE = fb + fc;
-//    return fb;
+    stateA = fa + 0x9E3779B97F4A7C15UL;
+    stateB = fa ^ fe;
+    stateC = fb + fd;
+    stateD = rotate64(fc, 52);
+    stateE = fb + fc;
+    return fb;
 
 
 // crand64
@@ -7094,12 +7098,12 @@ return fd;
 // BassD in https://quick-bench.com/q/E-wxFyZQMlGJaN-Rflh_IkObTOU
 // Passes 64TB with no anomalies!
 // Minimim period is 2 to the 64, expected period is a much higher multiple.
-stateA = fb ^ fd;
-stateB = fe ^ fc;
-stateC = fa + fb;
-stateD = rotate64(fc, 52);
-stateE = fe + 0x9E3779B97F4A7C15UL;
-return fa;
+// stateA = fb ^ fd;
+// stateB = fe ^ fc;
+// stateC = fa + fb;
+// stateD = rotate64(fc, 52);
+// stateE = fe + 0x9E3779B97F4A7C15UL;
+// return fa;
 
 				}
 				std::string overload320::get_name() const { return "overload320"; }
@@ -7215,7 +7219,7 @@ return fa;
 				Uint32 floatHax32::rand() {
 					uint32_t x, y;
 					x = (stateA += 0xDB4F0B91);
-					y = (stateB += (rotate32(x, 21) + __lzcnt(x)));
+					y = (stateB += (rotate32(x, 21) + std::countl_zero(x)));
 					x ^= rotate32(y, 21);
 					x ^= x >> 15;
 					x *= 0x2c1b3c6d;
@@ -7232,7 +7236,7 @@ return fa;
 					//}
 					//float f = ldexpf((float)(rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
 					uint32_t bits = rand();
-					float f = intBitsToFloat((126u - __lzcnt(rand()) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFF));
+					float f = intBitsToFloat(((126u - std::countl_zero(rand())) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFF));
 
 					// gets the low 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x800000);
@@ -7272,16 +7276,16 @@ return fa;
 					if (proto_exp_offset == 0) {
 						return 0;
 					}
-					float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - __lzcnt(proto_exp_offset));
+					float f = ldexpf((float)((uint32_t)rand() | 0x80000001), -32 - std::countl_zero(proto_exp_offset));
 
 					//uint64_t bits = rand();
 					//if ((bits & 0xFFFFFFFF00000000ULL) == 0ULL) {
 					//	return 0;
 					//}
-					//float f = ldexpf((float)((uint32_t)(bits) | 0x80000001), -32 - __lzcnt64(bits));
+					//float f = ldexpf((float)((uint32_t)(bits) | 0x80000001), -32 - std::countl_zero(bits));
 
 					//uint64_t bits = rand();
-					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(bits) << 23 & 0u - (uint32_t)((bits | 0ULL - bits) >> 63)) | ((uint32_t)bits & 0x7FFFFF));
+					//float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(bits) << 23 & 0u - (uint32_t)((bits | 0ULL - bits) >> 63)) | ((uint32_t)bits & 0x7FFFFF));
 
 					// better, but not immune? gets "unusual" at 256GB, the low bit of the same troublesome test... [Low1/16]FPF-14+6/16:cross
 					//uint64_t x = (state += 0x9E3779B97F4A7C15ULL);
@@ -7291,7 +7295,7 @@ return fa;
 
 					// even with MX3, this is "very suspicious" at only 256GB -- the construction is likely at fault.
 					//uint64_t x = rand();
-					//float f = intBitsToFloat((126u - ((uint32_t)__lzcnt64(x)) << 23) | ((uint32_t)x & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+					//float f = intBitsToFloat((126u - ((uint32_t)std::countl_zero(x)) << 23) | ((uint32_t)x & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
 
 
 					// gets the low 16 bits of the random float f after scaling
@@ -7324,7 +7328,7 @@ return fa;
 
 					//// fails at 2TB: FPF-14+6/16:(16,14-0)
 					//uint32_t bits = rand();
-					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state) << 23 & (bits | 0u - bits)) | (bits & 0x7FFFFFu));
+					//float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(state) << 23 & (bits | 0u - bits)) | (bits & 0x7FFFFFu));
 
 					//// passes at least 64TB with no anomalies (!), on seed 0x0.
 					//// This is dependent on the structure of PCG-Random for how well it works.
@@ -7334,13 +7338,13 @@ return fa;
 					//// An extra 64-bit multiplication (here, by 0xD1342543DE82EF95ULL) allows it to avoid correlation for our purposes.
 					// This works!
 					//uint32_t bits = rand();
-					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+					//float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(state * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
 					
-					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state * 0xD1342543DE82EF95ULL) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFFu));
+					//float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(state * 0xD1342543DE82EF95ULL) << 23 & 0u - ((bits | 0u - bits) >> 31)) | (bits & 0x7FFFFFu));
 
 					// passes at least 512 GB with no anomalies, test interrupted.
 					//uint32_t bits = rand();
-					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(state ^ state << 16u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+					//float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(state ^ state << 16u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
 
 					// passes at least 256GB with no anomalies, but seems slower than above xorshifted state version
 					//uint64_t oldstate = state;
@@ -7348,7 +7352,7 @@ return fa;
 					//uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
 					//uint32_t rot = oldstate >> 59u;
 					//uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
-					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+					//float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(oldstate * 0xD1342543DE82EF95ULL) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
 
 					// passes 4TB without anomalies. Interrupted because I learned Godot's generator is inclusive on both 0f and 1f . (Whaaaa?!)
 					//uint64_t oldstate = state;
@@ -7356,7 +7360,7 @@ return fa;
 					//uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
 					//uint32_t rot = oldstate >> 59u;
 					//uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
-					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
+					//float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(oldstate ^ oldstate << 37u) << 23 & 0u - (bits != 0u)) | (bits & 0x7FFFFFu));
 
 					//// Passes 64TB with no anomalies, took 197985 seconds.
 					//// This generator is, like Godot's randf(), inclusive on 0f and 1f.
@@ -7365,7 +7369,7 @@ return fa;
 					//uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
 					//uint32_t rot = oldstate >> 59u;
 					//uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
-					//float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+					//float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
 
 					//// gets the low 16 bits of the random float f after scaling
 					//return (uint16_t)(f * 0x800000);
@@ -7381,7 +7385,7 @@ return fa;
 //					uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
 //					uint32_t rot = oldstate >> 59u;
 //					uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
-//					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+//					float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(oldstate ^ oldstate << 37u) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
 //
 					// No matter what variants I try using 64-bit oldstate for clz, this fails at or by 512GB... FPF-14+6/16:cross every time.
 					// It's the upper 16 bits of the float that fail, and only those.
@@ -7390,7 +7394,7 @@ return fa;
 					uint32_t xorshifted = oldstate >> 27u ^ oldstate >> 45u;
 					uint32_t rot = oldstate >> 59u;
 					uint32_t bits = (xorshifted >> rot) | (xorshifted << (32u - rot & 31u));
-					float f = intBitsToFloat((126u - (uint32_t)__lzcnt64(oldstate ^ (oldstate << rot | oldstate >> 64u - rot) ^ (oldstate << 37u | oldstate >> 27u)) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
+					float f = intBitsToFloat((126u - (uint32_t)std::countl_zero(oldstate ^ (oldstate << rot | oldstate >> 64u - rot) ^ (oldstate << 37u | oldstate >> 27u)) << 23) | (bits & 0x7FFFFFu) + 1u) - 2.7105058E-20f;
 
 					// gets the high 16 bits of the random float f after scaling
 					return (uint16_t)(f * 0x10000);
@@ -7419,7 +7423,7 @@ return fa;
 					x = (x ^ rotate64(y, 37)) * 0x3C79AC492BA7B653ULL;
 					y = (x ^ x >> 33) * 0x1C69B3F74AC4AE35ULL;
 					y ^= y >> 27;
-					double d = longBitsToDouble((1022ULL - __lzcnt64(x) << 52 & 0ULL - (y != 0ULL)) | (y & 0xFFFFFFFFFFFFFULL));
+					double d = longBitsToDouble((1022ULL - std::countl_zero(x) << 52 & 0ULL - (y != 0ULL)) | (y & 0xFFFFFFFFFFFFFULL));
 
 					//// gets the low 32 bits of the random float f after scaling
 					//return (uint32_t)(d * (1ULL << 52));

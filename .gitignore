@@ -30,7 +30,8 @@
 *.exe
 *.out
 *.app
-**/bin
+**/bin/**
+!bin/.gitkeep
 
 **/.vs
 **.tlog

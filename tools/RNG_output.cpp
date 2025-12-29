@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
@@ -11,7 +12,7 @@
 #include <iostream>
 #include <sstream>
 //#include <map>
-#include <signal.h>     /* signal, sig_atomic_t */
+#include <csignal>     /* signal, sig_atomic_t */
 
 #ifdef WIN32 // needed to allow binary stdout on windows
 #include <fcntl.h>

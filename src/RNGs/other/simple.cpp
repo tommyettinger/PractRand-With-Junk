@@ -7,6 +7,9 @@
 
 #include "PractRand/RNGs/other/simple.h"
 
+#include <x86gprintrin.h>
+#include <cstdint>
+
 namespace PractRand {
 	using namespace Internals;
 	namespace RNGs {
@@ -1487,7 +1490,7 @@ namespace PractRand {
 //...and 1158 test result(s) without anomalies
 //uint64_t s0 = state0, s1 = state1, s2 = state2, result = s2 ^ rotate64(s2, 23) ^ rotate64(s2, 47);
 //state0 += 0xD1B54A32D192ED03UL;
-//state1 += 0xABC98388FB8FAC05UL + _lzcnt_u64(s0);
+//state1 += 0xABC98388FB8FAC05UL + std::countl_zero(s0);
 //state2 += result ^ s1;
 //return result;
 
@@ -2272,7 +2275,7 @@ return z ^ rotate64(z, 25) ^ rotate64(z, 50);
 					// Also passes 64TB of testing using a multiply, then xor-rotate-rotate, which is not ARX.
 					// Uses different Weyl sequences than TortieRandom, but can use the same round function.
 					//uint64_t aa = a += 0xD1B54A32D192ED03L;
-					//uint64_t bb = b += 0x8CB92BA72F3D8DD7L + __lzcnt64(a);
+					//uint64_t bb = b += 0x8CB92BA72F3D8DD7L + std::countl_zero(a);
 					//bb = (aa) ^ roundFunction(aa = bb);
 					//return (aa) ^ roundFunction(bb);
 
@@ -2770,7 +2773,7 @@ return x;
 //  ...and 879 test result(s) without anomalies
 					stream ^= e;
 					a += 0x9E3779B97F4A7C15UL;
-					b = rotate64(b, 1) + _lzcnt_u64(a);
+					b = rotate64(b, 1) + std::countl_zero(a);
 					c = rotate64(c, 1) + b;
 					d = rotate64(d, 1) + c;
 					e = rotate64(e, 1) + d;
@@ -2832,7 +2835,7 @@ return x;
 					b = fa ^ fg;
 					c = ff - fb;
 					d = rotate32(fc, 21);
-					e = __lzcnt(fa);
+					e = std::countl_zero(fa);
 					f = ff + fe;
 					g = fb + fd;
 					return fg;
@@ -2866,7 +2869,7 @@ return x;
 					walker->handle(e);
 					walker->handle(f);
 					walker->handle(g);
-					//g = __lzcnt(a);//__lzcnt64(a);// __builtin_ctzll(a);
+					//g = __lzcnt(a);//std::countl_zero(a);// __builtin_ctzll(a);
 					walker->handle(h);
 				}
 				Uint64 spangled_varqual::raw64() {
@@ -2879,7 +2882,7 @@ return x;
 					//					// It uses the round function from the Speck cipher
 					//					// If all streams are appended to one another, the resulting generator would have a period of 2 to the 128, 1D-equidistributed
 					//					// You can do that by changing stateB's assignment to:
-					//					// Uint64 b = (stateB += __lzcnt64(a));
+					//					// Uint64 b = (stateB += std::countl_zero(a));
 					//					// This eliminates the fast skipping, makes this have one stream, and makes it no longer an ARX generator
 					//					// It may also slow it down somewhat
 					//					Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
@@ -2970,8 +2973,8 @@ return x;
 										// Has a period of 2 to the 192.
 										// Needs at least two rounds of the Speck cipher; fails with one.
 					//					Uint64 a = (stateA = stateA * 0xD1342543DE82EF95UL + 0x9E3779B97F4A7C15UL);
-					//					Uint64 b = (stateB = stateB * 0x2C6FE96EE78B6955UL + __lzcnt64(a));
-					//					Uint64 c = (stateC = stateC * 0x369DEA0F31A53F85UL + __lzcnt64(a&b));
+					//					Uint64 b = (stateB = stateB * 0x2C6FE96EE78B6955UL + std::countl_zero(a));
+					//					Uint64 c = (stateC = stateC * 0x369DEA0F31A53F85UL + std::countl_zero(a&b));
 					//					b = rotate64(b, 56) + a ^ c;
 					//					a = (rotate64(a, 3) ^ b);
 					//					return (rotate64(a, 3) ^ (rotate64(b, 56) + a ^ c));
@@ -2984,8 +2987,8 @@ return x;
 										// This one might have issues with its increments at extremely long test lengths, for complicated reasons.
 										// At least with uint32_t states, XORing the large constant and the ctz result works better than adding.
 										// Uint64 a = (stateA += 0x9E3779B97F4A7C15UL);
-										// Uint64 b = (stateB += 0xD1342543DE82EF95UL + __lzcnt64(a));
-										// Uint64 c = (stateC += 0xA62B82F58DB8A985UL + __lzcnt64(a&b));
+										// Uint64 b = (stateB += 0xD1342543DE82EF95UL + std::countl_zero(a));
+										// Uint64 c = (stateC += 0xA62B82F58DB8A985UL + std::countl_zero(a&b));
 										// b = rotate64(b, 56) + a ^ c;
 										// a = (rotate64(a, 3) ^ b);
 										// b = rotate64(b, 56) + a ^ c;
@@ -2998,8 +3001,8 @@ return x;
 										// // Passes 64TB of PractRand with one anomaly at 64TB:
 										// // [Low1/64]TMFn(2+1):wl             R= +20.1  p~=   6e-6    unusual
 										// Uint64 a = (stateA += 0xBEA225F9EB34556DUL);
-										// Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ __lzcnt64(a));
-										// Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ __lzcnt64(a&b));
+										// Uint64 b = (stateB += 0xD1342543DE82EF95UL);// ^ std::countl_zero(a));
+										// Uint64 c = (stateC += 0xA62B82F58DB8A985UL);// ^ std::countl_zero(a&b));
 										// b = rotate64(b, 56) + a ^ c;
 										// a = (rotate64(a, 3) ^ b);
 										// b = rotate64(b, 56) + a ^ c;
@@ -3064,8 +3067,8 @@ return x;
 					//Other than the count-leading-zeros instruction and the optional combination of results into one 64-bit result, this uses only ARX operations.
 					//This can work on JS well, because any additions are followed by bitwise ops, which keeps each state in the 32-bit range.
 					uint32_t x = (stateA = stateA + 0xD192ED03 ^ 0xBEA225FA);
-					uint32_t y = (stateB = stateB + __lzcnt(x) ^ 0xA62B82F6);
-					uint32_t z = (stateC = stateC + __lzcnt(x & y) ^ 0x9E3779BA);
+					uint32_t y = (stateB = stateB + std::countl_zero(x) ^ 0xA62B82F6);
+					uint32_t z = (stateC = stateC + std::countl_zero(x & y) ^ 0x9E3779BA);
 					y = rotate32(y, 3) ^ (x = rotate32(x, 24) + y ^ z) + rotate32(x, 7);
 					x = rotate32(x, 14) ^ (y = rotate32(y, 29) + x ^ z) + rotate32(y, 11);
 					y = rotate32(y, 19) ^ (x = rotate32(x, 5) + y ^ z) + rotate32(x, 29);
@@ -3197,7 +3200,7 @@ return x;
 				}
 				std::string mace::get_name() const {
 					std::ostringstream str;
-					str << "mace" << _pext_u64(stream ^ 0x9E3779B97F4A7C15UL, 0x003569CA5369AC00UL);
+					str << "mace" << (stream << 10 ^ 0x9E3779B97F4A7C15UL);
 					return str.str();
 				}
 				void mace::walk_state(StateWalkingObject* walker) {

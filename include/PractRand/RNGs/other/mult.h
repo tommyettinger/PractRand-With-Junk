@@ -9,7 +9,8 @@ This set is of RNGs that:
 3. have only a few words of state
 4. are likely to have easily detectable bias
 */
-
+#pragma once
+#include <cstdint>
 namespace PractRand {
 	namespace RNGs {
 		namespace Polymorphic {

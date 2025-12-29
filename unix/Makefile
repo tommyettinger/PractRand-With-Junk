@@ -18,11 +18,11 @@ LIBS = $(BIN)/libpracrand
 CXX = g++
 # CXXFLAGS = -Wall -Werror -g $(addprefix -I,$(INCLUDES))
 # Many, many warnings. Too many to fix at the moment.
-CXXFLAGS = -g $(addprefix -I,$(INCLUDES)) -Ofast
+CXXFLAGS = -g $(addprefix -I,$(INCLUDES))
 LDFLAGS = $(CXXFLAGS)
 
 # ifeq ($(shell uname -s),Linux)
-CXXFLAGS += -std=c++11 -mavx2 -maes
+CXXFLAGS += -std=c++20 -mavx2 -maes -O3
 LDFLAGS += -lpthread
 # endif
 
@@ -62,7 +62,7 @@ LIB_OBJS = \
 	$(addprefix $(SRC)/,$(SRC_OBJS))
 
 $(BIN)/libpracrand.a: $(LIB_OBJS)
-	ar -r $@  $^
+	ar -r $@ $^
 	ranlib $@
 
 $(BIN)/RNG_benchmark: $(TOOLS)/RNG_benchmark.o $(LIB)

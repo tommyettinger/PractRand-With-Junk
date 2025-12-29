@@ -1,4 +1,8 @@
-#include <immintrin.h>
+#pragma once
+#include <x86gprintrin.h>
+#include <bit>
+#include <bmi2intrin.h>
+#include <cstdint>
 
 /*
 RNGs in the mediocre directory are not intended for real world use
@@ -622,7 +626,7 @@ namespace PractRand {
 				class mace : public vRNG64 {
 					Uint64 stateA, stateB, stateC, stateD, stateE, stream;
 				public:
-					mace(Uint64 stream_) : stream(_pdep_u64(stream_, 0x003569CA5369AC00UL) ^ 0x9E3779B97F4A7C15UL) {}
+					mace(Uint64 stream_) : stream(stream_ << 10 ^ 0x9E3779B97F4A7C15UL) {}
 					Uint64 raw64();
 					std::string get_name() const;
 					void walk_state(StateWalkingObject*);
