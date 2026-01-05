@@ -4163,16 +4163,32 @@ namespace PractRand {
 					// return xp;
 
 					// Passes 128TB with no anomalies.
-					// Minimum period is 2 to the 64.
+					// Minimum period is 2 to the 32.
+					// const uint32_t a = stateA;
+					// const uint32_t b = stateB;
+					// const uint32_t c = stateC - b;
+					// const uint32_t d = stateD - a;
+					// stateA = 3323815723u * c;
+					// stateB = rotate32(d, 6);
+					// stateC = rotate32(c, 22);
+					// stateD += 777777777u;
+					// return a;
+
+					// Fails almost everything at 64GB!
+					//rng=ta32, seed=0x0
+					//length= 64 gigabytes (2^36 bytes), time= 102 seconds
+					//TONS OF FAILURES!
 					const uint32_t a = stateA;
 					const uint32_t b = stateB;
-					const uint32_t c = stateC - b;
-					const uint32_t d = stateD - a;
-					stateA = 3323815723u * c;
-					stateB = rotate32(d, 6);
-					stateC = rotate32(c, 22);
-					stateD += 777777777u;
-					return a;
+					const uint32_t c = stateC;
+					const uint32_t d = stateD;
+					stateA = a + 555555555u;
+					stateB = 3323815723u * d;
+					stateC = a - d;
+					stateC = rotate32(stateC, 6);
+					stateD = b - c;
+					stateD = rotate32(stateD, 22);
+					return b;
 				}
 
 				std::string ta32::get_name() const { return "ta32"; }
