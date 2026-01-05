@@ -4152,15 +4152,27 @@ namespace PractRand {
 					// RomuTrio32
 					// Passes 128TB with no anomalies.
 					// Takes 2 days, 5 hours, 56 minutes, 46 seconds to do that.
-					uint32_t xp = stateA;
-					uint32_t yp = stateB;
-					uint32_t zp = stateC;
-					stateA = 3323815723u * zp;
-					stateB = yp - xp;
-					stateB = rotate32(stateB, 6);
-					stateC = zp - yp;
-					stateC = rotate32(stateC, 22);
-					return xp;
+					// uint32_t xp = stateA;
+					// uint32_t yp = stateB;
+					// uint32_t zp = stateC;
+					// stateA = 3323815723u * zp;
+					// stateB = yp - xp;
+					// stateB = rotate32(stateB, 6);
+					// stateC = zp - yp;
+					// stateC = rotate32(stateC, 22);
+					// return xp;
+
+					// Passes 128TB with no anomalies.
+					// Minimum period is 2 to the 64.
+					const uint32_t a = stateA;
+					const uint32_t b = stateB;
+					const uint32_t c = stateC - b;
+					const uint32_t d = stateD - a;
+					stateA = 3323815723u * c;
+					stateB = rotate32(d, 6);
+					stateC = rotate32(c, 22);
+					stateD += 777777777u;
+					return a;
 				}
 
 				std::string ta32::get_name() const { return "ta32"; }
