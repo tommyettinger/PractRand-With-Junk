@@ -4178,15 +4178,30 @@ namespace PractRand {
 					//rng=ta32, seed=0x0
 					//length= 64 gigabytes (2^36 bytes), time= 102 seconds
 					//TONS OF FAILURES!
+					// const uint32_t a = stateA;
+					// const uint32_t b = stateB;
+					// const uint32_t c = stateC;
+					// const uint32_t d = stateD;
+					// stateA = a + 555555555u;
+					// stateB = 3323815723u * d;
+					// stateC = a - d;
+					// stateC = rotate32(stateC, 6);
+					// stateD = b - c;
+					// stateD = rotate32(stateD, 22);
+					// return b;
+
+					// Passes 128TB with no anomalies.
+					// Minimum period is 2 to the 32.
+					// The all-zero state is permitted.
 					const uint32_t a = stateA;
 					const uint32_t b = stateB;
 					const uint32_t c = stateC;
 					const uint32_t d = stateD;
-					stateA = a + 555555555u;
-					stateB = 3323815723u * d;
-					stateC = a - d;
+					stateA = a + 777777777u;
+					stateB = 3323815723u * d + a;
+					stateC = c - b;
 					stateC = rotate32(stateC, 6);
-					stateD = b - c;
+					stateD = d - c;
 					stateD = rotate32(stateD, 22);
 					return b;
 				}
