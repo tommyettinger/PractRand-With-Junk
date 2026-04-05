@@ -2014,18 +2014,28 @@ namespace PractRand {
 					// state += 0x9E3779B97F4A7C15UL + (stream = stream >> 1 ^ (-(stream & 1UL) & 0x9C82435DE0D49E35UL));
 					// return z ^ z >> 29;
 
-					// MAOA3
 					// No anomalies for the first 32TB, then at 64TB:
 					// rng=tiptoe, seed=0x0
 					// length= 64 terabytes (2^46 bytes), time= 90725 seconds
 					//   Test Name                         Raw       Processed     Evaluation
 					//   [Low1/32]Gap-16:B                 R=  +9.6  p =  3.9e-8   very suspicious
 					//   ...and 1158 test result(s) without anomalies
+					// uint64_t x = state;
+					// const uint64_t key = stream;
+					// x += x * x + key | 1ULL; x = std::rotl(x, 32);
+					// x += x * x + key | 5ULL; x = std::rotl(x, 32);
+					// x += x * x + key | 17ULL; x ^= x >> 32;
+					// state += 0xD1342543DE82EF95ULL;
+					// stream += std::countl_zero(state);
+					// return x;
+
+					// MOAR3
+					// Passes 128 TB with no anomalies!
 					uint64_t x = state;
 					const uint64_t key = stream;
 					x += x * x + key | 1ULL; x = std::rotl(x, 32);
-					x += x * x + key | 5ULL; x = std::rotl(x, 32);
-					x += x * x + key | 17ULL; x ^= x >> 32;
+					x += x * x + key | 9ULL; x = std::rotl(x, 32);
+					x += x * x + key | 65ULL; x ^= x >> 33;
 					state += 0xD1342543DE82EF95ULL;
 					stream += std::countl_zero(state);
 					return x;
