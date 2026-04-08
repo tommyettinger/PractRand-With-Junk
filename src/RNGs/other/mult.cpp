@@ -2031,13 +2031,26 @@ namespace PractRand {
 
 					// MOAR3
 					// Passes 128 TB with no anomalies!
+					// uint64_t x = state;
+					// const uint64_t key = stream;
+					// x += x * x + key | 1ULL; x = std::rotl(x, 32);
+					// x += x * x + key | 9ULL; x = std::rotl(x, 32);
+					// x += x * x + key | 65ULL; x ^= x >> 33;
+					// state += 0xD1342543DE82EF95ULL;
+					// stream += std::countl_zero(state);
+					// return x;
+
+
+					// GulfRandom
+					// Passes 128TB with no anomalies.
+					// Stream was selected randomly using fixGamma(); it was 0x37C3E10A5C0A63CBULL here.
+					// Period is 2 to the 64; there are at least a million possible distinct streams that fixGamma() can
+					//  produce given sequential odd inputs starting from 1.
 					uint64_t x = state;
-					const uint64_t key = stream;
-					x += x * x + key | 1ULL; x = std::rotl(x, 32);
-					x += x * x + key | 9ULL; x = std::rotl(x, 32);
-					x += x * x + key | 65ULL; x ^= x >> 33;
+					x ^= std::rotl(x, 13) ^ std::rotl(x, 47);
+					x *= stream;
+					x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
 					state += 0xD1342543DE82EF95ULL;
-					stream += std::countl_zero(state);
 					return x;
 				}
 
@@ -2052,20 +2065,21 @@ namespace PractRand {
 					return x;
 				}
 
-				// uint64_t fixGamma(uint64_t gamma) {
-				// 	uint64_t inverse = mmi(gamma |= 1UL), add = 0UL;
-				// 	while (abs((long long)__popcnt64(gamma) - 32) > 8
-				// 		|| abs((long long)__popcnt64(gamma ^ gamma >> 1) - 32) > 8
-				// 		|| abs((long long)__popcnt64(inverse) - 32) > 8
-				// 		|| abs((long long)__popcnt64(inverse ^ inverse >> 1) - 32) > 8) {
-				// 		inverse = mmi(gamma = gamma * 0xD1342543DE82EF95L + (add += 2L));
-				// 	}
-				// 	return gamma;
-				// }
+				uint64_t fixGamma(uint64_t gamma) {
+					uint64_t inverse = mmi(gamma |= 1UL), add = 0UL;
+					while (abs(std::popcount(gamma) - 32) > 8
+						|| abs(std::popcount(gamma ^ gamma >> 1) - 32) > 8
+						|| abs(std::popcount(inverse) - 32) > 8
+						|| abs(std::popcount(inverse ^ inverse >> 1) - 32) > 8) {
+						inverse = mmi(gamma = gamma * 0xD1342543DE82EF95ULL + (add += 2ULL));
+					}
+					return gamma;
+				}
 
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
+					stream = fixGamma(stream);
 					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
