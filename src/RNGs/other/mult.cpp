@@ -2046,11 +2046,22 @@ namespace PractRand {
 					// Stream was selected randomly using fixGamma(); it was 0x37C3E10A5C0A63CBULL here.
 					// Period is 2 to the 64; there are at least a million possible distinct streams that fixGamma() can
 					//  produce given sequential odd inputs starting from 1.
+					// uint64_t x = state;
+					// x ^= std::rotl(x, 13) ^ std::rotl(x, 47);
+					// x *= stream;
+					// x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
+					// state += 0xD1342543DE82EF95ULL;
+					// return x;
+
+
+					// GolfRandom
+					// Passes 128TB with no anomalies.
+					// Using a fixed multiplier and a variable increment also works.
 					uint64_t x = state;
 					x ^= std::rotl(x, 13) ^ std::rotl(x, 47);
-					x *= stream;
+					x *= 0xD1342543DE82EF95ULL;
 					x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
-					state += 0xD1342543DE82EF95ULL;
+					state += stream;
 					return x;
 				}
 
