@@ -2057,11 +2057,23 @@ namespace PractRand {
 					// GolfRandom
 					// Passes 128TB with no anomalies.
 					// Using a fixed multiplier and a variable increment also works.
+					// Stream was 0x37C3E10A5C0A63CB here, the same as above.
+					// uint64_t x = state;
+					// x ^= std::rotl(x, 13) ^ std::rotl(x, 47);
+					// x *= 0xD1342543DE82EF95ULL;
+					// x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
+					// state += stream;
+					// return x;
+
+					// QuizRandom
+					// Passes 128TB with no anomalies.
+					// Period is 2 to the 128; perfectly 1D-equidistributed.
 					uint64_t x = state;
-					x ^= std::rotl(x, 13) ^ std::rotl(x, 47);
-					x *= 0xD1342543DE82EF95ULL;
+					x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
+					x += x * x + stream | 257ULL;
 					x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
-					state += stream;
+					state += 0xD1342543DE82EF95ULL;
+					stream += std::countl_zero(state);
 					return x;
 				}
 
@@ -2090,7 +2102,7 @@ namespace PractRand {
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
-					stream = fixGamma(stream);
+					// stream = fixGamma(stream);
 					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
