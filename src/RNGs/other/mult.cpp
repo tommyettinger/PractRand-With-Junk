@@ -2065,16 +2065,39 @@ namespace PractRand {
 					// state += stream;
 					// return x;
 
+					// Slight change, but a problem at 128TB!
+//rng=tiptoe, seed=0x0
+//length= 128 terabytes (2^47 bytes), time= 164830 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low8/32]Gap-16:A                 R=  +6.7  p =  1.0e-4   unusual
+//  [Low8/32]Gap-16:B                 R=  +7.0  p =  6.1e-6   mildly suspicious
+//  ...and 1179 test result(s) without anomalies
+					uint64_t x = state;
+					x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
+					x *= 0x9E3779B97F4A7C15ULL;
+					x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
+					state += stream;
+					return x;
+
 					// QuizRandom
 					// Passes 128TB with no anomalies.
 					// Period is 2 to the 128; perfectly 1D-equidistributed.
-					uint64_t x = state;
-					x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
-					x += x * x + stream | 257ULL;
-					x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
-					state += 0xD1342543DE82EF95ULL;
-					stream += std::countl_zero(state);
-					return x;
+					// uint64_t x = state;
+					// x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
+					// x += x * x + stream | 257ULL;
+					// x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
+					// state += 0xD1342543DE82EF95ULL;
+					// stream += std::countl_zero(state);
+					// return x;
+
+					// Passes 1TB with no anomalies; cut off early.
+					// uint64_t x = state;
+					// x ^= x >> 11 ^ x >> 47;
+					// x += x * x + stream | 257ULL;
+					// x ^= x >> 23 ^ x >> 51;
+					// state += 0xD1342543DE82EF95ULL;
+					// stream += std::countl_zero(state);
+					// return x;
 				}
 
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
@@ -2102,7 +2125,7 @@ namespace PractRand {
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
-					// stream = fixGamma(stream);
+					stream = fixGamma(stream);
 					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
