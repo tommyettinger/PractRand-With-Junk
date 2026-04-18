@@ -2072,12 +2072,12 @@ namespace PractRand {
 //  [Low8/32]Gap-16:A                 R=  +6.7  p =  1.0e-4   unusual
 //  [Low8/32]Gap-16:B                 R=  +7.0  p =  6.1e-6   mildly suspicious
 //  ...and 1179 test result(s) without anomalies
-					uint64_t x = state;
-					x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
-					x *= 0x9E3779B97F4A7C15ULL;
-					x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
-					state += stream;
-					return x;
+					// uint64_t x = state;
+					// x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
+					// x *= 0x9E3779B97F4A7C15ULL;
+					// x ^= std::rotl(x, 23) ^ std::rotl(x, 51);
+					// state += stream;
+					// return x;
 
 					// QuizRandom
 					// Passes 128TB with no anomalies.
@@ -2098,6 +2098,20 @@ namespace PractRand {
 					// state += 0xD1342543DE82EF95ULL;
 					// stream += std::countl_zero(state);
 					// return x;
+
+					// Fine until 64TB, then one minor anomaly.
+					// Going for perfect! One anomaly is not good enough.
+// rng=tiptoe, seed=0x0
+// length= 64 terabytes (2^46 bytes), time= 83470 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/64]FPF-14+6/16:cross        R=  -2.7  p =1-4.8e-5   unusual
+//   ...and 1158 test result(s) without anomalies
+					uint64_t x = state;
+					x ^= std::rotl(x, 13) ^ std::rotl(x, 47);
+					x *= 0xF1357AEA2E62A9C5U;
+					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					state += stream;
+					return x;
 				}
 
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
