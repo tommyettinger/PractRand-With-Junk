@@ -2106,8 +2106,17 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low4/64]FPF-14+6/16:cross        R=  -2.7  p =1-4.8e-5   unusual
 //   ...and 1158 test result(s) without anomalies
+					// uint64_t x = state;
+					// x ^= std::rotl(x, 13) ^ std::rotl(x, 47);
+					// x *= 0xF1357AEA2E62A9C5U;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// state += stream;
+					// return x;
+
+					// Passes 128TB with no anomalies.
+					// This might be the new GolfRandom.
 					uint64_t x = state;
-					x ^= std::rotl(x, 13) ^ std::rotl(x, 47);
+					x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
 					x *= 0xF1357AEA2E62A9C5U;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
 					state += stream;
