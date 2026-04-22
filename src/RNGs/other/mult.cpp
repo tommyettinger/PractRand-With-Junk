@@ -2123,12 +2123,34 @@ namespace PractRand {
 					// return x;
 
 					// Passes 128TB with no anomalies.
-					uint64_t x = state ^ stream;
-					x ^= std::rotl(x, 11) ^ std::rotl(x, 41);
-					x *= 0xF1357AEA2E62A9C5U;
+					// uint64_t x = state ^ stream;
+					// x ^= std::rotl(x, 11) ^ std::rotl(x, 41);
+					// x *= 0xF1357AEA2E62A9C5U;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// stream += std::countl_zero(state);
+					// state += 0xD1342543DE82EF95ULL;
+					// return x;
+
+					uint64_t x = state;
+					// using 11 and 41 produces an anomaly at 4TB:
+// rng=tiptoe, seed=0x0
+// length= 4 terabytes (2^42 bytes), time= 5093 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/8]BCFN(2+1,13-0,T)          R=  -8.3  p =1-2.5e-4   unusual
+//   ...and 1051 test result(s) without anomalies
+					// x ^= std::rotl(x, 11) ^ std::rotl(x, 41);
+					// trying 21 and 41, but it has an anomaly earlier at 64GB:
+// rng=tiptoe, seed=0x0
+// length= 64 gigabytes (2^36 bytes), time= 85.6 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]Gap-16:B                 R=  +5.2  p =  2.2e-4   unusual
+//   ...and 842 test result(s) without anomalies
+					// x ^= std::rotl(x, 21) ^ std::rotl(x, 41);
+
+					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					x *= stream;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
-					stream += std::countl_zero(state);
-					state += 0xD1342543DE82EF95ULL;
+					state += stream;
 					return x;
 				}
 
@@ -2157,7 +2179,7 @@ namespace PractRand {
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
-					// stream = fixGamma(stream);
+					stream = fixGamma(stream);
 					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
