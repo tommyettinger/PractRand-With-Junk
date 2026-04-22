@@ -2115,11 +2115,20 @@ namespace PractRand {
 
 					// Passes 128TB with no anomalies.
 					// This might be the new GolfRandom.
-					uint64_t x = state;
-					x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
+					// uint64_t x = state;
+					// x ^= std::rotl(x, 11) ^ std::rotl(x, 47);
+					// x *= 0xF1357AEA2E62A9C5U;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// state += stream;
+					// return x;
+
+					// Passes 128TB with no anomalies.
+					uint64_t x = state ^ stream;
+					x ^= std::rotl(x, 11) ^ std::rotl(x, 41);
 					x *= 0xF1357AEA2E62A9C5U;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
-					state += stream;
+					stream += std::countl_zero(state);
+					state += 0xD1342543DE82EF95ULL;
 					return x;
 				}
 
@@ -2148,7 +2157,7 @@ namespace PractRand {
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
-					stream = fixGamma(stream);
+					// stream = fixGamma(stream);
 					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
