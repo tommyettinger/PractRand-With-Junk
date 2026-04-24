@@ -2147,6 +2147,8 @@ namespace PractRand {
 //   ...and 842 test result(s) without anomalies
 					// x ^= std::rotl(x, 21) ^ std::rotl(x, 41);
 
+					// THE NEW GolfRandom !
+					// Passes 128TB with no anomalies!
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
 					x *= stream;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
