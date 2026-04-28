@@ -2131,7 +2131,7 @@ namespace PractRand {
 					// state += 0xD1342543DE82EF95ULL;
 					// return x;
 
-					uint64_t x = state;
+					// uint64_t x = state;
 					// using 11 and 41 produces an anomaly at 4TB:
 // rng=tiptoe, seed=0x0
 // length= 4 terabytes (2^42 bytes), time= 5093 seconds
@@ -2149,11 +2149,39 @@ namespace PractRand {
 
 					// THE NEW GolfRandom !
 					// Passes 128TB with no anomalies!
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// x *= stream;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// state += stream;
+					// return x;
+
+					// ARX generator using lots of non-multiply ops.
+					// Fails at 16TB.
+// rng=tiptoe, seed=0x0
+// length= 8 terabytes (2^43 bytes), time= 10300 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]BCFN(2+13,13-3,T)        R= +17.9  p =  2.7e-8   suspicious
+//   ...and 1080 test result(s) without anomalies
+//
+// rng=tiptoe, seed=0x0
+// length= 16 terabytes (2^44 bytes), time= 20489 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]BCFN(2+1,13-0,T)         R= +12.1  p =  5.2e-6   mildly suspicious
+//   [Low1/64]BCFN(2+12,13-2,T)        R= +14.6  p =  4.5e-7   unusual
+//   [Low1/64]BCFN(2+13,13-3,T)        R= +31.1  p =  1.5e-14    FAIL
+//   ...and 1104 test result(s) without anomalies
+					uint64_t x = state;
+					uint64_t y = stream;
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
-					x *= stream;
+					y ^= std::rotl(y, 11) ^ std::rotl(y, 47);
+					x += std::rotl(y, 29);
+					y ^= 0xD1342543DE82EF95UL;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
-					state += stream;
-					return x;
+					y ^= std::rotl(y, 23) ^ std::rotl(y, 51);
+					state += 0xC13FA9A902A6328FUL;
+					stream += 0x91E10DA5C79E7B1DUL;
+					return std::rotl(x, 31) ^ y;
+
 				}
 
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
@@ -2181,7 +2209,7 @@ namespace PractRand {
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
-					stream = fixGamma(stream);
+					// stream = fixGamma(stream);
 					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
 					//stream = stream << 3 ^ UINT64_C(0x369DEA0F31A53F89);
