@@ -2170,17 +2170,32 @@ namespace PractRand {
 //   [Low1/64]BCFN(2+12,13-2,T)        R= +14.6  p =  4.5e-7   unusual
 //   [Low1/64]BCFN(2+13,13-3,T)        R= +31.1  p =  1.5e-14    FAIL
 //   ...and 1104 test result(s) without anomalies
+					// uint64_t x = state;
+					// uint64_t y = stream;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// y ^= std::rotl(y, 11) ^ std::rotl(y, 47);
+					// x += std::rotl(y, 29);
+					// y ^= 0xD1342543DE82EF95UL;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// y ^= std::rotl(y, 23) ^ std::rotl(y, 51);
+					// state += 0xC13FA9A902A6328FUL;
+					// stream += 0x91E10DA5C79E7B1DUL;
+					// return std::rotl(x, 31) ^ y;
+
+					// ToteRandom
+					// Totally ARX operations, two states, 2 to the 64 period, 2 to the 64 streams.
+					// Passes 128TB of PractRand with no anomalies.
 					uint64_t x = state;
 					uint64_t y = stream;
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
 					y ^= std::rotl(y, 11) ^ std::rotl(y, 47);
 					x += std::rotl(y, 29);
-					y ^= 0xD1342543DE82EF95UL;
+					y ^= x;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
 					y ^= std::rotl(y, 23) ^ std::rotl(y, 51);
 					state += 0xC13FA9A902A6328FUL;
 					stream += 0x91E10DA5C79E7B1DUL;
-					return std::rotl(x, 31) ^ y;
+					return std::rotl(x, 31) + y;
 
 				}
 
