@@ -2204,9 +2204,24 @@ namespace PractRand {
 //   [Low1/8]FPF-14+6/16:(7,14-0)      R=  +7.0  p =  4.3e-6   unusual
 //   [Low1/8]FPF-14+6/16:all           R=  +5.7  p =  8.5e-5   unusual
 //   ...and 1179 test result(s) without anomalies
+					// uint64_t y = stream;
+					// uint64_t x = state + y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41) ^ std::rotl(y, 11);
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// x = std::rotl(x, 31) + y;
+					// y ^= y << 7;
+					// stream = y ^ y >> 9;
+					// state += 0xC13FA9A902A6328FUL;
+					// return x;
+
+					// FlamencoRandom
+					// Passes 128TB with no anomalies.
+					// Period is (2 to the 128) minus (2 to the 64).
+					// 1D equidistributed; returns every result (2 to the 64) minus 1 times over its period.
 					uint64_t y = stream;
 					uint64_t x = state + y;
-					x ^= std::rotl(x, 19) ^ std::rotl(x, 41) ^ std::rotl(y, 11);
+					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					x += std::rotl(y, 53);
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
 					x = std::rotl(x, 31) + y;
 					y ^= y << 7;
