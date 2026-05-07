@@ -2218,12 +2218,23 @@ namespace PractRand {
 					// Passes 128TB with no anomalies.
 					// Period is (2 to the 128) minus (2 to the 64).
 					// 1D equidistributed; returns every result (2 to the 64) minus 1 times over its period.
+					// uint64_t y = stream;
+					// uint64_t x = state + y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// x += std::rotl(y, 53);
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// x = std::rotl(x, 31) + y;
+					// y ^= y << 7;
+					// stream = y ^ y >> 9;
+					// state += 0xC13FA9A902A6328FUL;
+					// return x;
+
+					// One less line; also passes 128TB with no anomalies!
 					uint64_t y = stream;
 					uint64_t x = state + y;
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
 					x += std::rotl(y, 53);
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
-					x = std::rotl(x, 31) + y;
 					y ^= y << 7;
 					stream = y ^ y >> 9;
 					state += 0xC13FA9A902A6328FUL;
