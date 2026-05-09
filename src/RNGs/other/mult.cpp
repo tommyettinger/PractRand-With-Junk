@@ -2230,15 +2230,29 @@ namespace PractRand {
 					// return x;
 
 					// One less line; also passes 128TB with no anomalies!
-					uint64_t y = stream;
+					// uint64_t y = stream;
+					// uint64_t x = state + y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// x += std::rotl(y, 53);
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// y ^= y << 7;
+					// stream = y ^ y >> 9;
+					// state += 0xC13FA9A902A6328FUL;
+					// return x;
+
+					// FlambergeRandom
+					// Passes 128TB with no anomalies.
+					// Period is (2 to the 128) minus (2 to the 64).
+					// 0 is an invalid state for stream.
+					const uint64_t y = stream;
 					uint64_t x = state + y;
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
-					x += std::rotl(y, 53);
+					x += std::rotl(y, 47);
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
-					y ^= y << 7;
-					stream = y ^ y >> 9;
+					stream = (y << 1) ^ (0u - (y >> 63) & 0xFEEDBABEDEADBEEFL);
 					state += 0xC13FA9A902A6328FUL;
 					return x;
+
 
 				}
 
