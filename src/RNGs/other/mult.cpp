@@ -2244,10 +2244,36 @@ namespace PractRand {
 					// Passes 128TB with no anomalies.
 					// Period is (2 to the 128) minus (2 to the 64).
 					// 0 is an invalid state for stream.
+					// const uint64_t y = stream;
+					// uint64_t x = state + y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// x += std::rotl(y, 47);
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// stream = (y << 1) ^ (0u - (y >> 63) & 0xFEEDBABEDEADBEEFL);
+					// state += 0xC13FA9A902A6328FUL;
+					// return x;
+
+					// Hits issues at 1TB and fails at 2TB:
+//rng=tiptoe, seed=0x0
+//length= 1 terabyte (2^40 bytes), time= 1322 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/64]Gap-16:B                 R=  +6.4  p =  2.1e-5   mildly suspicious
+//  [Low4/64]FPF-14+6/16:(0,14-0)     R=  +9.7  p =  1.2e-8   suspicious
+//  ...and 986 test result(s) without anomalies
+//
+//rng=tiptoe, seed=0x0
+//length= 2 terabytes (2^41 bytes), time= 2565 seconds
+//  Test Name                         Raw       Processed     Evaluation
+//  [Low4/64]Gap-16:A                 R= +10.2  p =  4.9e-7   suspicious
+//  [Low4/64]Gap-16:B                 R= +15.7  p =  2.5e-13    FAIL
+//  [Low4/64]FPF-14+6/16:(0,14-0)     R= +17.2  p =  1.6e-15    FAIL
+//  [Low4/64]FPF-14+6/16:(1,14-0)     R= +12.6  p =  3.0e-11   VERY SUSPICIOUS
+//  [Low4/64]FPF-14+6/16:all          R= +10.4  p =  3.2e-9   very suspicious
+//  ...and 1015 test result(s) without anomalies
 					const uint64_t y = stream;
-					uint64_t x = state + y;
-					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
-					x += std::rotl(y, 47);
+					uint64_t x = state;
+					x ^= std::rotl(x, 17) ^ std::rotl(x, 41);
+					x += y;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
 					stream = (y << 1) ^ (0u - (y >> 63) & 0xFEEDBABEDEADBEEFL);
 					state += 0xC13FA9A902A6328FUL;
