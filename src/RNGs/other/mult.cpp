@@ -2270,14 +2270,40 @@ namespace PractRand {
 //  [Low4/64]FPF-14+6/16:(1,14-0)     R= +12.6  p =  3.0e-11   VERY SUSPICIOUS
 //  [Low4/64]FPF-14+6/16:all          R= +10.4  p =  3.2e-9   very suspicious
 //  ...and 1015 test result(s) without anomalies
+					// const uint64_t y = stream;
+					// uint64_t x = state;
+					// x ^= std::rotl(x, 17) ^ std::rotl(x, 41);
+					// x += y;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// stream = (y << 1) ^ (0u - (y >> 63) & 0xFEEDBABEDEADBEEFL);
+					// state += 0xC13FA9A902A6328FUL;
+					// return x;
+
+					// Struggles near the end...
+// rng=tiptoe, seed=0x0
+// length= 16 terabytes (2^44 bytes), time= 20895 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/16]FPF-14+6/16:all          R=  -5.7  p =1-3.5e-5   unusual
+//   ...and 1106 test result(s) without anomalies
+//
+// rng=tiptoe, seed=0x0
+// length= 32 terabytes (2^45 bytes), time= 42180 seconds
+//   no anomalies in 1134 test result(s)
+//
+// rng=tiptoe, seed=0x0
+// length= 64 terabytes (2^46 bytes), time= 84510 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/64]FPF-14+6/16:all          R=  +6.5  p =  1.4e-5   mildly suspicious
+//   ...and 1158 test result(s) without anomalies
 					const uint64_t y = stream;
-					uint64_t x = state;
-					x ^= std::rotl(x, 17) ^ std::rotl(x, 41);
+					uint64_t x = state + y;
+					x ^= std::rotl(x, 19) ^ std::rotl(x, 43);
 					x += y;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
 					stream = (y << 1) ^ (0u - (y >> 63) & 0xFEEDBABEDEADBEEFL);
 					state += 0xC13FA9A902A6328FUL;
 					return x;
+
 
 
 				}
