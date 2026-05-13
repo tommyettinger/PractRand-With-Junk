@@ -2305,14 +2305,55 @@ namespace PractRand {
 					// return x;
 
 					// Passes 128TB with no anomalies!
+					// uint64_t y = stream;
+					// uint64_t x = state ^ y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// x += y;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// y ^= y << 7;
+					// stream = y ^ y >> 9;
+					// state += 0xC13FA9A902A6328FUL;
+					// return x;
+
+					// Fine for 512GB with no anomalies, but then...
+// rng=tiptoe, seed=0x0
+// length= 1 terabyte (2^40 bytes), time= 1290 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]BCFN(2+5,13-0,T)         R= +12.8  p =  2.2e-6   mildly suspicious
+//   [Low1/64]BCFN(2+9,13-3,T)         R= +12.7  p =  8.1e-6   unusual
+//   [Low1/64]BCFN(2+12,13-5,T)        R= +23.6  p =  2.0e-9   very suspicious
+//   [Low8/32]Gap-16:A                 R=  +5.9  p =  3.3e-4   unusual
+//   [Low8/32]Gap-16:B                 R=  +7.8  p =  1.4e-6   suspicious
+//   ...and 983 test result(s) without anomalies
+//
+// rng=tiptoe, seed=0x0
+// length= 2 terabytes (2^41 bytes), time= 2502 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]BCFN(2+4,13-0,T)         R= +24.0  p =  2.3e-12   VERY SUSPICIOUS
+//   [Low1/64]BCFN(2+5,13-0,T)         R= +25.3  p =  4.5e-13    FAIL
+//   [Low1/64]BCFN(2+6,13-0,T)         R= +13.6  p =  8.0e-7   mildly suspicious
+//   [Low1/64]BCFN(2+7,13-1,T)         R= +15.4  p =  9.3e-8   suspicious
+//   [Low1/64]BCFN(2+8,13-1,T)         R= +16.5  p =  2.4e-8   suspicious
+//   [Low1/64]BCFN(2+9,13-2,T)         R= +16.5  p =  4.9e-8   suspicious
+//   [Low1/64]BCFN(2+10,13-3,T)        R= +24.8  p =  1.6e-11   VERY SUSPICIOUS
+//   [Low1/64]BCFN(2+11,13-3,T)        R= +24.1  p =  3.2e-11   VERY SUSPICIOUS
+//   [Low1/64]BCFN(2+12,13-4,T)        R= +37.6  p =  2.2e-16    FAIL
+//   [Low1/64]BCFN(2+13,13-5,T)        R= +26.1  p =  2.2e-10  very suspicious
+//   [Low1/64]BCFN(2+14,13-5,T)        R= +21.2  p =  1.7e-8   mildly suspicious
+//   [Low1/64]BCFN(2+15,13-6,T)        R= +31.9  p =  2.2e-11  very suspicious
+//   [Low1/64]Gap-16:B                 R=  +7.8  p =  1.2e-6   suspicious
+//   [Low4/64]Gap-16:B                 R=  +7.5  p =  2.7e-6   suspicious
+//   [Low8/32]Gap-16:A                 R= +11.4  p =  7.1e-8   very suspicious
+//   [Low8/32]Gap-16:B                 R= +20.5  p =  1.9e-17    FAIL !
+//   ...and 1004 test result(s) without anomalies
 					uint64_t y = stream;
-					uint64_t x = state ^ y;
+					uint64_t x = state ^ std::rotl(y, 17);
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
-					x += y;
+					x += std::rotl(y, 53);
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
-					y ^= y << 7;
-					stream = y ^ y >> 9;
+					x += std::rotl(y, 42);
 					state += 0xC13FA9A902A6328FUL;
+					stream += 0x91E10DA5C79E7B1DUL;
 					return x;
 
 
