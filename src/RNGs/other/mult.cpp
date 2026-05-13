@@ -2295,12 +2295,23 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low4/64]FPF-14+6/16:all          R=  +6.5  p =  1.4e-5   mildly suspicious
 //   ...and 1158 test result(s) without anomalies
-					const uint64_t y = stream;
-					uint64_t x = state + y;
-					x ^= std::rotl(x, 19) ^ std::rotl(x, 43);
+					// const uint64_t y = stream;
+					// uint64_t x = state + y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 43);
+					// x += y;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// stream = (y << 1) ^ (0u - (y >> 63) & 0xFEEDBABEDEADBEEFL);
+					// state += 0xC13FA9A902A6328FUL;
+					// return x;
+
+					// Passes 128TB with no anomalies!
+					uint64_t y = stream;
+					uint64_t x = state ^ y;
+					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
 					x += y;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
-					stream = (y << 1) ^ (0u - (y >> 63) & 0xFEEDBABEDEADBEEFL);
+					y ^= y << 7;
+					stream = y ^ y >> 9;
 					state += 0xC13FA9A902A6328FUL;
 					return x;
 
