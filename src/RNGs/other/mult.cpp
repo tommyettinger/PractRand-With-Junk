@@ -2346,16 +2346,26 @@ namespace PractRand {
 //   [Low8/32]Gap-16:A                 R= +11.4  p =  7.1e-8   very suspicious
 //   [Low8/32]Gap-16:B                 R= +20.5  p =  1.9e-17    FAIL !
 //   ...and 1004 test result(s) without anomalies
+					// uint64_t y = stream;
+					// uint64_t x = state ^ std::rotl(y, 17);
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// x += std::rotl(y, 53);
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// x += std::rotl(y, 42);
+					// state += 0xC13FA9A902A6328FUL;
+					// stream += 0x91E10DA5C79E7B1DUL;
+					// return x;
+
+					// Also fails at 1TB, with anomalies earlier (256GB and 512GB)...
 					uint64_t y = stream;
 					uint64_t x = state ^ std::rotl(y, 17);
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
-					x += std::rotl(y, 53);
-					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					y = x + std::rotl(y, 53);
+					x ^= y ^ std::rotl(y, 25) ^ std::rotl(y, 50);
 					x += std::rotl(y, 42);
 					state += 0xC13FA9A902A6328FUL;
 					stream += 0x91E10DA5C79E7B1DUL;
 					return x;
-
 
 
 				}
