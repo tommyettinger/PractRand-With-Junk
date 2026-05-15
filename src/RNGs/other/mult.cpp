@@ -2357,11 +2357,27 @@ namespace PractRand {
 					// return x;
 
 					// Also fails at 1TB, with anomalies earlier (256GB and 512GB)...
-					uint64_t y = stream;
-					uint64_t x = state ^ std::rotl(y, 17);
+					// uint64_t y = stream;
+					// uint64_t x = state ^ std::rotl(y, 17);
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// y = x + std::rotl(y, 53);
+					// x ^= y ^ std::rotl(y, 25) ^ std::rotl(y, 50);
+					// x += std::rotl(y, 42);
+					// state += 0xC13FA9A902A6328FUL;
+					// stream += 0x91E10DA5C79E7B1DUL;
+					// return x;
+
+					// Passes 128TB with one anomaly at 32TB:
+// rng=tiptoe, seed=0x0
+// length= 32 terabytes (2^45 bytes), time= 42519 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low8/32]BCFN(2+3,13-0,T)         R=  -9.2  p =1-6.2e-5   unusual
+//   ...and 1133 test result(s) without anomalies
+					const uint64_t y = stream ^ std::rotl(stream, 13) ^ std::rotl(stream, 47);
+					uint64_t x = state ^ y;
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
-					y = x + std::rotl(y, 53);
-					x ^= y ^ std::rotl(y, 25) ^ std::rotl(y, 50);
+					x += std::rotl(y, 53);
+					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
 					x += std::rotl(y, 42);
 					state += 0xC13FA9A902A6328FUL;
 					stream += 0x91E10DA5C79E7B1DUL;
