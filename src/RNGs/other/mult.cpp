@@ -2373,13 +2373,51 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low8/32]BCFN(2+3,13-0,T)         R=  -9.2  p =1-6.2e-5   unusual
 //   ...and 1133 test result(s) without anomalies
-					const uint64_t y = stream ^ std::rotl(stream, 13) ^ std::rotl(stream, 47);
+					// const uint64_t y = stream ^ std::rotl(stream, 13) ^ std::rotl(stream, 47);
+					// uint64_t x = state ^ y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					// x += std::rotl(y, 53);
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// x += std::rotl(y, 42);
+					// state += 0xC13FA9A902A6328FUL;
+					// stream += 0x91E10DA5C79E7B1DUL;
+					// return x;
+
+					// Fails at 1TB after gradually worsening Gap-16:B test results.
+// rng=tiptoe, seed=0x0
+// length= 128 gigabytes (2^37 bytes), time= 168 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low8/32]Gap-16:B                 R=  +5.7  p =  8.9e-5   unusual
+//   ...and 879 test result(s) without anomalies
+//
+// rng=tiptoe, seed=0x0
+// length= 256 gigabytes (2^38 bytes), time= 324 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low8/32]Gap-16:B                 R=  +5.7  p =  8.9e-5   unusual
+//   ...and 914 test result(s) without anomalies
+//
+// rng=tiptoe, seed=0x0
+// length= 512 gigabytes (2^39 bytes), time= 660 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low8/32]Gap-16:A                 R=  +7.0  p =  6.2e-5   unusual
+//   [Low8/32]Gap-16:B                 R= +10.8  p =  3.9e-9    VERY SUSPICIOUS
+//   ...and 950 test result(s) without anomalies
+//
+// rng=tiptoe, seed=0x0
+// length= 1 terabyte (2^40 bytes), time= 1315 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]BCFN(2+13,13-5,T)        R= +16.8  p =  8.9e-7   unusual
+//   [Low1/64]BCFN(2+14,13-6,T)        R= +19.9  p =  3.1e-7   unusual
+//   [Low8/32]Gap-16:A                 R= +11.2  p =  9.9e-8   very suspicious
+//   [Low8/32]Gap-16:B                 R= +17.0  p =  1.9e-14    FAIL
+//   ...and 984 test result(s) without anomalies
+					const uint64_t y = stream ^ 0xC13FA9A902A6328FUL;
 					uint64_t x = state ^ y;
-					x ^= std::rotl(x, 19) ^ std::rotl(x, 41);
+					x ^= std::rotl(x, 19) ^ std::rotl(x, 47);
 					x += std::rotl(y, 53);
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
 					x += std::rotl(y, 42);
-					state += 0xC13FA9A902A6328FUL;
+					state += 0xD1342543DE82EF95UL;
 					stream += 0x91E10DA5C79E7B1DUL;
 					return x;
 
