@@ -2411,13 +2411,25 @@ namespace PractRand {
 //   [Low8/32]Gap-16:A                 R= +11.2  p =  9.9e-8   very suspicious
 //   [Low8/32]Gap-16:B                 R= +17.0  p =  1.9e-14    FAIL
 //   ...and 984 test result(s) without anomalies
-					const uint64_t y = stream ^ 0xC13FA9A902A6328FUL;
+					// const uint64_t y = stream ^ 0xC13FA9A902A6328FUL;
+					// uint64_t x = state ^ y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 47);
+					// x += std::rotl(y, 53);
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// x += std::rotl(y, 42);
+					// state += 0xD1342543DE82EF95UL;
+					// stream += 0x91E10DA5C79E7B1DUL;
+					// return x;
+
+					// Passes 128TB with no anomalies.
+					// Period is 2 to the 64, with 2 to the 64 possible streams.
+					// (FlowRandom-like.)
+					const uint64_t y = stream;
 					uint64_t x = state ^ y;
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 47);
-					x += std::rotl(y, 53);
+					x = x * 0xD1342543DE82EF95UL + y;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
-					x += std::rotl(y, 42);
-					state += 0xD1342543DE82EF95UL;
+					state += 0xC13FA9A902A6328FUL;
 					stream += 0x91E10DA5C79E7B1DUL;
 					return x;
 
