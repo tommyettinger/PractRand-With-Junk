@@ -2424,8 +2424,23 @@ namespace PractRand {
 					// Passes 128TB with no anomalies.
 					// Period is 2 to the 64, with 2 to the 64 possible streams.
 					// (FlowRandom-like.)
+					// const uint64_t y = stream;
+					// uint64_t x = state ^ y;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 47);
+					// x = x * 0xD1342543DE82EF95UL + y;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// state += 0xC13FA9A902A6328FUL;
+					// stream += 0x91E10DA5C79E7B1DUL;
+					// return x;
+
+					// Passes 128TB with one "unusual" anomaly at 64TB.
+// rng=tiptoe, seed=0x0
+// length= 64 terabytes (2^46 bytes), time= 83118 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]FPF-14+6/16:cross        R=  +4.9  p =  1.5e-4   unusual
+//   ...and 1158 test result(s) without anomalies
 					const uint64_t y = stream;
-					uint64_t x = state ^ y;
+					uint64_t x = state;
 					x ^= std::rotl(x, 19) ^ std::rotl(x, 47);
 					x = x * 0xD1342543DE82EF95UL + y;
 					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
