@@ -2450,14 +2450,27 @@ namespace PractRand {
 
 					// SwirlRandom
 					// Passes 128TB with no anomalies!
-					const uint64_t y = stream;
-					uint64_t x = state;
-					x ^= std::rotl(x, 19) ^ std::rotl(x, 47) ^ y;
-					x = x * 0xD1342543DE82EF95UL;
-					x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// const uint64_t y = stream;
+					// uint64_t x = state;
+					// x ^= std::rotl(x, 19) ^ std::rotl(x, 47) ^ y;
+					// x = x * 0xD1342543DE82EF95UL;
+					// x ^= std::rotl(x, 25) ^ std::rotl(x, 50);
+					// state += 0xC13FA9A902A6328FUL;
+					// stream += 0x91E10DA5C79E7B1DUL;
+					// return x;
+
+
+					// TorpedoRandom
+					// Passes 128TB with no anomalies!
+					// Period is 2 to the 128.
+					const uint64_t x = state;
+					uint64_t y = stream;
+					y ^= std::rotl(x, 19) ^ std::rotl(x, 47) ^ x;
+					y = y * 0xD1342543DE82EF95UL;
+					y ^= std::rotl(y, 25) ^ std::rotl(y, 50);
 					state += 0xC13FA9A902A6328FUL;
-					stream += 0x91E10DA5C79E7B1DUL;
-					return x;
+					stream += std::countl_zero(x);
+					return y;
 
 
 				}
