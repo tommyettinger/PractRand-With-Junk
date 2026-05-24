@@ -2463,11 +2463,28 @@ namespace PractRand {
 					// TorpedoRandom
 					// Passes 128TB with no anomalies!
 					// Period is 2 to the 128.
+					// const uint64_t x = state;
+					// uint64_t y = stream;
+					// y ^= std::rotl(x, 19) ^ std::rotl(x, 47) ^ x;
+					// y = y * 0xD1342543DE82EF95UL;
+					// y ^= std::rotl(y, 25) ^ std::rotl(y, 50);
+					// state += 0xC13FA9A902A6328FUL;
+					// stream += std::countl_zero(x);
+					// return y;
+
+
+					// Fails at 64TB:
+// rng=tiptoe, seed=0x0
+// length= 64 gigabytes (2^36 bytes), time= 86.5 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low8/32]Gap-16:A                 R=  +7.0  p =  6.2e-5   unusual
+//   [Low8/32]Gap-16:B                 R= +17.1  p =  1.7e-14    FAIL
+//   ...and 841 test result(s) without anomalies
 					const uint64_t x = state;
 					uint64_t y = stream;
-					y ^= std::rotl(x, 19) ^ std::rotl(x, 47) ^ x;
+					y ^= x ^ x >> 26;
 					y = y * 0xD1342543DE82EF95UL;
-					y ^= std::rotl(y, 25) ^ std::rotl(y, 50);
+					y ^= y >> 29 ^ x;
 					state += 0xC13FA9A902A6328FUL;
 					stream += std::countl_zero(x);
 					return y;
