@@ -2492,16 +2492,31 @@ namespace PractRand {
 					// Passes 128TB with no anomalies.
 					// Period is 2 to the 128. All states are allowed.
 					// Expected to fail initial correlation tests (ICE) due to how it mixes states.
-					const uint64_t x = state;
-					uint64_t y = stream ^ x;
-					y ^= std::rotl(y, 19) ^ std::rotl(y, 41);
-					y = y * 0xD1342543DE82EF95UL;
-					y ^= std::rotl(y, 25) ^ std::rotl(y, 50);
-					state += 0xC13FA9A902A6328FUL;
-					stream += std::countl_zero(x);
+					// const uint64_t x = state;
+					// uint64_t y = stream ^ x;
+					// y ^= std::rotl(y, 19) ^ std::rotl(y, 41);
+					// y = y * 0xD1342543DE82EF95UL;
+					// y ^= std::rotl(y, 25) ^ std::rotl(y, 50);
+					// state += 0xC13FA9A902A6328FUL;
+					// stream += std::countl_zero(x);
+					// return y;
+
+					// ExtendoRandom (assuming all-0 extended state)
+					// Passes 128TB with no anomalies.
+					// Period is 2 to the 128.
+					// In theory, at least, supports arbitrary amounts of extended state as distinct streams.
+					// Whether they are actually distinct and decorrelated is a task for some other test.
+					uint64_t x = state;
+					uint64_t y = stream;
+					state += 0xD1B54A32D192ED03UL;
+					stream += 0x8CB92BA72F3D8DD7UL + std::countl_zero(x);
+					y = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
+
+					y = (y ^ y >> 32) * 0xBEA225F9EB34556DL; // + extended state
+					y = (y ^ y >> 29) * 0xBEA225F9EB34556DL; // + extended state
+
+					y ^= y >> 27;
 					return y;
-
-
 				}
 
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
