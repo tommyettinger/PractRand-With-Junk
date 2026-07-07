@@ -2506,7 +2506,7 @@ namespace PractRand {
 					// Period is 2 to the 128.
 					// In theory, at least, supports arbitrary amounts of extended state as distinct streams.
 					// Whether they are actually distinct and decorrelated is a task for some other test.
-					uint64_t x = state;
+					const uint64_t x = state;
 					uint64_t y = stream;
 					state += 0xD1B54A32D192ED03UL;
 					stream += 0x8CB92BA72F3D8DD7UL + std::countl_zero(x);
@@ -6191,10 +6191,23 @@ namespace PractRand {
 					//  Test Name                         Raw       Processed     Evaluation
 					//  [Low8/32]BCFN(2+0,13-0,T)         R=  -8.8  p =1-1.2e-4   unusual
 					//  ...and 1106 test result(s) without anomalies
-					uint64_t x = (state += 0x632BE59BD9B4E019UL);
-					x = ((x ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL);
-					x = (x ^ x >> 27) * 0xAEF17502108EF2D9UL;
-					return x ^ x >> 25;
+					// uint64_t x = (state += 0x632BE59BD9B4E019UL);
+					// x = ((x ^ 0x9E3779B97F4A7C15UL) * 0xC6BC279692B5CC83UL);
+					// x = (x ^ x >> 27) * 0xAEF17502108EF2D9UL;
+					// return x ^ x >> 25;
+
+					// Fails a variety of tests immediately; BCFN and BRank on all bits, others low 4 or 8 bits.
+					// const uint64_t x = (state += state * state | 123456789UL);
+					// return x ^ x >> 29;
+
+					// Fails BRank only, but immediately (at 2GB).
+					// const uint64_t x = (state += state * state | 123456789UL);
+					// return x ^ rotate64(x, 11) ^ rotate64(x, 41);
+
+					uint64_t x = (state += state * state | 123456789UL);
+					x ^= x >> 29;
+					x += x * x | 1234567UL;
+					return x ^ x >> 29;
 
 
 					// QomStage1
