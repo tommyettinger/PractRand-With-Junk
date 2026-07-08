@@ -6204,6 +6204,12 @@ namespace PractRand {
 					// const uint64_t x = (state += state * state | 123456789UL);
 					// return x ^ rotate64(x, 11) ^ rotate64(x, 41);
 
+					// Passes 128TB with one anomaly at 32TB:
+// rng=moremur64, seed=0x0
+// length= 32 terabytes (2^45 bytes), time= 41712 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/32]BCFN(2+0,13-0,T)         R=  -8.5  p =1-1.9e-4   unusual
+//   ...and 1133 test result(s) without anomalies
 					uint64_t x = (state += state * state | 123456789UL);
 					x ^= x >> 29;
 					x += x * x | 1234567UL;
