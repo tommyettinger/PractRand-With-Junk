@@ -6210,10 +6210,26 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low4/32]BCFN(2+0,13-0,T)         R=  -8.5  p =1-1.9e-4   unusual
 //   ...and 1133 test result(s) without anomalies
-					uint64_t x = (state += state * state | 123456789UL);
-					x ^= x >> 29;
+					// uint64_t x = (state += state * state | 123456789UL);
+					// x ^= x >> 29;
+					// x += x * x | 1234567UL;
+					// return x ^ x >> 29;
+
+					// Trying little changes to see if the anomaly can be eliminated:
+// rng=moremur64, seed=0x0
+// length= 512 gigabytes (2^39 bytes), time= 658 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/16]DC6-9x1Bytes-1           R=  +5.7  p =  8.6e-4   unusual
+//   ...and 951 test result(s) without anomalies
+					// uint64_t x = (state += state * state | 123456789UL);
+					// x ^= x >> 29;
+					// x += x * x | 99999999UL;
+					// return x ^ x >> 29;
+
+					uint64_t x = (state += state * state | 9999999UL);
+					x ^= x >> 31;
 					x += x * x | 1234567UL;
-					return x ^ x >> 29;
+					return x ^ x >> 31;
 
 
 					// QomStage1
