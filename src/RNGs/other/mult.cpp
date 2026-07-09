@@ -6226,6 +6226,15 @@ namespace PractRand {
 					// x += x * x | 99999999UL;
 					// return x ^ x >> 29;
 
+					// Oh no! Shifting by 31 is worse.
+// rng=moremur64, seed=0x0
+// length= 32 terabytes (2^45 bytes), time= 41729 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/32]Gap-16:A                 R=  +5.8  p =  3.8e-4   unusual
+//   [Low4/32]Gap-16:B                 R=  +8.9  p =  1.5e-7   very suspicious
+//   [Low4/32]FPF-14+6/16:(0,14-0)     R=  +7.0  p =  4.7e-6   unusual
+//   [Low4/32]FPF-14+6/16:all          R=  +5.5  p =  1.1e-4   unusual
+//   ...and 1130 test result(s) without anomalies
 					uint64_t x = (state += state * state | 9999999UL);
 					x ^= x >> 31;
 					x += x * x | 1234567UL;
