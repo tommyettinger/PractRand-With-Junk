@@ -6235,10 +6235,16 @@ namespace PractRand {
 //   [Low4/32]FPF-14+6/16:(0,14-0)     R=  +7.0  p =  4.7e-6   unusual
 //   [Low4/32]FPF-14+6/16:all          R=  +5.5  p =  1.1e-4   unusual
 //   ...and 1130 test result(s) without anomalies
-					uint64_t x = (state += state * state | 9999999UL);
-					x ^= x >> 31;
-					x += x * x | 1234567UL;
-					return x ^ x >> 31;
+					// uint64_t x = (state += state * state | 9999999UL);
+					// x ^= x >> 31;
+					// x += x * x | 1234567UL;
+					// return x ^ x >> 31;
+
+					// Passes 128TB with no anomalies!
+					uint64_t x = (state += state * state | 123456789UL);
+					x ^= x >> 29;
+					x += x * x | 123456789UL;
+					return x ^ x >> 27;
 
 
 					// QomStage1
