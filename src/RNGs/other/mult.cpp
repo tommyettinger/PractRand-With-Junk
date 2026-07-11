@@ -8047,6 +8047,25 @@ namespace PractRand {
 					walker->handle(stateE);
 				}
 
+
+				Uint32 trunk32::raw32() {
+
+					// Fails Gap-16 tests at 8TB.
+					state += state * state | 123456789;
+					return (uint32_t)(state >> 32);
+
+					// Fails lots of TMFn tests at 256TB!
+					// state += state * state | 123456789;
+					// return (uint32_t)(rotate64(state, 32) ^ rotate64(state, 43) ^ rotate64(state, 19));
+				}
+
+				std::string trunk32::get_name() const { return "trunk32"; }
+
+				void trunk32::walk_state(StateWalkingObject *walker) {
+					walker->handle(state);
+				}
+
+
 				union int_to_float_bits {
 					uint32_t integer_bits;
 					float converted_float_bits;

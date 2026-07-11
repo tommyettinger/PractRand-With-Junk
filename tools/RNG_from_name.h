@@ -1,5 +1,6 @@
 #ifndef RNG_from_name_h
 #define RNG_from_name_h
+#include <PractRand/RNGs/other/mult.h>
 
 namespace Special_RNGs {
 	template<typename Word>
@@ -135,6 +136,7 @@ namespace PractRand {
 				"zig32",
 				"aesdragontamer",
 				"nr3",
+				"trunk32",
 				NULL
 			};
 			const int num_nonrecommended_nonlcg = sizeof(nonrecommended_nonlcg) / sizeof(nonrecommended_nonlcg[0]) - 1;
@@ -642,6 +644,7 @@ namespace RNG_Factories {
 			REGISTER_RNG_0(overload320)
 			REGISTER_RNG_0(joker40)
 			REGISTER_RNG_0(suit80)
+			REGISTER_RNG_0(trunk32)
 			REGISTER_RNG_0(floatHax32)
 			REGISTER_RNG_0(floatHax64)
 			REGISTER_RNG_0(floatHaxPCG)

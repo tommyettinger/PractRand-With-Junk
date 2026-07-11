@@ -706,6 +706,14 @@ namespace PractRand {
 					void walk_state(StateWalkingObject *);
 				};
 
+				class trunk32 : public vRNG32 {
+					Uint64 state;
+				public:
+					Uint32 raw32();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject*);
+				};
+
 				class floatHax32 : public vRNG16 {
 					Uint32 stateA, stateB;
 				public:
