@@ -8051,12 +8051,22 @@ namespace PractRand {
 				Uint32 trunk32::raw32() {
 
 					// Fails Gap-16 tests at 8TB.
-					state += state * state | 123456789;
-					return (uint32_t)(state >> 32);
+					// state += state * state | 123456789;
+					// return (uint32_t)(state >> 32);
 
 					// Fails lots of TMFn tests at 256TB!
 					// state += state * state | 123456789;
 					// return (uint32_t)(rotate64(state, 32) ^ rotate64(state, 43) ^ rotate64(state, 19));
+
+					// Passes 128TB with one anomaly at 2TB:
+// rng=trunk32, seed=0x0
+// length= 2 terabytes (2^41 bytes), time= 2794 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/8]mod3n(5):(2,9-0)          R=  -8.2  p =1-6.7e-5   unusual
+//   ...and 1019 test result(s) without anomalies
+					const uint64_t x = state;
+					state = x + (x * x | 123456789);
+					return (uint32_t)((x ^ x >> 29) * 3333333333333333333UL >> 32);
 				}
 
 				std::string trunk32::get_name() const { return "trunk32"; }
