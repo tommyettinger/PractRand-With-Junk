@@ -6241,7 +6241,19 @@ namespace PractRand {
 					// return x ^ x >> 31;
 
 					// Passes 128TB with no anomalies!
-					uint64_t x = (state += state * state | 123456789UL);
+					// uint64_t x = (state += state * state | 123456789UL);
+					// x ^= x >> 29;
+					// x += x * x | 123456789UL;
+					// return x ^ x >> 27;
+
+					// Passes 128TB with one anomaly at the very end, 128TB mark:
+// rng=moremur64, seed=0x0
+// length= 128 terabytes (2^47 bytes), time= 160704 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]Gap-16:A                 R=  -5.2  p =1-2.8e-4   unusual
+//   ...and 1180 test result(s) without anomalies
+					uint64_t x = (state += 5555555555555555555UL);
+					x += x * x | 123456789UL;
 					x ^= x >> 29;
 					x += x * x | 123456789UL;
 					return x ^ x >> 27;
