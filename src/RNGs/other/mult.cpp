@@ -6252,10 +6252,24 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low1/32]Gap-16:A                 R=  -5.2  p =1-2.8e-4   unusual
 //   ...and 1180 test result(s) without anomalies
+					// uint64_t x = (state += 5555555555555555555UL);
+					// x += x * x | 123456789UL;
+					// x ^= x >> 29;
+					// x += x * x | 123456789UL;
+					// return x ^ x >> 27;
+
+					// Passes 128TB with no anomalies!
+					// The scale of constants matters.
+					// Using constants that are 27 bits or larger seems to have problems at the very end.
+					// This uses constants that are 23 bits, and equal 5 modulo 8.
+					// In theory, they should be able to equal 7 modulo 8 as well, but I haven't tried those yet.
+					// The constants here are the maximum uint16_t value, written as if it were decimal, but made into
+					// a hexadecimal constant without changing the digits. So, 0x65535 for both.
+					// The nineteen 5's constant is also used as a Weyl sequence increment.
 					uint64_t x = (state += 5555555555555555555UL);
-					x += x * x | 123456789UL;
+					x += x * x | 0x65535UL;
 					x ^= x >> 29;
-					x += x * x | 123456789UL;
+					x += x * x | 0x65535UL;
 					return x ^ x >> 27;
 
 
