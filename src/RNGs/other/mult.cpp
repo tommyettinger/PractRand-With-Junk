@@ -6266,10 +6266,23 @@ namespace PractRand {
 					// The constants here are the maximum uint16_t value, written as if it were decimal, but made into
 					// a hexadecimal constant without changing the digits. So, 0x65535 for both.
 					// The nineteen 5's constant is also used as a Weyl sequence increment.
+					// uint64_t x = (state += 5555555555555555555UL);
+					// x += x * x | 0x65535UL;
+					// x ^= x >> 29;
+					// x += x * x | 0x65535UL;
+					// return x ^ x >> 27;
+
+					// Passes 16TB, but has one anomaly at 4TB:
+// rng=moremur64, seed=0x0
+// length= 4 terabytes (2^42 bytes), time= 5008 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]FPF-14+6/16:cross        R=  -2.5  p =1-2.0e-4   unusual
+//   ...and 1051 test result(s) without anomalies
+					// We want this to be perfect!
 					uint64_t x = (state += 5555555555555555555UL);
-					x += x * x | 0x65535UL;
+					x += x * x | 0x32767UL;
 					x ^= x >> 29;
-					x += x * x | 0x65535UL;
+					x += x * x | 0x32767UL;
 					return x ^ x >> 27;
 
 
