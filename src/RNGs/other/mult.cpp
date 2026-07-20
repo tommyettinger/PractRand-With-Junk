@@ -6279,10 +6279,19 @@ namespace PractRand {
 //   [Low1/32]FPF-14+6/16:cross        R=  -2.5  p =1-2.0e-4   unusual
 //   ...and 1051 test result(s) without anomalies
 					// We want this to be perfect!
+					// uint64_t x = (state += 5555555555555555555UL);
+					// x += x * x | 0x32767UL;
+					// x ^= x >> 29;
+					// x += x * x | 0x32767UL;
+					// return x ^ x >> 27;
+
+					// Passes 128TB with no anomalies!
+					// Both constants are 7 modulo 8, which I wasn't sure would ever work.
+					// The two constants are also different.
 					uint64_t x = (state += 5555555555555555555UL);
-					x += x * x | 0x32767UL;
+					x += x * x | 999911UL;
 					x ^= x >> 29;
-					x += x * x | 0x32767UL;
+					x += x * x | 119119UL;
 					return x ^ x >> 27;
 
 
