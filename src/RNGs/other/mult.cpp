@@ -7562,14 +7562,44 @@ namespace PractRand {
 //   BCFN(2+0,13-0,T)                  R= +40.5  p =  3.4e-21    FAIL !!
 //   BCFN(2+1,13-0,T)                  R= +33.4  p =  2.1e-17    FAIL !
 //   ...and 878 test result(s) without anomalies
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// stateA = fd * 0xF1357AEA2E62A9C5UL;
+					// stateB = fb + 0x9E3779B97F4A7C15UL;
+					// stateC = rotate64(fa, 52);
+					// stateD = fb ^ fc;
+					// return fd;
+
+					// Gets further, just not far enough... Fails at 512GB.
+// rng=lizard256, seed=0x0
+// length= 128 gigabytes (2^37 bytes), time= 171 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+1,13-0,T)                  R= +11.4  p =  1.2e-5   mildly suspicious
+//   ...and 879 test result(s) without anomalies
+//
+// rng=lizard256, seed=0x0
+// length= 256 gigabytes (2^38 bytes), time= 330 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+0,13-0,T)                  R= +13.7  p =  6.9e-7   suspicious
+//   BCFN(2+1,13-0,T)                  R= +20.5  p =  1.7e-10   VERY SUSPICIOUS
+//   ...and 913 test result(s) without anomalies
+//
+// rng=lizard256, seed=0x0
+// length= 512 gigabytes (2^39 bytes), time= 674 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+0,13-0,T)                  R= +25.1  p =  5.9e-13    FAIL
+//   BCFN(2+1,13-0,T)                  R= +36.4  p =  5.6e-19    FAIL !
+//   ...and 950 test result(s) without anomalies
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
 					const uint64_t fc = stateC;
 					const uint64_t fd = stateD;
 					stateA = fd * 0xF1357AEA2E62A9C5UL;
-					stateB = fb + 0x9E3779B97F4A7C15UL;
+					stateB = fb + 0xBEA225F9EB34556DUL;
 					stateC = rotate64(fa, 52);
-					stateD = fb ^ fc;
+					stateD = fb - fc;
 					return fd;
 				}
 
