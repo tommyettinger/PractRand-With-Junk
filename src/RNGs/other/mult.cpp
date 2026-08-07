@@ -7531,14 +7531,45 @@ namespace PractRand {
 					// ThrooshRandom
 					// A slightly faster variant on ThrushRandom; also passes 64TB with no anomalies.
 					// Whoosh!
-					uint64_t fa = stateA;
-					uint64_t fb = stateB;
-					uint64_t fc = stateC;
-					uint64_t fd = stateD;
-					stateA = rotate64(fa, 26) + fb;
-					stateB = rotate64(fb, 41) ^ fc;
-					stateC = fc + 0xBEA225F9EB34556DUL;
-					stateD = fd ^ fa;
+					// uint64_t fa = stateA;
+					// uint64_t fb = stateB;
+					// uint64_t fc = stateC;
+					// uint64_t fd = stateD;
+					// stateA = rotate64(fa, 26) + fb;
+					// stateB = rotate64(fb, 41) ^ fc;
+					// stateC = fc + 0xBEA225F9EB34556DUL;
+					// stateD = fd ^ fa;
+					// return fd;
+
+					// Fails at 128GB, with warning signs at 32GB.
+// rng=lizard256, seed=0x0
+// length= 32 gigabytes (2^35 bytes), time= 47.4 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+0,13-0,T)                  R= +11.3  p =  1.4e-5   mildly suspicious
+//   BCFN(2+1,13-0,T)                  R=  +9.4  p =  1.5e-4   unusual
+//   ...and 803 test result(s) without anomalies
+//
+// rng=lizard256, seed=0x0
+// length= 64 gigabytes (2^36 bytes), time= 95.5 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+0,13-0,T)                  R= +20.2  p =  2.4e-10   VERY SUSPICIOUS
+//   BCFN(2+1,13-0,T)                  R= +19.3  p =  7.6e-10   VERY SUSPICIOUS
+//   ...and 841 test result(s) without anomalies
+//
+// rng=lizard256, seed=0x0
+// length= 128 gigabytes (2^37 bytes), time= 189 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+0,13-0,T)                  R= +40.5  p =  3.4e-21    FAIL !!
+//   BCFN(2+1,13-0,T)                  R= +33.4  p =  2.1e-17    FAIL !
+//   ...and 878 test result(s) without anomalies
+					const uint64_t fa = stateA;
+					const uint64_t fb = stateB;
+					const uint64_t fc = stateC;
+					const uint64_t fd = stateD;
+					stateA = fd * 0xF1357AEA2E62A9C5UL;
+					stateB = fb + 0x9E3779B97F4A7C15UL;
+					stateC = rotate64(fa, 52);
+					stateD = fb ^ fc;
 					return fd;
 				}
 
