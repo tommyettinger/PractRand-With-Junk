@@ -7759,6 +7759,12 @@ namespace PractRand {
 					// return fa + fb + fc;
 
 					// Rotation 9 passes 128TB with no anomalies!
+					// Rotation 10 gets a "suspicious" result at 32TB:
+// rng=plum256x10, seed=0x0
+// length= 32 terabytes (2^45 bytes), time= 43220 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+0,13-0,T)                  R= +13.6  p =  8.6e-7   suspicious
+//   ...and 1133 test result(s) without anomalies
 					// Still testing...
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
