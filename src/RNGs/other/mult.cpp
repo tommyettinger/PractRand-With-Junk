@@ -7592,6 +7592,16 @@ namespace PractRand {
 //   BCFN(2+0,13-0,T)                  R= +25.1  p =  5.9e-13    FAIL
 //   BCFN(2+1,13-0,T)                  R= +36.4  p =  5.6e-19    FAIL !
 //   ...and 950 test result(s) without anomalies
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// stateA = fd * 0xF1357AEA2E62A9C5UL;
+					// stateB = fb + 0xBEA225F9EB34556DUL;
+					// stateC = rotate64(fa, 52);
+					// stateD = fb - fc;
+					// return fd;
+
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
 					const uint64_t fc = stateC;
@@ -7632,10 +7642,10 @@ namespace PractRand {
 					//					stateD = fd + 0xC6BC279692B5C323UL;
 					//					return fa;
 
-					const uint64_t fa = stateA;
-					const uint64_t fb = stateB;
-					const uint64_t fc = stateC;
-					const uint64_t fd = stateD;
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
 					//// Good rotations: 23, 41, 53-55
 					//	stateA = fb ^ fc;
 					//	stateB = rotate64(fa + fd, rotation);
@@ -7742,11 +7752,24 @@ namespace PractRand {
 					//stateC = fb ^ fd;
 					//stateD = fd + 0xDE916ABCC965815BUL;
 					//return fa + fb + fc;
-					stateD = fd * 0xDE916ABCC965815BUL + 0x9E3779B97F4A7C15UL;
-					stateA = rotate64(fc, rotation);
-					stateB = fa + fc;
-					stateC = fb ^ fd;
-					return fa + fb + fc;
+					// stateD = fd * 0xDE916ABCC965815BUL + 0x9E3779B97F4A7C15UL;
+					// stateA = rotate64(fc, rotation);
+					// stateB = fa + fc;
+					// stateC = fb ^ fd;
+					// return fa + fb + fc;
+
+					// Rotation 9 passes 128TB with no anomalies!
+					// Still testing...
+					const uint64_t fa = stateA;
+					const uint64_t fb = stateB;
+					const uint64_t fc = stateC;
+					const uint64_t fd = stateD;
+					stateA = fd * 0xF1357AEA2E62A9C5UL;
+					stateB = fb + 0xBEA225F9EB34556DUL;
+					stateC = rotate64(fa, rotation);
+					stateD = fb - fc;
+					return fd;
+
 				}
 
 				std::string plum256::get_name() const {
