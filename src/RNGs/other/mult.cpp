@@ -7765,6 +7765,13 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   BCFN(2+0,13-0,T)                  R= +13.6  p =  8.6e-7   suspicious
 //   ...and 1133 test result(s) without anomalies
+					// Rotation 11 gets a "suspicious" result at 32TB and FAILs at 64TB:
+// rng=plum256x11, seed=0x0
+// length= 64 terabytes (2^46 bytes), time= 85958 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+0,13-0,T)                  R= +29.0  p =  4.9e-15    FAIL
+//   BCFN(2+1,13-0,T)                  R=  +9.4  p =  1.5e-4   unusual
+//   ...and 1157 test result(s) without anomalies
 					// Still testing...
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
