@@ -7772,6 +7772,7 @@ namespace PractRand {
 //   BCFN(2+0,13-0,T)                  R= +29.0  p =  4.9e-15    FAIL
 //   BCFN(2+1,13-0,T)                  R=  +9.4  p =  1.5e-4   unusual
 //   ...and 1157 test result(s) without anomalies
+					// Rotation 12 passes 128TB with no anomalies!
 					// Still testing...
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
