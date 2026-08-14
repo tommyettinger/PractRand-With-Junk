@@ -7773,6 +7773,24 @@ namespace PractRand {
 //   BCFN(2+1,13-0,T)                  R=  +9.4  p =  1.5e-4   unusual
 //   ...and 1157 test result(s) without anomalies
 					// Rotation 12 passes 128TB with no anomalies!
+					// Rotation 13 gets a variety of "unusual" anomalies, but passes 128TB.
+// rng=plum256x13, seed=0x0
+// length= 4 gigabytes (2^32 bytes), time= 5.5 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]BCFN(2+1,13-1,T)         R=  -8.6  p =1-1.2e-4   unusual
+//   ...and 687 test result(s) without anomalies
+//
+// rng=plum256x13, seed=0x0
+// length= 2 terabytes (2^41 bytes), time= 2618 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]Gap-16:B                 R=  +5.2  p =  2.4e-4   unusual
+//   ...and 1019 test result(s) without anomalies
+//
+// rng=plum256x13, seed=0x0
+// length= 4 terabytes (2^42 bytes), time= 5360 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]BCFN(2+0,13-0,T)         R=  +9.0  p =  2.4e-4   unusual
+//   ...and 1051 test result(s) without anomalies
 					// Still testing...
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
