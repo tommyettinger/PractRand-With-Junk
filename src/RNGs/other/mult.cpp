@@ -7797,6 +7797,35 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   FPF-14+6/16:cross                 R=  +5.4  p =  7.1e-5   unusual
 //   ...and 804 test result(s) without anomalies
+					// Rotation 15 passes 128TB with three "unusual" anomalies.
+// rng=plum256x15, seed=0x0
+// length= 2 gigabytes (2^31 bytes), time= 2.5 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]DC6-9x1Bytes-1           R=  -5.3  p =1-1.1e-3   unusual
+//   ...and 645 test result(s) without anomalies
+//
+// rng=plum256x15, seed=0x0
+// length= 4 gigabytes (2^32 bytes), time= 5.5 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low8/64]FPF-14+6/16:cross        R=  +4.8  p =  2.1e-4   unusual
+//   ...and 687 test result(s) without anomalies
+//
+// rng=plum256x15, seed=0x0
+// length= 32 terabytes (2^45 bytes), time= 42904 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]FPF-14+6/16:cross        R=  -2.6  p =1-1.1e-4   unusual
+//   ...and 1133 test result(s) without anomalies
+					// Rotation 16 fails at 1TB!
+// rng=plum256x16, seed=0x0
+// length= 1 terabyte (2^40 bytes), time= 1343 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/16]Gap-16:A                 R= +11.9  p =  3.6e-8   very suspicious
+//   [Low1/16]Gap-16:B                 R= +22.3  p =  5.0e-19    FAIL !
+//   [Low1/16]FPF-14+6/16:(0,14-0)     R= +29.9  p =  3.0e-27    FAIL !!
+//   [Low1/16]FPF-14+6/16:(1,14-0)     R= +14.5  p =  4.7e-13   VERY SUSPICIOUS
+//   [Low1/16]FPF-14+6/16:(2,14-0)     R=  +7.2  p =  2.9e-6   unusual
+//   [Low1/16]FPF-14+6/16:all          R= +15.7  p =  3.6e-14    FAIL
+//   ...and 982 test result(s) without anomalies
 					// Still testing...
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
