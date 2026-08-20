@@ -7826,6 +7826,13 @@ namespace PractRand {
 //   [Low1/16]FPF-14+6/16:(2,14-0)     R=  +7.2  p =  2.9e-6   unusual
 //   [Low1/16]FPF-14+6/16:all          R= +15.7  p =  3.6e-14    FAIL
 //   ...and 982 test result(s) without anomalies
+					// Rotation 17 passes 128TB with two unusual anomalies at 256GB:
+// rng=plum256x17, seed=0x0
+// length= 256 gigabytes (2^38 bytes), time= 335 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/16]mod3n(5):(2,9-0)         R=  -8.7  p =1-3.6e-5   unusual
+//   [Low8/64]BCFN(2+0,13-0,T)         R=  +9.6  p =  1.1e-4   unusual
+//   ...and 913 test result(s) without anomalies
 					// Still testing...
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
