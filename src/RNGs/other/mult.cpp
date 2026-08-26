@@ -7851,6 +7851,7 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low1/8]FPF-14+6/16:cross         R=  +5.1  p =  1.3e-4   unusual
 //   ...and 768 test result(s) without anomalies
+					// Rotation 20 passes 128TB with no anomalies!
 					// Still testing...
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
