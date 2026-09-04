@@ -2506,17 +2506,36 @@ namespace PractRand {
 					// Period is 2 to the 128.
 					// In theory, at least, supports arbitrary amounts of extended state as distinct streams.
 					// Whether they are actually distinct and decorrelated is a task for some other test.
-					const uint64_t x = state;
-					uint64_t y = stream;
-					state += 0xD1B54A32D192ED03UL;
-					stream += 0x8CB92BA72F3D8DD7UL + std::countl_zero(x);
-					y = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
+					// const uint64_t x = state;
+					// uint64_t y = stream;
+					// state += 0xD1B54A32D192ED03UL;
+					// stream += 0x8CB92BA72F3D8DD7UL + std::countl_zero(x);
+					// y = (y ^ rotate64(x, 37)) * 0x3C79AC492BA7B653UL;
+					//
+					// y = (y ^ y >> 32) * 0xBEA225F9EB34556DL; // + extended state
+					// y = (y ^ y >> 29) * 0xBEA225F9EB34556DL; // + extended state
+					//
+					// y ^= y >> 27;
+					// return y;
 
-					y = (y ^ y >> 32) * 0xBEA225F9EB34556DL; // + extended state
-					y = (y ^ y >> 29) * 0xBEA225F9EB34556DL; // + extended state
-
-					y ^= y >> 27;
-					return y;
+					// LowGyo2 fails at 32GB:
+// rng=tiptoe, seed=0x0
+// length= 32 gigabytes (2^35 bytes), time= 41.7 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/16]TMFn(2+2):wl             R= +26.3  p~=   7e-9    very suspicious
+//   [Low1/16]TMFn(2+3):wl             R= +34.2  p~=   1e-13     FAIL
+//   [Low1/32]TMFn(2+1):wl             R= +26.9  p~=   3e-9    very suspicious
+//   [Low1/32]TMFn(2+2):wl             R= +33.0  p~=   9e-13    VERY SUSPICIOUS
+//   ...and 801 test result(s) without anomalies
+					uint64_t lfsr = stream, x = state + lfsr;
+					x ^= x >> 32;
+					x *= 3333333333333333333L;
+					x ^= x >> 32;
+					x += lfsr;
+					lfsr ^= lfsr << 7;
+					stream = lfsr ^ lfsr >> 9;
+					state = state * 3333333333333333333L + 5555555555555555555L;
+					return x;
 				}
 
 				std::string tiptoe64::get_name() const { return "tiptoe"; }
@@ -2544,6 +2563,7 @@ namespace PractRand {
 				void tiptoe64::walk_state(StateWalkingObject *walker) {
 					walker->handle(state);
 					walker->handle(stream);
+					stream |= stream == 0;
 					// stream = fixGamma(stream);
 					//stream |= 1ULL;
 					//stream = (stream ^ UINT64_C(0x369DEA0F31A53F85)) * UINT64_C(0x6A5D39EAE116586D) + (state ^ state >> 17) * UINT64_C(0x9E3779B97F4A7C15);
