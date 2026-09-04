@@ -7881,7 +7881,13 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   mod3n(5):(0,9-0)                  R=  -8.5  p =1-4.3e-5   unusual
 //   ...and 951 test result(s) without anomalies
-					// Still testing...
+					// Rotation 24 passes 64TB with no anomalies, but gets two worse ones at 128TB:
+// rng=plum256x24, seed=0x0
+// length= 128 terabytes (2^47 bytes), time= 173454 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/8]DC6-9x1Bytes-1            R=  +8.6  p =  7.6e-4   unusual
+//   [Low1/16]BCFN(2+0,13-0,T)         R= -10.7  p =1-8.0e-6   mildly suspicious
+//   ...and 1179 test result(s) without anomalies
 					const uint64_t fa = stateA;
 					const uint64_t fb = stateB;
 					const uint64_t fc = stateC;
