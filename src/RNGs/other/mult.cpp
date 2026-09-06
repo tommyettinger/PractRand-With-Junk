@@ -2527,7 +2527,24 @@ namespace PractRand {
 //   [Low1/32]TMFn(2+1):wl             R= +26.9  p~=   3e-9    very suspicious
 //   [Low1/32]TMFn(2+2):wl             R= +33.0  p~=   9e-13    VERY SUSPICIOUS
 //   ...and 801 test result(s) without anomalies
+					// uint64_t lfsr = stream, x = state + lfsr;
+					// x ^= x >> 32;
+					// x *= 3333333333333333333L;
+					// x ^= x >> 32;
+					// x += lfsr;
+					// lfsr ^= lfsr << 7;
+					// stream = lfsr ^ lfsr >> 9;
+					// state = state * 3333333333333333333L + 5555555555555555555L;
+					// return x;
+
+					// GyozaRandom
+				    // Passes 128TB with no anomalies.
+					// Combines an LCG with a basic 7-9 XorShift generator and mixes them with a MurmurHash-style mixer.
+					// Period is (2 to the 128) minus (2 to the 64).
+					// 1D-equidistributed; each uint64_t is returned (2 to the 64) minus 1 times over its period.
 					uint64_t lfsr = stream, x = state + lfsr;
+					x ^= x >> 32;
+					x *= 5555555555555555555L;
 					x ^= x >> 32;
 					x *= 3333333333333333333L;
 					x ^= x >> 32;
