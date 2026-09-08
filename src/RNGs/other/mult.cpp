@@ -7639,15 +7639,30 @@ namespace PractRand {
 					// stateD = fb - fc;
 					// return fd;
 
-					const uint64_t fa = stateA;
-					const uint64_t fb = stateB;
-					const uint64_t fc = stateC;
-					const uint64_t fd = stateD;
-					stateA = fd * 0xF1357AEA2E62A9C5UL;
-					stateB = fb + 0xBEA225F9EB34556DUL;
-					stateC = rotate64(fa, 52);
-					stateD = fb - fc;
-					return fd;
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// stateA = fd * 0xF1357AEA2E62A9C5UL;
+					// stateB = fb + 0xBEA225F9EB34556DUL;
+					// stateC = rotate64(fa, 52);
+					// stateD = fb - fc;
+					// return fd;
+
+					// Goblin4Random (early draft)
+					// Passes 128TB with no anomalies.
+					// Period is 2 to the 256; 1D equidistributed.
+					uint64_t a = (stateA += 0x9E3779B97F4A7C15UL);
+					uint64_t b = (stateB += a + std::countl_zero(a));
+					uint64_t c = (stateC += b + std::countl_zero(a &= b));
+					uint64_t x = (stateD += c + std::countl_zero(a &= c));
+					x ^= a;
+					x ^= x >> 27;
+					x *= 0x3C79AC492BA7B653UL;
+					x ^= x >> 33;
+					x *= 0x1C69B3F74AC4AE35UL;
+					x ^= x >> 27;
+					return x;
 				}
 
 				std::string lizard256::get_name() const { return "lizard256"; }
