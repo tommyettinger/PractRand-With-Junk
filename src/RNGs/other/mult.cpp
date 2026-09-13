@@ -8050,11 +8050,11 @@ namespace PractRand {
 					//	stateE = fe + 0xDE916ABCC965815BUL;
 					//	return stateD;
 
-					const uint64_t fa = stateA;
-					const uint64_t fb = stateB;
-					const uint64_t fc = stateC;
-					const uint64_t fd = stateD;
-					const uint64_t fe = stateE;
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
 
 					//	stateA = fd + fc ^ fe;//0xF1357AEA2E62A9C5UL;//0xD1342543DE82EF95UL
 					//	stateB = fb + 0xDE916ABCC965815BUL;
@@ -8066,6 +8066,11 @@ namespace PractRand {
 					//// Pasar320.
 					//// Passes 64TB with no anomalies (using seed 3).
 					//// Passes 179PB of ReMort, 107 PB of BBin.
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
 					//  stateA = fe * 0xF1357AEA2E62A9C5UL;
 					//  stateB = rotate64(fa, 44);
 					//  stateC = fb + fd;
@@ -8075,6 +8080,11 @@ namespace PractRand {
 					// Finch320.
 					// Passes 64TB with one anomaly at 128GB,
 					// [Low4/16]BCFN(2+0,13-0,T)         R=  +8.6  p =  4.1e-4   unusual
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
 					//   stateA = rotate64(fe, 50);
 					//   stateB = fb ^ fa + fd;
 					//   stateC = rotate64(fb, 25);
@@ -8083,12 +8093,22 @@ namespace PractRand {
 
 					//  // Lantern320.
 					//  // Passes 64TB with no anomalies.
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
 					//  stateA = fa + 0x9E3779B97F4A7C15UL;
 					//  stateB = rotate64(fe, 41);
 					//  stateC = fa ^ fb;
 					//  stateD = rotate64(fc, 17);
 					//  return stateE = fc + fd;
 
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
 					//  stateA = fa + 0x9E3779B97F4A7C15UL;
 					//  stateB = rotate64(fe, 49);
 					//  stateC = fa ^ fb;
@@ -8185,6 +8205,11 @@ namespace PractRand {
 					//
 					//--- Finished -- BBin trials: 281474976710656	2^48.0 (out of 2^48) trials -- lantern320 -- 	ps:   7.750e-01    2.158e-01    6.135e-01    8.197e-01*   6.559e-01    3.482e-01   => p <   6.93024e-01   2^52.58 calls, 2^55.58 bytes	2^36.61 bytes/second	used:   5::23:32:48.36
 
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
 					// stateA = fa + 0x9E3779B97F4A7C15UL;
 					// stateB = fa ^ fe;
 					// stateC = fb + fd;
@@ -8218,12 +8243,17 @@ namespace PractRand {
 					//               6.579 15 =>     5.025017e-02           12.974 15 =>     4.716522e-01           21.466 15 =>   1-9.052175e-02           11.248 15 =>     3.332448e-01            8.548 15 =>     1.409673e-01
 					//
 					//--- Finished -- ReMort trials: 2251799813685248	2^51.0 (out of 2^51) trials -- lantern320 -- 64 bits: 	ps:   5.025e-02*   4.717e-01  1-9.052e-02    3.332e-01    1.410e-01   => p <   5.76107e-01   2^54.32 calls, 2^57.32 bytes	2^37.96 bytes/second	used:   7::18:15:57.98
-					stateA = fa + 0x9E3779B97F4A7C15UL;
-					stateB = fa ^ fe;
-					stateC = fb + fd;
-					stateD = rotate64(fc, 52);
-					stateE = fb + fc;
-					return fb;
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
+					// stateA = fa + 0x9E3779B97F4A7C15UL;
+					// stateB = fa ^ fe;
+					// stateC = fb + fd;
+					// stateD = rotate64(fc, 52);
+					// stateE = fb + fc;
+					// return fb;
 
 
 					// crand64
@@ -8265,6 +8295,11 @@ namespace PractRand {
 
 					// Tested with the "worst-case" stream, this still passses 64TB fine!
 					// Period is 2 to the 64 minimum, but likely 2 to the 319 expected. 2 to the 24 possible streams.
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
 					//stateA = fa + stream;
 					//stateB = fa ^ fe;
 					//stateC = fb + fd;
@@ -8276,12 +8311,33 @@ namespace PractRand {
 					// BassD in https://quick-bench.com/q/E-wxFyZQMlGJaN-Rflh_IkObTOU
 					// Passes 64TB with no anomalies!
 					// Minimim period is 2 to the 64, expected period is a much higher multiple.
+					// const uint64_t fa = stateA;
+					// const uint64_t fb = stateB;
+					// const uint64_t fc = stateC;
+					// const uint64_t fd = stateD;
+					// const uint64_t fe = stateE;
 					// stateA = fb ^ fd;
 					// stateB = fe ^ fc;
 					// stateC = fa + fb;
 					// stateD = rotate64(fc, 52);
 					// stateE = fe + 0x9E3779B97F4A7C15UL;
 					// return fa;
+
+					// Goblin5Random
+					// Passes 128TB with no anomalies.
+					// Period is 2 to the 320. 1D-equidistributed.
+					uint64_t a = (stateA += 7777777777777777777UL);
+					uint64_t b = (stateB += a + std::countl_zero(a));
+					uint64_t c = (stateC += b + std::countl_zero(a &= b));
+					uint64_t d = (stateD += c + std::countl_zero(a &= c));
+					uint64_t x = (stateE += d + std::countl_zero(a &= d));
+					x ^= x >> 27 ^ a;
+					x *= 5555555555555555555UL;
+					x ^= x >> 33 ^ b ^ c ^ d;
+					x *= 3333333333333333333UL;
+					x ^= x >> 27;
+					return x;
+
 				}
 
 				std::string overload320::get_name() const { return "overload320"; }
