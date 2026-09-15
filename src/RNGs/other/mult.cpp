@@ -8326,14 +8326,30 @@ namespace PractRand {
 					// Goblin5Random
 					// Passes 128TB with no anomalies.
 					// Period is 2 to the 320. 1D-equidistributed.
+					// uint64_t a = (stateA += 7777777777777777777UL);
+					// uint64_t b = (stateB += a + std::countl_zero(a));
+					// uint64_t c = (stateC += b + std::countl_zero(a &= b));
+					// uint64_t d = (stateD += c + std::countl_zero(a &= c));
+					// uint64_t x = (stateE += d + std::countl_zero(a &= d));
+					// x ^= x >> 27 ^ a;
+					// x *= 5555555555555555555UL;
+					// x ^= x >> 33 ^ b ^ c ^ d;
+					// x *= 3333333333333333333UL;
+					// x ^= x >> 27;
+					// return x;
+
+					// Goblin6Random
+				    // Passes 128TB with no anomalies.
+					// Period is 2 to the 384. Exactly 1D-equidistributed.
 					uint64_t a = (stateA += 7777777777777777777UL);
 					uint64_t b = (stateB += a + std::countl_zero(a));
 					uint64_t c = (stateC += b + std::countl_zero(a &= b));
 					uint64_t d = (stateD += c + std::countl_zero(a &= c));
-					uint64_t x = (stateE += d + std::countl_zero(a &= d));
+					uint64_t e = (stateE += d + std::countl_zero(a &= d));
+					uint64_t x = (stream += e + std::countl_zero(a &= e));
 					x ^= x >> 27 ^ a;
 					x *= 5555555555555555555UL;
-					x ^= x >> 33 ^ b ^ c ^ d;
+					x ^= x >> 33 ^ b ^ c ^ d ^ e;
 					x *= 3333333333333333333UL;
 					x ^= x >> 27;
 					return x;
