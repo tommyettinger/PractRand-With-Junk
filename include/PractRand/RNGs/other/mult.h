@@ -691,6 +691,13 @@ namespace PractRand {
 					std::string get_name() const;
 					void walk_state(StateWalkingObject *);
 				};
+				class manyState : public vRNG64 {
+					Uint64 stateA, stateB, stateC, stateD, stateE, stateF, stateG, stateH;;
+				public:
+					Uint64 raw64();
+					std::string get_name() const;
+					void walk_state(StateWalkingObject *);
+				};
 				class joker40 : public vRNG8 {
 					Uint8 stateA, stateB, stateC, stateD, stateE;
 				public:

@@ -8390,6 +8390,44 @@ namespace PractRand {
 					printf("stream: %016llX\n", stream);
 					//stream = 1UL;
 				}
+				Uint64 manyState::raw64() {
+					// Goblin7Random
+					uint64_t a = (stateA += 7777777777777777777UL);
+					uint64_t b = (stateB += a + std::countl_zero(a));
+					uint64_t c = (stateC += b + std::countl_zero(a &= b));
+					uint64_t d = (stateD += c + std::countl_zero(a &= c));
+					uint64_t e = (stateE += d + std::countl_zero(a &= d));
+					uint64_t f = (stateF += e + std::countl_zero(a &= e));
+					uint64_t x = (stateG += f + std::countl_zero(a &= f));
+					x ^= x >> 27 ^ a;
+					x *= 5555555555555555555UL;
+					x ^= x >> 33 ^ b ^ c ^ d ^ e ^ f;
+					x *= 3333333333333333333UL;
+					x ^= x >> 27;
+					return x;
+
+				}
+				std::string manyState::get_name() const { return "manyState"; }
+
+				void manyState::walk_state(StateWalkingObject *walker) {
+					walker->handle(stateA);
+					walker->handle(stateB);
+					walker->handle(stateC);
+					walker->handle(stateD);
+					walker->handle(stateE);
+					walker->handle(stateF);
+					walker->handle(stateG);
+					walker->handle(stateH);
+
+					printf("stateA: %016llX\n", stateA);
+					printf("stateB: %016llX\n", stateB);
+					printf("stateC: %016llX\n", stateC);
+					printf("stateD: %016llX\n", stateD);
+					printf("stateE: %016llX\n", stateE);
+					printf("stream: %016llX\n", stateF);
+					printf("stream: %016llX\n", stateG);
+					printf("stream: %016llX\n", stateH);
+				}
 
 				// Joker40, a shrunken-down AceRandom.
 				// Running this command,
