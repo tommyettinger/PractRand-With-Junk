@@ -7667,13 +7667,26 @@ namespace PractRand {
 					// Goblin4Random (current version)
 					// Passes 128TB with no anomalies.
 					// Period is 2 to the 256; 1D equidistributed.
+					// uint64_t a = (stateA += 7777777777777777777UL);
+					// uint64_t b = (stateB += a + std::countl_zero(a));
+					// uint64_t c = (stateC += b + std::countl_zero(a &= b));
+					// uint64_t x = (stateD += c + std::countl_zero(a &= c));
+					// x ^= x >> 27 ^ a;
+					// x *= 5555555555555555555UL;
+					// x ^= x >> 33 ^ b ^ c;
+					// x *= 3333333333333333333UL;
+					// x ^= x >> 27;
+					// return x;
+
+					// Goblin3Random
+					// Passes 128TB with no anomalies.
+					// Period is 2 to the 192. Exactly 1D-equidistributed.
 					uint64_t a = (stateA += 7777777777777777777UL);
 					uint64_t b = (stateB += a + std::countl_zero(a));
-					uint64_t c = (stateC += b + std::countl_zero(a &= b));
-					uint64_t x = (stateD += c + std::countl_zero(a &= c));
+					uint64_t x = (stateC += b + std::countl_zero(a &= b));
 					x ^= x >> 27 ^ a;
 					x *= 5555555555555555555UL;
-					x ^= x >> 33 ^ b ^ c;
+					x ^= x >> 33 ^ b;
 					x *= 3333333333333333333UL;
 					x ^= x >> 27;
 					return x;
