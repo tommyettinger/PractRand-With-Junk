@@ -65,10 +65,25 @@ namespace PractRand {
                 	// Not equidistributed. Period is 2 to the 64. 2 to the 64 possible streams.
                 	// Uses AES-NI instructions and _mm_add_epi64().
                 	// k1 and k2 can be changed to any 256 bits of state, in theory.
-                    state = _mm_add_epi64(state, k0);
-                    auto res = _mm_aesenc_si128(state, k1);
-                	res = _mm_aesenclast_si128(res, k2);
-                    return res[0] ^ res[1];
+                 //    state = _mm_add_epi64(state, k0);
+                 //    auto res = _mm_aesenc_si128(state, k1);
+                 //    res = _mm_aesenclast_si128(res, k2);
+                 //    return res[0] ^ res[1];
+
+                	// Fails BRank immediately (2GB).
+                	// state = _mm_add_epi64(state, k0);
+                    // auto res = _mm_aesenc_si128(state, k1);
+                    // return res[0] ^ res[1];
+
+                	// Fails BRank immediately (2GB).
+                	// state = _mm_add_epi64(state, k0);
+                	// auto res = _mm_aesdec_si128(state, k1);
+                	// return res[0] ^ res[1];
+
+                	// Fails almost everything immediately (2GB).
+                	state = _mm_add_epi64(state, k0);
+                	auto res = _mm_aesenclast_si128(state, k2);
+                	return res[0] ^ res[1];
                 }
                 std::string arsenic64::get_name() const {
                 	return "arsenic64";
