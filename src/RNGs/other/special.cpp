@@ -60,6 +60,26 @@ namespace PractRand {
                     state = _mm_set_epi64x(seed1, seed2);
                 }
 
+                Uint64 arsenic64::raw64() {
+                	// Passes 128TB with no anomalies.
+                	// Not equidistributed. Period is 2 to the 64. 2 to the 64 possible streams.
+                	// Uses AES-NI instructions and _mm_add_epi64().
+                	// k1 and k2 can be changed to any 256 bits of state, in theory.
+                    state = _mm_add_epi64(state, k0);
+                    auto res = _mm_aesenc_si128(state, k1);
+                	res = _mm_aesenclast_si128(res, k2);
+                    return res[0] ^ res[1];
+                }
+                std::string arsenic64::get_name() const {
+                	return "arsenic64";
+                }
+                void arsenic64::walk_state(StateWalkingObject *walker) {
+                    Uint64 seed1, seed2;
+                	walker->handle(seed1);
+                	walker->handle(seed2);
+                    state = _mm_set_epi64x(static_cast<long long>(seed1), static_cast<long long>(seed2));
+                }
+
 			}//NotRecommended
 		}//Polymorphic
 	}//RNGs

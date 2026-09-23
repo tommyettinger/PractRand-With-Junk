@@ -135,6 +135,7 @@ namespace PractRand {
 				"twirl32",
 				"zig32",
 				"aesdragontamer",
+				"arsenic64",
 				"nr3",
 				"trunk32",
 				NULL
@@ -703,6 +704,7 @@ namespace RNG_Factories {
 
 		// include/PractRand/RNGs/other/special.h
 			REGISTER_RNG_0(aesdragontamer)
+			REGISTER_RNG_0(arsenic64)
 
 		// include/PractRand/RNGs/other/transform.h
 		RNG_Factories::RNG_factory_index["BDS"] = BDS_factory;
