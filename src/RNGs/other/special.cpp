@@ -65,10 +65,10 @@ namespace PractRand {
                 	// Not equidistributed. Period is 2 to the 64. 2 to the 64 possible streams.
                 	// Uses AES-NI instructions and _mm_add_epi64().
                 	// k1 and k2 can be changed to any 256 bits of state, in theory.
-                 //    state = _mm_add_epi64(state, k0);
-                 //    auto res = _mm_aesenc_si128(state, k1);
-                 //    res = _mm_aesenclast_si128(res, k2);
-                 //    return res[0] ^ res[1];
+                 // state = _mm_add_epi64(state, k0);
+                 // auto res = _mm_aesenc_si128(state, k1);
+                 // res = _mm_aesenclast_si128(res, k2);
+                 // return res[0] ^ res[1];
 
                 	// Fails BRank immediately (2GB).
                 	// state = _mm_add_epi64(state, k0);
@@ -81,8 +81,26 @@ namespace PractRand {
                 	// return res[0] ^ res[1];
 
                 	// Fails almost everything immediately (2GB).
+                	// state = _mm_add_epi64(state, k0);
+                	// auto res = _mm_aesenclast_si128(state, k2);
+                	// return res[0] ^ res[1];
+
+                	// Using k1 for both enc and enclast steps has some anomalies:
+// rng=arsenic64, seed=0x0
+// length= 32 gigabytes (2^35 bytes), time= 40.9 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]BCFN(2+0,13-0,T)         R=  +8.8  p =  2.9e-4   unusual
+//   ...and 804 test result(s) without anomalies
+//
+// rng=arsenic64, seed=0x0
+// length= 512 gigabytes (2^39 bytes), time= 633 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   BCFN(2+1,13-0,T)                  R=  -8.3  p =1-2.5e-4   unusual
+//   ...and 951 test result(s) without anomalies
+                	// Both are very borderline BCFN anomalies with opposed p-values.
                 	state = _mm_add_epi64(state, k0);
-                	auto res = _mm_aesenclast_si128(state, k2);
+                	auto res = _mm_aesenc_si128(state, k1);
+                	res = _mm_aesenclast_si128(res, k1); // same key as the enc step
                 	return res[0] ^ res[1];
                 }
                 std::string arsenic64::get_name() const {
