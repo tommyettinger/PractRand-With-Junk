@@ -109,10 +109,32 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low1/32]BCFN(2+2,13-2,T)         R= +10.6  p =  5.5e-5   unusual
 //   ...and 768 test result(s) without anomalies
+                	// state = _mm_add_epi64(state, k0);
+                	// auto res = _mm_aesenc_si128(state, k1);
+                	// res = _mm_aesenclast_si128(res, k1); // same key as the enc step
+                	// return res[0] ^ res[1];
+
+                	// Gets through 512GB with no anomalies, but then:
+// rng=arsenic64, seed=0x0
+// length= 1 terabyte (2^40 bytes), time= 1256 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   FPF-14+6/16:all                   R=  +8.2  p =  3.8e-7   suspicious
+//   ...and 987 test result(s) without anomalies
+//
+// rng=arsenic64, seed=0x0
+// length= 2 terabytes (2^41 bytes), time= 2431 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   FPF-14+6/16:(4,14-0)              R=  +8.0  p =  5.5e-7   unusual
+//   FPF-14+6/16:(5,14-0)              R=  +8.2  p =  3.2e-7   mildly suspicious
+//   FPF-14+6/16:(9,14-0)              R=  +9.3  p =  3.4e-8   suspicious
+//   FPF-14+6/16:(10,14-0)             R=  +8.8  p =  8.7e-8   mildly suspicious
+//   FPF-14+6/16:(11,14-0)             R=  +7.6  p =  1.2e-6   unusual
+//   FPF-14+6/16:all                   R= +16.5  p =  5.3e-15    FAIL
+//   ...and 1014 test result(s) without anomalies
+                	// It fails at 2TB.
                 	state = _mm_add_epi64(state, k0);
-                	auto res = _mm_aesenc_si128(state, k1);
-                	res = _mm_aesenclast_si128(res, k1); // same key as the enc step
-                	return res[0] ^ res[1];
+                	auto res = _mm_aesdec_si128(state, k3);
+                	return state[0] ^ res[0] ^ state[1] ^ res[1];
                 }
                 std::string arsenic64::get_name() const {
                 	return "arsenic64";
