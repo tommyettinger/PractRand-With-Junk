@@ -98,6 +98,17 @@ namespace PractRand {
 //   BCFN(2+1,13-0,T)                  R=  -8.3  p =1-2.5e-4   unusual
 //   ...and 951 test result(s) without anomalies
                 	// Both are very borderline BCFN anomalies with opposed p-values.
+                	// state = _mm_add_epi64(state, k0);
+                	// auto res = _mm_aesenc_si128(state, k1);
+                	// res = _mm_aesenclast_si128(res, k1); // same key as the enc step
+                	// return res[0] ^ res[1];
+
+                	// Using all 0 for the key in both enc and enclast has one anomaly:
+// rng=arsenic64, seed=0x0
+// length= 16 gigabytes (2^34 bytes), time= 21.4 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]BCFN(2+2,13-2,T)         R= +10.6  p =  5.5e-5   unusual
+//   ...and 768 test result(s) without anomalies
                 	state = _mm_add_epi64(state, k0);
                 	auto res = _mm_aesenc_si128(state, k1);
                 	res = _mm_aesenclast_si128(res, k1); // same key as the enc step
