@@ -132,9 +132,26 @@ namespace PractRand {
 //   FPF-14+6/16:all                   R= +16.5  p =  5.3e-15    FAIL
 //   ...and 1014 test result(s) without anomalies
                 	// It fails at 2TB.
+                	// state = _mm_add_epi64(state, k0);
+                	// auto res = _mm_aesdec_si128(state, k3);
+                	// return state[0] ^ res[0] ^ state[1] ^ res[1];
+
+                	// Passes 128TB with two "unusual" anomalies:
+// rng=arsenic64, seed=0x0
+// length= 16 terabytes (2^44 bytes), time= 19856 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/32]FPF-14+6/16:all          R=  -5.0  p =1-1.9e-4   unusual
+//   ...and 1106 test result(s) without anomalies
+//
+// rng=arsenic64, seed=0x0
+// length= 32 terabytes (2^45 bytes), time= 40104 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]Gap-16:A                 R=  +7.2  p =  4.3e-5   unusual
+//   ...and 1133 test result(s) without anomalies
                 	state = _mm_add_epi64(state, k0);
-                	auto res = _mm_aesdec_si128(state, k3);
-                	return state[0] ^ res[0] ^ state[1] ^ res[1];
+                	auto enc = _mm_aesdec_si128(state, k3);
+                	auto res = enc[0] + enc[1];// + state[0] + state[1];
+                	return res ^ rotate64(res, 25) ^ rotate64(res, 50);
                 }
                 std::string arsenic64::get_name() const {
                 	return "arsenic64";
