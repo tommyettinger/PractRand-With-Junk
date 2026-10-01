@@ -148,10 +148,27 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low1/32]Gap-16:A                 R=  +7.2  p =  4.3e-5   unusual
 //   ...and 1133 test result(s) without anomalies
+                	// state = _mm_add_epi64(state, k0);
+                	// auto enc = _mm_aesdec_si128(state, k3);
+                	// auto res = enc[0] + enc[1];// + state[0] + state[1];
+                	// return res ^ rotate64(res, 25) ^ rotate64(res, 50);
+
+                	// Linear Weyl sequences, decrypt, decrypt, return first half of state.
+                	// Has two unusual anomalies, both similar BCFN:
+// rng=arsenic64, seed=0x0
+// length= 64 gigabytes (2^36 bytes), time= 81.5 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]BCFN(2+2,13-1,T)         R=  -8.0  p =1-3.0e-4   unusual
+//   ...and 842 test result(s) without anomalies
+// rng=arsenic64, seed=0x0
+// length= 2 terabytes (2^41 bytes), time= 2425 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]BCFN(2+0,13-0,T)         R=  -8.1  p =1-3.2e-4   unusual
+//   ...and 1019 test result(s) without anomalies
                 	state = _mm_add_epi64(state, k0);
-                	auto enc = _mm_aesdec_si128(state, k3);
-                	auto res = enc[0] + enc[1];// + state[0] + state[1];
-                	return res ^ rotate64(res, 25) ^ rotate64(res, 50);
+                	auto d0 = _mm_aesdec_si128(state, k1);
+                	auto d1 = _mm_aesdec_si128(d0, k2);
+                	return d1[0];// ^ d1[1];
                 }
                 std::string arsenic64::get_name() const {
                 	return "arsenic64";
