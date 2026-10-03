@@ -214,9 +214,23 @@ namespace PractRand {
                 	// return res[0] ^ res[0] >> 29;
 
                 	// Also fails immediately.
-                	state = _mm_add_epi64(state, k0);
-                	__m128i res = _mm_add_epi64(_mm_aesenc_si128(state, k1), state);
-                	return res[0] ^ res[0] >> 29;
+                	// state = _mm_add_epi64(state, k0);
+                	// __m128i res = _mm_add_epi64(_mm_aesenc_si128(state, k1), state);
+                	// return res[0] ^ res[0] >> 29;
+
+                	// Grumble...
+// rng=arsenic64, seed=0x0
+// length= 32 gigabytes (2^35 bytes), time= 40.8 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low8/64]BCFN(2+0,13-0,T)         R=  -8.0  p =1-3.7e-4   unusual
+//   ...and 804 test result(s) without anomalies
+                	// state = _mm_add_epi64(state, k0);
+                	// auto res = _mm_aesenc_si128(_mm_aesenc_si128(state, k2), state);
+                	// return res[0];
+
+                	auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k2), k1);
+                	return res[0];
+
 
                 }
                 std::string arsenic64::get_name() const {
