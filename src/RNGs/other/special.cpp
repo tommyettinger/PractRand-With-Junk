@@ -176,8 +176,17 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low1/8]Gap-16:A                  R=  -5.0  p =1-3.9e-4   unusual
 //   ...and 1180 test result(s) without anomalies
-                	auto d1 = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k1), k2);
-                	return d1[0];// ^ d1[1];
+                	// auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k1), k2);
+                	// return res[0];
+
+                	// Gets an "unusual" anomaly at 512GB:
+// rng=arsenic64, seed=0x0
+// length= 512 gigabytes (2^39 bytes), time= 629 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/64]DC6-9x1Bytes-1           R=  +5.8  p =  6.8e-4   unusual
+//   ...and 951 test result(s) without anomalies
+                	auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k1), k3);
+                	return res[0];
                 }
                 std::string arsenic64::get_name() const {
                 	return "arsenic64";
