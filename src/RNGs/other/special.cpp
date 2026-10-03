@@ -204,9 +204,20 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low1/64]Gap-16:A                 R=  +6.0  p =  1.7e-4   unusual
 //   ...and 768 test result(s) without anomalies
+                	// state = _mm_add_epi64(state, k0);
+                	// __m128i res = _mm_add_epi64(_mm_aesenc_si128(state, k1), state);
+                	// return res[0] ^ res[1];
+
+                	// Fails immediately.
+                	// state = _mm_add_epi64(state, k0);
+                	// __m128i res = _mm_mul_epi32(_mm_aesenc_si128(state, k1), k0);
+                	// return res[0] ^ res[0] >> 29;
+
+                	// Also fails immediately.
                 	state = _mm_add_epi64(state, k0);
                 	__m128i res = _mm_add_epi64(_mm_aesenc_si128(state, k1), state);
-                	return res[0] ^ res[1];
+                	return res[0] ^ res[0] >> 29;
+
                 }
                 std::string arsenic64::get_name() const {
                 	return "arsenic64";
