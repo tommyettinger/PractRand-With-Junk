@@ -230,10 +230,23 @@ namespace PractRand {
 
                 	// Passes 128TB with no anomalies!
                 	// This switches the order of k2 and k1 relative to the version that had an anomaly at 128TB.
-                	auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k2), k1);
+                	// auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k2), k1);
+                	// return res[0];
+
+                	// It looks like either aesenclast is weaker than aesenc, or using only k0 is a problem.
+// rng=arsenic64, seed=0x0
+// length= 16 gigabytes (2^34 bytes), time= 21.4 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low8/64]Gap-16:A                 R= +26.9  p =  5.4e-19    FAIL !
+//   [Low8/64]Gap-16:B                 R= +27.7  p =  1.4e-23    FAIL !!
+//   [Low8/64]FPF-14+6/16:(0,14-0)     R= +32.4  p =  1.4e-29    FAIL !!
+//   [Low8/64]FPF-14+6/16:(1,14-0)     R= +32.2  p =  2.2e-29    FAIL !!
+//   [Low8/64]FPF-14+6/16:(2,14-0)     R= +15.5  p =  5.9e-14    FAIL
+//   [Low8/64]FPF-14+6/16:(3,14-0)     R= +11.3  p =  4.4e-10  very suspicious
+//   [Low8/64]FPF-14+6/16:all          R= +39.7  p =  9.5e-37    FAIL !!!
+//   ...and 762 test result(s) without anomalies
+                	auto res = _mm_aesenclast_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
                 	return res[0];
-
-
                 }
                 std::string arsenic64::get_name() const {
                 	return "arsenic64";
