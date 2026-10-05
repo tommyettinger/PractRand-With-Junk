@@ -228,6 +228,8 @@ namespace PractRand {
                 	// auto res = _mm_aesenc_si128(_mm_aesenc_si128(state, k2), state);
                 	// return res[0];
 
+                	// Passes 128TB with no anomalies!
+                	// This switches the order of k2 and k1 relative to the version that had an anomaly at 128TB.
                 	auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k2), k1);
                 	return res[0];
 
