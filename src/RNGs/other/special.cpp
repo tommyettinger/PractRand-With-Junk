@@ -245,7 +245,11 @@ namespace PractRand {
 //   [Low8/64]FPF-14+6/16:(3,14-0)     R= +11.3  p =  4.4e-10  very suspicious
 //   [Low8/64]FPF-14+6/16:all          R= +39.7  p =  9.5e-37    FAIL !!!
 //   ...and 762 test result(s) without anomalies
-                	auto res = _mm_aesenclast_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
+                	// auto res = _mm_aesenclast_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
+                	// return res[0];
+
+                	// Passes 128TB with no anomalies!
+                	auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
                 	return res[0];
                 }
                 std::string arsenic64::get_name() const {
