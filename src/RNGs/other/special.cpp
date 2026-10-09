@@ -248,7 +248,17 @@ namespace PractRand {
                 	// auto res = _mm_aesenclast_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
                 	// return res[0];
 
+                	// Using:
+                	// k0 = _mm_set_epi32(0xC13FA9A9, 0x02A6328F, 0x91E10DA5, 0xC79E7B1D)
                 	// Passes 128TB with no anomalies!
+                	// With a different k0, it gets one "unusual" anomaly.
+                	// Using:
+                	// k0 = _mm_set_epi32(0x13995A4F, 0xA44BEC87, 0x362CAC2F, 0x1C32F26B)
+// rng=arsenic64, seed=0x0
+// length= 2 terabytes (2^41 bytes), time= 2434 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]DC6-9x1Bytes-1           R=  +6.3  p =  3.3e-4   unusual
+//   ...and 1019 test result(s) without anomalies
                 	auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
                 	return res[0];
                 }
