@@ -259,6 +259,9 @@ namespace PractRand {
 //   Test Name                         Raw       Processed     Evaluation
 //   [Low1/64]DC6-9x1Bytes-1           R=  +6.3  p =  3.3e-4   unusual
 //   ...and 1019 test result(s) without anomalies
+                	// Using:
+                	// k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F)
+                	// Passes 128TB with no anomalies!
                 	auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
                 	return res[0];
                 }

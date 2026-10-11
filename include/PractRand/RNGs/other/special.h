@@ -39,7 +39,8 @@ namespace PractRand {
 					// const __m128i k3 = _mm_set_epi32(0xE19B01AA, 0x9D42C633, 0xC6D1D6C8, 0xED0C9631);
 					// const __m128i k4 = _mm_set_epi32(0xE60E2B72, 0x2B53AEEB, 0xCEBD76D9, 0xEDB6A8EF);
 					// const __m128i k1 = _mm_set_epi32(0, 0, 0, 0);
-					const __m128i k0 = _mm_set_epi32(0x13995A4F, 0xA44BEC87, 0x362CAC2F, 0x1C32F26B);
+					// const __m128i k0 = _mm_set_epi32(0x13995A4F, 0xA44BEC87, 0x362CAC2F, 0x1C32F26B);
+					const __m128i k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F);
 
 				public:
 					arsenic64()
