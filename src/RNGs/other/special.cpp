@@ -285,6 +285,43 @@ namespace PractRand {
                 	walker->handle(seed2);
                     state = _mm_set_epi64x(static_cast<long long>(seed1), static_cast<long long>(seed2));
                 }
+				Uint64 arsenic256::raw64() {
+                	// Fails at 128GB after anomaly at 64GB:
+// rng=arsenic256, seed=0x0
+// length= 64 gigabytes (2^36 bytes), time= 81.7 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/8]FPF-14+6/16:(5,14-0)      R=  +7.8  p =  8.4e-7   unusual
+//   [Low1/8]FPF-14+6/16:all           R=  +7.9  p =  6.1e-7   suspicious
+//   ...and 841 test result(s) without anomalies
+//
+// rng=arsenic256, seed=0x0
+// length= 128 gigabytes (2^37 bytes), time= 161 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/8]FPF-14+6/16:(4,14-0)      R= +16.1  p =  1.5e-14    FAIL
+//   [Low1/8]FPF-14+6/16:(5,14-0)      R= +17.8  p =  4.6e-16    FAIL
+//   [Low1/8]FPF-14+6/16:(6,14-0)      R= +10.0  p =  8.0e-9   suspicious
+//   [Low1/8]FPF-14+6/16:all           R= +15.6  p =  3.6e-14    FAIL
+//   ...and 876 test result(s) without anomalies
+                	if (idx == 0) {
+                		stateA = _mm_add_epi64(stateA, k0);
+                		_mm256_storeu_si256((__m256i *) buf, _mm256_inserti128_si256(
+                			_mm256_castsi128_si256(_mm_aesenc_si128(_mm_aesenc_si128(stateA, k0), k0)),
+                			_mm_aesenc_si128(_mm_aesenc_si128(stateA, k1), k1), 1));
+
+                	}
+                	return buf[idx = (idx + 1) & 3];
+
+                }
+				std::string arsenic256::get_name() const {
+                	return "arsenic256";
+                }
+				void arsenic256::walk_state(StateWalkingObject *walker) {
+                	idx = 0;
+                	Uint64 seed1, seed2;
+                	walker->handle(seed1);
+                	walker->handle(seed2);
+                	stateA = _mm_set_epi64x(static_cast<long long>(seed1), static_cast<long long>(seed2));
+                }
 
 			}//NotRecommended
 		}//Polymorphic
