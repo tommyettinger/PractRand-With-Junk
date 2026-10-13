@@ -262,13 +262,24 @@ namespace PractRand {
                 	// Using:
                 	// k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F)
                 	// Passes 128TB with no anomalies!
-                	auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
-                	return res[0];
+                	// auto res = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
+                	// return res[0];
+
+                	// Checking 128-bit output, with 64-bit folding...
+                	// Using:
+                	// k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F)
+                	// Passes 128TB with no anomalies!
+                	if (idx == 0) {
+                		buffer = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
+                	}
+                	return buffer[idx = (idx + 1) & 1];
+
                 }
                 std::string arsenic64::get_name() const {
                 	return "arsenic64";
                 }
                 void arsenic64::walk_state(StateWalkingObject *walker) {
+                	idx = 0;
                     Uint64 seed1, seed2;
                 	walker->handle(seed1);
                 	walker->handle(seed2);

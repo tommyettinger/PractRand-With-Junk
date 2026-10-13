@@ -8,6 +8,7 @@ This set is of RNGs that use at least one of the following:
 2. complex math functions (sqrt, log/exp, sin/cos, etc)
 3. anything else not covered by simple.h, mult.h, indirection.h, or fibonacci.h
 */
+#include <cstdint>
 #include <immintrin.h>
 
 namespace PractRand {
@@ -32,7 +33,8 @@ namespace PractRand {
 				};
 
 				class arsenic64 : public vRNG64 {
-					__m128i state = _mm_set_epi32(0, 0, 0, 0);
+					__m128i state = _mm_set_epi32(0, 0, 0, 0), buffer = _mm_set_epi32(0, 0, 0, 0);
+					uint8_t idx = 0;
 					// const __m128i k0 = _mm_set_epi32(0xC13FA9A9, 0x02A6328F, 0x91E10DA5, 0xC79E7B1D);
 					// const __m128i k1 = _mm_set_epi32(0xD1B54A32, 0xD192ED03, 0xABC98388, 0xFB8FAC03);
 					// const __m128i k2 = _mm_set_epi32(0xDB4F0B91, 0x75AE2165, 0xBBE05633, 0x03A4615F);
@@ -43,7 +45,7 @@ namespace PractRand {
 					const __m128i k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F);
 
 				public:
-					arsenic64()
+					arsenic64() : idx(0)
 					{}
 					Uint64 raw64();
 					std::string get_name() const;
