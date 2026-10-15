@@ -54,6 +54,7 @@ namespace PractRand {
 
 				class arsenic256 : public vRNG64 {
 					__m128i stateA = _mm_set_epi32(0, 0, 0, 0);
+					__m128i stateB = _mm_set_epi32(0, 0, 0, 0);
 					Uint64 buf[4];
 					uint8_t idx = 0;
 					// const __m128i k0 = _mm_set_epi32(0xC13FA9A9, 0x02A6328F, 0x91E10DA5, 0xC79E7B1D);
@@ -63,7 +64,7 @@ namespace PractRand {
 					// const __m128i k4 = _mm_set_epi32(0xE60E2B72, 0x2B53AEEB, 0xCEBD76D9, 0xEDB6A8EF);
 					// const __m128i k1 = _mm_set_epi32(0, 0, 0, 0);
 					const __m128i k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F);
-					const __m128i k1 = _mm_set_epi32(0x13995A4F, 0xA44BEC87, 0x362CAC2F, 0x1C32F26B);
+					const __m128i k1 = _mm_set_epi32(0xC13FA9A9, 0x02A6328F, 0x91E10DA5, 0xC79E7B1D);
 
 				public:
 					arsenic256() : buf(), idx(0)

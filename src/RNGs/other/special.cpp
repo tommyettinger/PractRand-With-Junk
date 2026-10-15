@@ -302,12 +302,20 @@ namespace PractRand {
 //   [Low1/8]FPF-14+6/16:(6,14-0)      R= +10.0  p =  8.0e-9   suspicious
 //   [Low1/8]FPF-14+6/16:all           R= +15.6  p =  3.6e-14    FAIL
 //   ...and 876 test result(s) without anomalies
-                	if (idx == 0) {
-                		stateA = _mm_add_epi64(stateA, k0);
-                		_mm256_storeu_si256((__m256i *) buf, _mm256_inserti128_si256(
-                			_mm256_castsi128_si256(_mm_aesenc_si128(_mm_aesenc_si128(stateA, k0), k0)),
-                			_mm_aesenc_si128(_mm_aesenc_si128(stateA, k1), k1), 1));
+       //          	if (idx == 0) {
+       //          		stateA = _mm_add_epi64(stateA, k0);
+       //          		_mm256_storeu_si256((__m256i *) buf, _mm256_inserti128_si256(
+							// _mm256_castsi128_si256(_mm_aesenc_si128(_mm_aesenc_si128(stateA, k0), k0)),
+							// _mm_aesenc_si128(_mm_aesenc_si128(stateA, k1), k1), 1));
+       //          	}
+       //          	return buf[idx = (idx + 1) & 3];
 
+                	// Passes 128TB with no anomalies.
+                	// Period is 2 to the 66, or 2 to the 64 256-bit outputs.
+                	if (idx == 0) {
+                		_mm256_storeu_si256((__m256i *) buf, _mm256_inserti128_si256(
+                			_mm256_castsi128_si256(_mm_aesenc_si128(_mm_aesenc_si128(stateA = _mm_add_epi64(stateA, k0), k0), k0)),
+                			_mm_aesenc_si128(_mm_aesenc_si128(stateB = _mm_add_epi64(stateB, k1), k1), k1), 1));
                 	}
                 	return buf[idx = (idx + 1) & 3];
 
@@ -317,10 +325,13 @@ namespace PractRand {
                 }
 				void arsenic256::walk_state(StateWalkingObject *walker) {
                 	idx = 0;
-                	Uint64 seed1, seed2;
+                	Uint64 seed1, seed2, seed3, seed4;
                 	walker->handle(seed1);
                 	walker->handle(seed2);
+                	walker->handle(seed3);
+                	walker->handle(seed4);
                 	stateA = _mm_set_epi64x(static_cast<long long>(seed1), static_cast<long long>(seed2));
+                	stateB = _mm_set_epi64x(static_cast<long long>(seed3), static_cast<long long>(seed4));
                 }
 
 			}//NotRecommended
