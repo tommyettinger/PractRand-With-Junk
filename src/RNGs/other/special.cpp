@@ -282,9 +282,14 @@ namespace PractRand {
                 	// return m ^ rotate64(m, 25) ^ rotate64(m, 50);
 
                 	//Fails a lot of tests right away.
+                	// auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
+                	// auto m = s1[0] + s1[1];
+                	// return m ^ m >> 29;
+
+                	// Fails BRank tests immediately.
                 	auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
-                	auto m = s1[0] + s1[1];
-                	return m ^ m >> 29;
+                	auto m = s1[0];
+                	return m ^ rotate64(m, 25) ^ rotate64(m, 50);
 
                 }
                 std::string arsenic64::get_name() const {
