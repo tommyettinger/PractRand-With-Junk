@@ -269,10 +269,17 @@ namespace PractRand {
                 	// Using:
                 	// k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F)
                 	// Passes 128TB with no anomalies!
-                	if (idx == 0) {
-                		buffer = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
-                	}
-                	return buffer[idx = (idx + 1) & 1];
+                	// if (idx == 0) {
+                	// 	buffer = _mm_aesenc_si128(_mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0), k0);
+                	// }
+                	// return buffer[idx = (idx + 1) & 1];
+
+                	// Using:
+                	// k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F)
+                	// Passes 128TB with no anomalies.
+                	auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
+                	auto m = s1[0] + s1[1];
+                	return m ^ rotate64(m, 25) ^ rotate64(m, 50);
 
                 }
                 std::string arsenic64::get_name() const {
@@ -312,12 +319,17 @@ namespace PractRand {
 
                 	// Passes 128TB with no anomalies.
                 	// Period is 2 to the 66, or 2 to the 64 256-bit outputs.
-                	if (idx == 0) {
-                		_mm256_storeu_si256((__m256i *) buf, _mm256_inserti128_si256(
-                			_mm256_castsi128_si256(_mm_aesenc_si128(_mm_aesenc_si128(stateA = _mm_add_epi64(stateA, k0), k0), k0)),
-                			_mm_aesenc_si128(_mm_aesenc_si128(stateB = _mm_add_epi64(stateB, k1), k1), k1), 1));
-                	}
-                	return buf[idx = (idx + 1) & 3];
+                	// if (idx == 0) {
+                	// 	_mm256_storeu_si256((__m256i *) buf, _mm256_inserti128_si256(
+                	// 		_mm256_castsi128_si256(_mm_aesenc_si128(_mm_aesenc_si128(stateA = _mm_add_epi64(stateA, k0), k0), k0)),
+                	// 		_mm_aesenc_si128(_mm_aesenc_si128(stateB = _mm_add_epi64(stateB, k1), k1), k1), 1));
+                	// }
+                	// return buf[idx = (idx + 1) & 3];
+
+                	auto s1 = _mm_aesenc_si128(stateA = _mm_add_epi64(stateA, k0), k0);
+                	auto s2 = _mm_aesenc_si128(stateB = _mm_add_epi64(stateB, k1), k1);
+                	auto m = s1[0] + s2[0];
+                	return m ^ rotate64(m, 25) ^ rotate64(m, 50);
 
                 }
 				std::string arsenic256::get_name() const {
