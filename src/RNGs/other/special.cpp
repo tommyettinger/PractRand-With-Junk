@@ -277,9 +277,14 @@ namespace PractRand {
                 	// Using:
                 	// k0 = _mm_set_epi32(0x00555DBF, 0x00556BBF, 0x00556FAF, 0x0055775F)
                 	// Passes 128TB with no anomalies.
+                	// auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
+                	// auto m = s1[0] + s1[1];
+                	// return m ^ rotate64(m, 25) ^ rotate64(m, 50);
+
+                	//Fails a lot of tests right away.
                 	auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
                 	auto m = s1[0] + s1[1];
-                	return m ^ rotate64(m, 25) ^ rotate64(m, 50);
+                	return m ^ m >> 29;
 
                 }
                 std::string arsenic64::get_name() const {
