@@ -287,9 +287,28 @@ namespace PractRand {
                 	// return m ^ m >> 29;
 
                 	// Fails BRank tests immediately.
+                	// auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
+                	// auto m = s1[0];
+                	// return m ^ rotate64(m, 25) ^ rotate64(m, 50);
+
+                	// Gets two opposite "unusual" Gap-16:B anomalies, at 32TB and 128TB:
+// rng=arsenic64, seed=0x0
+// length= 32 terabytes (2^45 bytes), time= 39822 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]Gap-16:B                 R=  -5.3  p =1-2.0e-4   unusual
+//   ...and 1133 test result(s) without anomalies
+//
+// rng=arsenic64, seed=0x0
+// length= 64 terabytes (2^46 bytes), time= 79824 seconds
+//   no anomalies in 1159 test result(s)
+//
+// rng=arsenic64, seed=0x0
+// length= 128 terabytes (2^47 bytes), time= 159801 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]Gap-16:B                 R=  +5.5  p =  1.3e-4   unusual
+//   ...and 1180 test result(s) without anomalies
                 	auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
-                	auto m = s1[0];
-                	return m ^ rotate64(m, 25) ^ rotate64(m, 50);
+                	return s1[0] - rotate64(s1[1], 44);
 
                 }
                 std::string arsenic64::get_name() const {
