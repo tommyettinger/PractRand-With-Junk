@@ -323,8 +323,34 @@ namespace PractRand {
 //   [Low1/64]Gap-16:B                 R=  +7.0  p =  7.2e-6   mildly suspicious
 //   [Low1/64]TMFn(2+1):wl             R= +20.1  p~=   6e-6    unusual
 //   ...and 1179 test result(s) without anomalies
+                	// auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
+                	// return s1[0] + rotate64(s1[1], 52);
+
+                	// Problems at the end, again...
+// rng=arsenic64, seed=0x0
+// length= 16 terabytes (2^44 bytes), time= 19737 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/32]Gap-16:B                 R=  -5.4  p =1-1.7e-4   unusual
+//   ...and 1106 test result(s) without anomalies
+//
+//
+// rng=arsenic64, seed=0x0
+// length= 64 terabytes (2^46 bytes), time= 79795 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/64]FPF-14+6/16:(0,14-0)     R=  +7.4  p =  1.8e-6   unusual
+//   [Low1/64]FPF-14+6/16:all          R=  +5.6  p =  1.0e-4   unusual
+//   ...and 1157 test result(s) without anomalies
+//
+// rng=arsenic64, seed=0x0
+// length= 128 terabytes (2^47 bytes), time= 159721 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/32]FPF-14+6/16:(0,14-0)     R=  +8.3  p =  2.8e-7   mildly suspicious
+//   [Low1/64]FPF-14+6/16:(0,14-0)     R= +13.6  p =  3.2e-12   VERY SUSPICIOUS
+//   [Low1/64]FPF-14+6/16:(1,14-0)     R=  +9.4  p =  2.4e-8   suspicious
+//   [Low1/64]FPF-14+6/16:all          R=  +9.1  p =  5.1e-8   very suspicious
+//   ...and 1177 test result(s) without anomalies
                 	auto s1 = _mm_aesenc_si128(state = _mm_add_epi64(state, k0), k0);
-                	return s1[0] + rotate64(s1[1], 52);
+                	return s1[0] - rotate64(s1[1], 47);
 
                 }
                 std::string arsenic64::get_name() const {
