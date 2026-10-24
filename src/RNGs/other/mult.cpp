@@ -5859,10 +5859,18 @@ namespace PractRand {
 					// Passes 64TB with no anomalies.
 					// Period is 2 to the 64.
 					// Meant to be portable to JavaScript, using imul() and clz32() .
-					uint32_t z = (a ^ rotate32(b, 12)) * 999999999;
-					a = (a + std::countl_zero(b)) * 777777777;
-					b = (b * 555555555) ^ 333333333;
-					return z ^ z >> 23;
+					// uint32_t z = (a ^ rotate32(b, 12)) * 999999999;
+					// a = (a + std::countl_zero(b)) * 777777777;
+					// b = (b * 555555555) ^ 333333333;
+					// return z ^ z >> 23;
+
+					// Fails immediately, all over!
+					a += 0x9e3779b9; // you can swap this for an LCG or QOA sequence
+					b = (b << 1) ^ ((0 - (b >> 31)) & 0xA84C5F95); // this is the Galois LFSR, and it can be swapped for the XorShift
+					uint32_t z = (a ^ b);
+					z = (z ^ (z >> 16) * 0x21f0aaad);
+					z = (z ^ (z >> 15) * 0x735a2d97);
+					return z ^ (z >> 15);
 				}
 
 				std::string zig32::get_name() const { return "zig32"; }
@@ -5871,6 +5879,7 @@ namespace PractRand {
 					walker->handle(a);
 					//if (a == 0) a = 1;
 					walker->handle(b);
+					b += (b == 0);
 				}
 
 
