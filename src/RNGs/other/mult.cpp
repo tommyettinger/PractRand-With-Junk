@@ -5864,13 +5864,42 @@ namespace PractRand {
 					// b = (b * 555555555) ^ 333333333;
 					// return z ^ z >> 23;
 
-					// Fails immediately, all over!
-					a += 0x9e3779b9; // you can swap this for an LCG or QOA sequence
-					b = (b << 1) ^ ((0 - (b >> 31)) & 0xA84C5F95); // this is the Galois LFSR, and it can be swapped for the XorShift
-					uint32_t z = (a ^ b);
-					z = (z ^ (z >> 16) * 0x21f0aaad);
-					z = (z ^ (z >> 15) * 0x735a2d97);
-					return z ^ (z >> 15);
+					// Fails immediately, all over! 2GB.
+					// a += 0x9e3779b9; // you can swap this for an LCG or QOA sequence
+					// b = (b << 1) ^ ((0 - (b >> 31)) & 0xA84C5F95); // this is the Galois LFSR, and it can be swapped for the XorShift
+					// uint32_t z = (a ^ b);
+					// z = (z ^ (z >> 16) * 0x21f0aaad);
+					// z = (z ^ (z >> 15) * 0x735a2d97);
+					// return z ^ (z >> 15);
+
+					// Also fails immediately (2GB).
+					// a = a * 0x915F77F5u + 12345u; // LCG
+					// b = (b << 1) ^ ((0 - (b >> 31)) & 0xA84C5F95); // this is the Galois LFSR, and it can be swapped for the XorShift
+					// uint32_t z = (a ^ b);
+					// z = (z ^ (z >> 16) * 0x21f0aaad);
+					// z = (z ^ (z >> 15) * 0x735a2d97);
+					// return z ^ (z >> 15);
+
+					// Also fails... immediately. 2GB.
+					// a = a * 0x915F77F5u + 12345u; // LCG
+					// b ^= b << 13; b ^= b >> 17; b ^= b << 5; // Marsaglia XorShift
+					// uint32_t z = (a ^ b);
+					// z = (z ^ (z >> 16) * 0x21f0aaad);
+					// z = (z ^ (z >> 15) * 0x735a2d97);
+					// return z ^ (z >> 15);
+
+					// Somehow, even worse! 2GB fail.
+					// a += a * a | (10000u|5u); // QOA
+					// b ^= b << 13; b ^= b >> 17; b ^= b << 5; // Marsaglia XorShift
+					// uint32_t z = (a ^ b);
+					// z = (z ^ (z >> 16) * 0x21f0aaad);
+					// z = (z ^ (z >> 15) * 0x735a2d97);
+					// return z ^ (z >> 15);
+
+					uint32_t z = (a ^ rotate32(b, 12)) * 999999;
+					a = (a + std::countl_zero(b)) * 777777;
+					b = (b * 555555) ^ 333333333;
+					return z ^ z >> 23;
 				}
 
 				std::string zig32::get_name() const { return "zig32"; }
