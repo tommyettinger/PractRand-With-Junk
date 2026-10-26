@@ -5899,8 +5899,28 @@ namespace PractRand {
 					// Lamb32Random with JS-friendly multipliers in more places.
 					// Passes 128TB with no anomalies.
 					// Period is 2 to the 64. Exactly 1-equidistributed.
+					// uint32_t z = (a ^ rotate32(b, 12)) * 999999;
+					// a = (a + std::countl_zero(b)) * 777777;
+					// b = (b * 555555) ^ 333333333;
+					// return z ^ z >> 23;
+
+					// Not enough multiplication!
+					// Fails at 64GB.
+// rng=zig32, seed=0x0
+// length= 32 gigabytes (2^35 bytes), time= 48.9 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   Gap-16:A                          R=  +9.2  p =  2.0e-6   suspicious
+//   Gap-16:B                          R= +10.5  p =  6.5e-9   very suspicious
+//   ...and 803 test result(s) without anomalies
+//
+// rng=zig32, seed=0x0
+// length= 64 gigabytes (2^36 bytes), time= 98.1 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   Gap-16:A                          R= +15.7  p =  1.0e-10   VERY SUSPICIOUS
+//   Gap-16:B                          R= +22.6  p =  2.8e-19    FAIL !
+//   ...and 841 test result(s) without anomalies
 					uint32_t z = (a ^ rotate32(b, 12)) * 999999;
-					a = (a + std::countl_zero(b)) * 777777;
+					a = (a + std::countl_zero(b));
 					b = (b * 555555) ^ 333333333;
 					return z ^ z >> 23;
 				}
@@ -5911,7 +5931,7 @@ namespace PractRand {
 					walker->handle(a);
 					//if (a == 0) a = 1;
 					walker->handle(b);
-					b += (b == 0);
+					// b += (b == 0);
 				}
 
 
