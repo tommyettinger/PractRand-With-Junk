@@ -5919,10 +5919,37 @@ namespace PractRand {
 //   Gap-16:A                          R= +15.7  p =  1.0e-10   VERY SUSPICIOUS
 //   Gap-16:B                          R= +22.6  p =  2.8e-19    FAIL !
 //   ...and 841 test result(s) without anomalies
+					// uint32_t z = (a ^ rotate32(b, 12)) * 999999;
+					// a = (a + std::countl_zero(b));
+					// b = (b * 555555) ^ 333333333;
+					// return z ^ z >> 23;
+
+					// Not quite enough; fails at 1TB.
+// rng=zig32, seed=0x0
+// length= 256 gigabytes (2^38 bytes), time= 372 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   Gap-16:B                          R=  +6.6  p =  1.6e-5   mildly suspicious
+//   ...and 914 test result(s) without anomalies
+//
+// rng=zig32, seed=0x0
+// length= 512 gigabytes (2^39 bytes), time= 757 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   Gap-16:A                          R=  +8.7  p =  4.5e-6   mildly suspicious
+//   Gap-16:B                          R= +12.8  p =  7.4e-11   VERY SUSPICIOUS
+//   ...and 950 test result(s) without anomalies
+//
+// rng=zig32, seed=0x0
+// length= 1 terabyte (2^40 bytes), time= 1509 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   Gap-16:A                          R= +12.5  p =  1.4e-8   very suspicious
+//   Gap-16:B                          R= +22.1  p =  8.3e-19    FAIL !
+//   [Low4/16]Gap-16:A                 R=  +6.7  p =  9.2e-5   unusual
+//   [Low4/16]Gap-16:B                 R= +10.6  p =  6.2e-9   very suspicious
+//   ...and 984 test result(s) without anomalies
 					uint32_t z = (a ^ rotate32(b, 12)) * 999999;
-					a = (a + std::countl_zero(b));
+					a = (a + std::countl_zero(b)) ^ 777777;
 					b = (b * 555555) ^ 333333333;
-					return z ^ z >> 23;
+					return z ^ z >> 19;
 				}
 
 				std::string zig32::get_name() const { return "zig32"; }
