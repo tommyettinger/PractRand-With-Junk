@@ -5985,10 +5985,41 @@ namespace PractRand {
 
 					// Various shifts at the end all fail quickly when a is added rather than XORed.
 					// 14, 21, and 23 all fail at 8GB or earlier.
-					uint32_t z = (a + rotate32(b, 12)) * 999999;
-					a = (a + std::countl_zero(b)) ^ 777777777;
+					// uint32_t z = (a + rotate32(b, 12)) * 999999;
+					// a = (a + std::countl_zero(b)) ^ 777777777;
+					// b = (b * 555555) ^ 333333333;
+					// return z ^ z >> 23;
+
+					// Not a solution, fails many tests immediately.
+					// uint32_t z = (a * 999999 ^ rotate32(b, 12));
+					// a = (a + std::countl_zero(b)) ^ 777777777;
+					// b = (b * 555555) ^ 333333333;
+					// return z ^ z >> 19;
+
+					// Fails later, anyway...
+// rng=zig32, seed=0x0
+// length= 1 terabyte (2^40 bytes), time= 1515 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]Gap-16:B                 R=  +6.0  p =  5.2e-5   unusual
+//   ...and 987 test result(s) without anomalies
+//
+// rng=zig32, seed=0x0
+// length= 2 terabytes (2^41 bytes), time= 2951 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]Gap-16:A                 R=  +8.1  p =  1.2e-5   mildly suspicious
+//   [Low4/16]Gap-16:B                 R= +12.2  p =  2.4e-10   VERY SUSPICIOUS
+//   ...and 1018 test result(s) without anomalies
+//
+// rng=zig32, seed=0x0
+// length= 4 terabytes (2^42 bytes), time= 6021 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low4/16]Gap-16:A                 R= +17.5  p =  7.8e-12    FAIL
+//   [Low4/16]Gap-16:B                 R= +26.5  p =  1.3e-22    FAIL !!
+//   ...and 1050 test result(s) without anomalies
+					uint32_t z = (a * 999999 ^ rotate32(b, 12)) * 777777;
+					a = (a + std::countl_zero(b));
 					b = (b * 555555) ^ 333333333;
-					return z ^ z >> 23;
+					return z ^ z >> 19;
 				}
 
 				std::string zig32::get_name() const { return "zig32"; }
