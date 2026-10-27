@@ -5978,10 +5978,17 @@ namespace PractRand {
 //   [Low8/32]Gap-16:B                 R=  +6.3  p =  2.8e-5   mildly suspicious
 //   [Low8/64]Gap-16:B                 R=  +5.2  p =  2.4e-4   unusual
 //   ...and 982 test result(s) without anomalies
-					uint32_t z = (a ^ rotate32(b, 12)) * 999999;
+					// uint32_t z = (a ^ rotate32(b, 12)) * 999999;
+					// a = (a + std::countl_zero(b)) ^ 777777777;
+					// b = (b * 555555) ^ 333333333;
+					// return z ^ z >> 15;
+
+					// Various shifts at the end all fail quickly when a is added rather than XORed.
+					// 14, 21, and 23 all fail at 8GB or earlier.
+					uint32_t z = (a + rotate32(b, 12)) * 999999;
 					a = (a + std::countl_zero(b)) ^ 777777777;
 					b = (b * 555555) ^ 333333333;
-					return z ^ z >> 15;
+					return z ^ z >> 23;
 				}
 
 				std::string zig32::get_name() const { return "zig32"; }
