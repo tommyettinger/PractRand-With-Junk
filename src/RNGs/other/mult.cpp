@@ -2566,13 +2566,26 @@ namespace PractRand {
 					return x;
 				}
 
-				uint64_t fixGamma(uint64_t gamma) {
+				uint64_t fixGammaCompatible(uint64_t gamma) {
 					uint64_t inverse = mmi(gamma |= 1UL), add = 0UL;
 					while (abs(std::popcount(gamma) - 32) > 8
 						|| abs(std::popcount(gamma ^ gamma >> 1) - 32) > 8
 						|| abs(std::popcount(inverse) - 32) > 8
 						|| abs(std::popcount(inverse ^ inverse >> 1) - 32) > 8) {
 						inverse = mmi(gamma = gamma * 0xD1342543DE82EF95ULL + (add += 2ULL));
+					}
+					return gamma;
+				}
+
+				uint64_t fixGamma(uint64_t gamma) {
+					uint64_t inverse = mmi(gamma = (gamma & 0x7FFFFFFFFFFFFFFFL) | (~(gamma << 1) & 0x8000000000000001L)), add = 0UL;
+					while (abs(std::popcount(gamma) - 32) > 8
+						|| abs(std::popcount(gamma ^ gamma >> 1) - 32) > 8
+						|| abs(std::popcount(inverse) - 32) > 8
+						|| abs(std::popcount(inverse ^ inverse >> 1) - 32) > 8) {
+						gamma = gamma * 0xD1342543DE82EF95ULL + (add += 2ULL);
+						gamma = (gamma & 0x7FFFFFFFFFFFFFFFL) | (~(gamma << 1) & 0x8000000000000001L);
+						inverse = mmi(gamma);
 					}
 					return gamma;
 				}
@@ -8464,24 +8477,27 @@ namespace PractRand {
 					//stateC = ((stateC << 24) | (stateC >> (64 - 24))) + result;
 					//return result;
 
-					// Tested with the "worst-case" stream, this still passses 64TB fine!
+					// TraceRandom
+					// Tested with the "worst-case" stream, this still passes 64TB fine!
 					// Period is 2 to the 64 minimum, but likely 2 to the 319 expected. 2 to the 24 possible streams.
-					// const uint64_t fa = stateA;
-					// const uint64_t fb = stateB;
-					// const uint64_t fc = stateC;
-					// const uint64_t fd = stateD;
-					// const uint64_t fe = stateE;
-					//stateA = fa + stream;
-					//stateB = fa ^ fe;
-					//stateC = fb + fd;
-					//stateD = rotate64(fc, 44);
-					//stateE = fb + fc;
-					//return fb;
+					// Tested with the new fixGamma() technique in GraceRandom, this passes 128TB with no anomalies.
+					// Period is 2 to the 64 minimum, but likely 2 to the 319 expected. 2 to the 29 possible streams.
+					 const uint64_t fa = stateA;
+					 const uint64_t fb = stateB;
+					 const uint64_t fc = stateC;
+					 const uint64_t fd = stateD;
+					 const uint64_t fe = stateE;
+					stateA = fa + stream;
+					stateB = fa ^ fe;
+					stateC = fb + fd;
+					stateD = rotate64(fc, 44);
+					stateE = fb + fc;
+					return fb;
 
 
 					// BassD in https://quick-bench.com/q/E-wxFyZQMlGJaN-Rflh_IkObTOU
 					// Passes 64TB with no anomalies!
-					// Minimim period is 2 to the 64, expected period is a much higher multiple.
+					// Minimum period is 2 to the 64, expected period is a much higher multiple.
 					// const uint64_t fa = stateA;
 					// const uint64_t fb = stateB;
 					// const uint64_t fc = stateC;
@@ -8540,6 +8556,7 @@ namespace PractRand {
 					// worst case?
 					//stream = 0x9E3779B97F4A7C15UL;
 					//stream = (stream & 0x003569CA5369AC00UL) ^ 0x9E3779B97F4A7C15UL;
+					stream = fixGamma(stream);
 					printf("stateA: %016llX\n", stateA);
 					printf("stateB: %016llX\n", stateB);
 					printf("stateC: %016llX\n", stateC);
