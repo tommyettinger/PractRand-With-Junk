@@ -8480,8 +8480,11 @@ namespace PractRand {
 					// TraceRandom
 					// Tested with the "worst-case" stream, this still passes 64TB fine!
 					// Period is 2 to the 64 minimum, but likely 2 to the 319 expected. 2 to the 24 possible streams.
-					// Tested with the new fixGamma() technique in GraceRandom, this passes 128TB with no anomalies.
+					// Tested with the new fixGamma() technique in GraceRandom, this passes 256TB with no anomalies.
+					// It also previously passed 128TB with no anomalies, using a different seed.
 					// Period is 2 to the 64 minimum, but likely 2 to the 319 expected. 2 to the 29 possible streams.
+					// Tested stream for the 128TB run was 0xAE74B1E2EC772A2FULL, seed 0.
+					// Tested stream for the 256TB run was 0xA3985844D4F08E63ULL, seed 1.
 					 const uint64_t fa = stateA;
 					 const uint64_t fb = stateB;
 					 const uint64_t fc = stateC;
