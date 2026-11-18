@@ -7088,7 +7088,7 @@ namespace PractRand {
 					stateD |= 1L;
 				}
 
-				Uint64 marsgwt::raw64() {
+				Uint32 marsgwt::raw32() {
 					//					const uint32_t fa = stateA;
 					//					const uint32_t fb = stateB;
 					//					const uint32_t fc = stateC;
@@ -7121,17 +7121,18 @@ namespace PractRand {
 					//					return fc;
 
 					//// ChopRandom
-					//// Passes 64TB of PractRand without any anomalies.
+					//// Passes at least 64TB of PractRand without any anomalies (seed=0).
+					//// Passes at least 256TB of PractRand without any anomalies (seed=1).
 					//// Generally quite fast on GWT.
-					//const uint32_t fa = stateA;
-					//const uint32_t fb = stateB;
-					//const uint32_t fc = stateC;
-					//const uint32_t fd = stateD;
-					//stateA = rotate32(fb ^ fc, 26);
-					//stateB = rotate32(fc ^ fd, 11);
-					//stateC = fa ^ fb + fc;
-					//stateD = fd + 0xADB5B165U;
-					//return fc;
+					const uint32_t fa = stateA;
+					const uint32_t fb = stateB;
+					const uint32_t fc = stateC;
+					const uint32_t fd = stateD;
+					stateA = rotate32(fb ^ fc, 26);
+					stateB = rotate32(fc ^ fd, 11);
+					stateC = fa ^ fb + fc;
+					stateD = fd + 0xADB5B165U;
+					return fc;
 
 					//// Modified TycheI2; passes 4TB without anomalies
 					//stateB = rotate32(stateB,  7) ^ stateC; stateC += 0xADB5B165U;//stateD;
@@ -7143,15 +7144,15 @@ namespace PractRand {
 					//// Passes 32TB with no anomalies, but has two anomalies at 64TB:
 					////  [Low8/32]DC6-9x1Bytes-1           R= +12.5  p =  3.4e-5   mildly suspicious
 					////  [Low8/32]FPF-14+6/16:(19,14-0)    R=  +7.1  p =  3.3e-6   unusual
-					const uint32_t fa = stateA;
-					const uint32_t fb = stateB;
-					const uint32_t fc = stateC;
-					const uint32_t fd = stateD;
-					stateA = rotate32(fb ^ fc, 26);
-					stateB = rotate32(fc ^ fd, 11);
-					stateC = fa ^ fb + fc;
-					stateD = fd + 0xADB5B165U;
-					return (uint64_t) (fa + fd) << 32 ^ (int32_t) (fb + fc);
+					// const uint32_t fa = stateA;
+					// const uint32_t fb = stateB;
+					// const uint32_t fc = stateC;
+					// const uint32_t fd = stateD;
+					// stateA = rotate32(fb ^ fc, 26);
+					// stateB = rotate32(fc ^ fd, 11);
+					// stateC = fa ^ fb + fc;
+					// stateD = fd + 0xADB5B165U;
+					// return (uint64_t) (fa + fd) << 32 ^ (int32_t) (fb + fc);
 				}
 
 				//0x3943D8696D4A3CDDUL;
