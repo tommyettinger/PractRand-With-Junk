@@ -1586,11 +1586,39 @@ namespace PractRand {
 // Passes at least 16TB with no anomalies.
 // However, state1 is essentially ignored during 30-63 generations, but not after.
 // This could be a serious flaw.
-const uint64_t z = (state0 ^ state0 >> 27) * (state1 ^ 0x3C79AC492BA7B653ULL);
-state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2;
-state1 = (state1 << 1) ^ (0ULL - (state1 >> 63)  & 0xB35846EEAB94A77EULL);
-state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL);
-return z ^ rotate64(z, 25) ^ rotate64(z, 50);
+// const uint64_t z = (state0 ^ state0 >> 27) * (state1 ^ 0x3C79AC492BA7B653ULL);
+// state0 = state0 * 0xD1342543DE82EF95ULL + 1ULL ^ state2;
+// state1 = (state1 << 1) ^ (0ULL - (state1 >> 63)  & 0xB35846EEAB94A77EULL);
+// state2 = (state2 << 1) ^ (0u - (state2 >> 63) & 0xFEEDBABEDEADBEEFULL);
+// return z ^ rotate64(z, 25) ^ rotate64(z, 50);
+
+					// Fails at 4TB:
+// rng=oriole64, seed=0x0
+// length= 4 terabytes (2^42 bytes), time= 5223 seconds
+//   Test Name                         Raw       Processed     Evaluation
+//   [Low1/8]Gap-16:B                  R=  +5.6  p =  1.1e-4   unusual
+//   [Low1/16]Gap-16:A                 R=  +7.3  p =  4.1e-5   unusual
+//   [Low1/16]Gap-16:B                 R= +11.7  p =  6.7e-10   VERY SUSPICIOUS
+//   [Low1/16]FPF-14+6/16:cross        R=  +5.0  p =  1.3e-4   unusual
+//   [Low1/32]Gap-16:B                 R=  +8.2  p =  6.0e-7   suspicious
+//   [Low1/64]Gap-16:A                 R= +15.5  p =  1.6e-10   VERY SUSPICIOUS
+//   [Low1/64]Gap-16:B                 R= +22.6  p =  3.1e-19    FAIL !
+//   [Low1/64]FPF-14+6/16:(0,14-0)     R= +14.4  p =  6.6e-13   VERY SUSPICIOUS
+//   [Low1/64]FPF-14+6/16:(1,14-0)     R=  +8.1  p =  3.9e-7   mildly suspicious
+//   [Low1/64]FPF-14+6/16:(2,14-0)     R=  +9.1  p =  4.9e-8   suspicious
+//   [Low1/64]FPF-14+6/16:all          R= +12.5  p =  3.3e-11   VERY SUSPICIOUS
+//   [Low4/16]BCFN(2+0,13-0,T)         R= +10.3  p =  5.0e-5   unusual
+//   [Low4/16]DC6-9x1Bytes-1           R= +28.3  p =  1.1e-10   VERY SUSPICIOUS
+//   [Low4/64]Gap-16:B                 R=  +5.3  p =  1.7e-4   unusual
+//   [Low4/64]FPF-14+6/16:all          R=  +6.9  p =  5.6e-6   mildly suspicious
+//   ...and 1037 test result(s) without anomalies
+					const uint64_t a = (state0 ^ state0 >> 31);// * 0x3C79AC492BA7B653UL;
+					const uint64_t b = (state1 ^ state1 >> 29);// * 0x1C69B3F74AC4AE35UL;
+					const uint64_t c = (state2 ^ state2 >> 30);// * 0xBEA225F9EB34556DUL;
+					state0 += 0xB492F903DF242A79L;
+					state1 += 0x9EF49B69C6820771L + a + std::countl_zero(a);
+					state2 += 0x83A9A7D23771CD09L + b + std::countl_zero(a | b);
+					return c ^ rotate64(a, 39) ^ rotate64(b, 14);
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
@@ -1600,10 +1628,10 @@ return z ^ rotate64(z, 25) ^ rotate64(z, 50);
 					// walker->handle(state2);
 					walker->handle(state0);
 					walker->handle(state1);
-					state1 |= (state1 == 0);
-					state1 <<= 1;
+					// state1 |= (state1 == 0);
+					// state1 <<= 1;
 					walker->handle(state2);
-					state2 += (state2 == 0);
+					// state2 += (state2 == 0);
 				}
 
 				Uint64 xoshiro256starstar::raw64() {
