@@ -1612,13 +1612,25 @@ namespace PractRand {
 //   [Low4/64]Gap-16:B                 R=  +5.3  p =  1.7e-4   unusual
 //   [Low4/64]FPF-14+6/16:all          R=  +6.9  p =  5.6e-6   mildly suspicious
 //   ...and 1037 test result(s) without anomalies
-					const uint64_t a = (state0 ^ state0 >> 31);// * 0x3C79AC492BA7B653UL;
-					const uint64_t b = (state1 ^ state1 >> 29);// * 0x1C69B3F74AC4AE35UL;
-					const uint64_t c = (state2 ^ state2 >> 30);// * 0xBEA225F9EB34556DUL;
+					// const uint64_t a = (state0 ^ state0 >> 31);// * 0x3C79AC492BA7B653UL;
+					// const uint64_t b = (state1 ^ state1 >> 29);// * 0x1C69B3F74AC4AE35UL;
+					// const uint64_t c = (state2 ^ state2 >> 30);// * 0xBEA225F9EB34556DUL;
+					// state0 += 0xB492F903DF242A79L;
+					// state1 += 0x9EF49B69C6820771L + a + std::countl_zero(a);
+					// state2 += 0x83A9A7D23771CD09L + b + std::countl_zero(a | b);
+					// return c ^ rotate64(a, 39) ^ rotate64(b, 14);
+
+					// TriopsRandom
+					// Passes 256TB with no anomalies.
+					// Period is 2 to the 192.
+					const uint64_t a = (state0 ^ state0 >> 31) * 0x3C79AC492BA7B653UL;
+					const uint64_t b = (state1 ^ state1 >> 29) * 0x1C69B3F74AC4AE35UL;
+					const uint64_t c = (state2 ^ state2 >> 30) * 0xBEA225F9EB34556DUL;
 					state0 += 0xB492F903DF242A79L;
 					state1 += 0x9EF49B69C6820771L + a + std::countl_zero(a);
 					state2 += 0x83A9A7D23771CD09L + b + std::countl_zero(a | b);
-					return c ^ rotate64(a, 39) ^ rotate64(b, 14);
+					return a + b + c;
+
 				}
 				std::string oriole64::get_name() const { return "oriole64"; }
 				void oriole64::walk_state(StateWalkingObject *walker) {
